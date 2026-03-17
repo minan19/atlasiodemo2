@@ -1,0 +1,971 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id                    String                 @id @default(cuid())
+  name                  String
+  slug                  String                 @unique
+  domain                String?
+  status                String                 @default("active")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  aiMetrics             AIMetric[]
+  asyncExports          AsyncExport[]
+  courses               Course[]
+  customerSignals       CustomerSignal[]
+  enrollments           Enrollment[]
+  integrationConnectors IntegrationConnector[]
+  learningEvents        LearningEvent[]
+  pricingProposals      PricingProposal[]      @ignore
+  pricingRules          PricingRule[]
+  recommendations       Recommendation[]
+  securityEvents        SecurityEvent[]
+  streamMetrics         StreamMetric[]
+}
+
+model User {
+  id                        String                     @id @default(cuid())
+  email                     String                     @unique
+  passwordHash              String
+  name                      String?
+  role                      Role                       @default(STUDENT)
+  isActive                  Boolean                    @default(true)
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  auditLogs                 AuditLog[]
+  biometricHashes           BiometricHash[]
+  certifications            Certification[]
+  cognitiveLoads            CognitiveLoad[]
+  communicationMessages     CommunicationMessage[]     @relation("UserCommunicationMessages")
+  instructorCourses         Course[]                   @relation("InstructorCourses")
+  enrollments               Enrollment[]
+  examSessions              ExamSession[]
+  instructorPayments        InstructorPayment[]        @relation("InstructorPayments")
+  recordedPayments          InstructorPayment[]        @relation("RecordedInstructorPayments")
+  payoutProfiles            InstructorPayoutProfile[]
+  valueScores               InstructorValueScore[]
+  valueScoreRecords         InstructorValueScore[]     @relation("InstructorValueScoreRecords")
+  learningEvents            LearningEvent[]
+  liveSessionsTeaching      LiveSession[]              @relation("InstructorLiveSessions")
+  liveParticipation         LiveSessionParticipant[]   @relation("UserLiveParticipants")
+  paymentIntents            PaymentIntent[]
+  presentationRequests      PresentationRequest[]      @relation("UserPresentationRequests")
+  recommendations           Recommendation[]
+  createdSchedules          ScheduledReport[]          @relation("ScheduledReportCreator")
+  streamMetrics             StreamMetric[]
+  volunteerContentApprovals VolunteerContent[]         @relation("VolunteerContentApprovals")
+  volunteerContents         VolunteerContent[]
+  volunteerFeedback         VolunteerContentFeedback[]
+  whiteboardActions         WhiteboardAction[]         @relation("UserWhiteboardActions")
+  whiteboardLayersCreated   WhiteboardLayer[]          @relation("UserLayerCreator")
+}
+
+  id                String               @id @default(cuid())
+  title             String
+  description       String?
+  isPublished       Boolean              @default(false)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  instructorId      String?
+  price             Decimal              @default(0)
+  tenantId          String               @default("public")
+  certifications    Certification[]
+  instructor        User?                @relation("InstructorCourses", fields: [instructorId], references: [id])
+  tenant            Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  schedules         CourseSchedule[]
+  enrollments       Enrollment[]
+  examSessions      ExamSession[]
+  plans             LearningPlanCourse[]
+  lessons           Lesson[]
+  liveSessions      LiveSession[]        @relation("CourseLiveSessions")
+  ltiDeployments    LtiDeployment[]
+  paymentIntents    PaymentIntent[]
+  streamMetrics     StreamMetric[]
+  volunteerContents VolunteerContent[]
+}
+
+model Lesson {
+  id             String          @id @default(cuid())
+  courseId       String
+  title          String
+  order          Int             @default(0)
+  videoUrl       String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  content        String?
+  isPreview      Boolean         @default(false)
+  cognitiveLoads CognitiveLoad[]
+  course         Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  streamMetrics  StreamMetric[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  refundedAt  DateTime?
+  tenantId    String    @default("public")
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([userId])
+  @@index([completedAt])
+  @@index([refundedAt])
+}
+
+model StreamMetric {
+  id             String   @id @default(cuid())
+  userId         String?
+  courseId       String?
+  lessonId       String?
+  liveSessionId  String?
+  watchSeconds   Int      @default(0)
+  rebufferCount  Int      @default(0)
+  avgBitrateKbps Int?
+  droppedFrames  Int?
+  device         Json?
+  network        Json?
+  tenantId       String   @default("public")
+  createdAt      DateTime @default(now())
+  course         Course?  @relation(fields: [courseId], references: [id])
+  lesson         Lesson?  @relation(fields: [lessonId], references: [id])
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user           User?    @relation(fields: [userId], references: [id])
+
+  @@index([courseId])
+  @@index([lessonId])
+  @@index([createdAt])
+  @@index([liveSessionId])
+}
+
+model AsyncExport {
+  id        String   @id @default(cuid())
+  type      String
+  status    String   @default("PROCESSING")
+  filePath  String?
+  actorId   String?
+  tenantId  String   @default("public")
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}
+
+model ScheduledReport {
+  id          String                   @id @default(cuid())
+  name        String
+  reportType  String                   @default("USERS")
+  format      ScheduledReportFormat    @default(PDF)
+  filters     Json?
+  recipients  Json
+  frequency   ScheduledReportFrequency
+  dayOfWeek   Int?
+  dayOfMonth  Int?
+  hour        Int
+  minute      Int
+  isActive    Boolean                  @default(true)
+  nextRunAt   DateTime?
+  lastRunAt   DateTime?
+  createdById String
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  createdBy   User                     @relation("ScheduledReportCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([isActive, nextRunAt])
+}
+
+model LearningPlan {
+  id          String               @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  courses     LearningPlanCourse[]
+}
+
+model LearningPlanCourse {
+  id             String       @id @default(cuid())
+  learningPlanId String
+  courseId       String
+  createdAt      DateTime     @default(now())
+  course         Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  learningPlan   LearningPlan @relation(fields: [learningPlanId], references: [id], onDelete: Cascade)
+
+  @@unique([learningPlanId, courseId])
+  @@index([courseId])
+}
+
+model Certification {
+  id               String              @id @default(cuid())
+  userId           String
+  courseId         String
+  issuedAt         DateTime            @default(now())
+  expiresAt        DateTime?
+  status           CertificationStatus @default(ACTIVE)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  examSessionId    String?             @unique
+  verifyCode       String?             @unique
+  blockchainStatus String?
+  sbtTokenId       String?
+  course           Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  examSession      ExamSession?        @relation("ExamSessionCertification", fields: [examSessionId], references: [id])
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([expiresAt])
+}
+
+model ExamSession {
+  id                String               @id @default(cuid())
+  userId            String
+  courseId          String
+  startedAt         DateTime             @default(now())
+  endedAt           DateTime?
+  deviceInfo        Json?
+  trustScore        Float?
+  aiDecision        String?
+  proctorNote       String?
+  createdAt         DateTime             @default(now())
+  proctoringResults AiProctoringResult[]
+  certification     Certification?       @relation("ExamSessionCertification")
+  course            Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user              User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, courseId])
+}
+
+model AiProctoringResult {
+  id               String      @id @default(cuid())
+  sessionId        String
+  eyeScore         Float?
+  headScore        Float?
+  audioScore       Float?
+  tabSwitches      Int?
+  objectFlags      Int?
+  finalTrustScore  Float?
+  aiRecommendation String?
+  createdAt        DateTime    @default(now())
+  session          ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model BiometricHash {
+  id        String   @id @default(cuid())
+  userId    String
+  faceHash  String?
+  voiceHash String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CognitiveLoad {
+  id             String   @id @default(cuid())
+  userId         String
+  lessonId       String
+  attentionScore Float?
+  confusionIndex Float?
+  recordedAt     DateTime @default(now())
+  lesson         Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, lessonId, recordedAt])
+}
+
+model CourseSchedule {
+  id            String       @id @default(cuid())
+  courseId      String
+  title         String
+  description   String?
+  startAt       DateTime
+  endAt         DateTime
+  timezone      String?
+  location      String?
+  meetingUrl    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  liveSessionId String?
+  course        Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  liveSession   LiveSession? @relation(fields: [liveSessionId], references: [id])
+
+  @@index([courseId, startAt])
+}
+
+model InstructorPayoutProfile {
+  id               String   @id @default(cuid())
+  instructorId     String
+  level            String?
+  baseFee          Decimal  @default(0)
+  perEnrollmentFee Decimal  @default(0)
+  revenueShare     Decimal  @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  instructor       User     @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@index([instructorId])
+}
+
+model InstructorPayment {
+  id                   String                  @id @default(cuid())
+  instructorId         String
+  periodStart          DateTime
+  periodEnd            DateTime
+  completedEnrollments Int
+  refundCount          Int
+  courseRevenue        Decimal                 @default(0)
+  amount               Decimal                 @default(0)
+  details              Json?
+  notes                String?
+  status               InstructorPaymentStatus @default(PENDING)
+  recordedById         String?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  paidAt               DateTime?
+  instructor           User                    @relation("InstructorPayments", fields: [instructorId], references: [id], onDelete: Cascade)
+  recordedBy           User?                   @relation("RecordedInstructorPayments", fields: [recordedById], references: [id])
+
+  @@unique([instructorId, periodStart, periodEnd])
+  @@index([instructorId, status])
+  @@index([periodStart, periodEnd])
+}
+
+model VolunteerContent {
+  id           String                     @id @default(cuid())
+  instructorId String
+  courseId     String?
+  title        String
+  description  String?
+  resourceUrl  String?
+  contentType  String?
+  status       VolunteerContentStatus     @default(PENDING)
+  isPublic     Boolean                    @default(true)
+  submittedAt  DateTime                   @default(now())
+  reviewedAt   DateTime?
+  approvedById String?
+  notes        String?
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  approvedBy   User?                      @relation("VolunteerContentApprovals", fields: [approvedById], references: [id])
+  course       Course?                    @relation(fields: [courseId], references: [id])
+  instructor   User                       @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  feedback     VolunteerContentFeedback[]
+}
+
+model VolunteerContentFeedback {
+  id        String           @id @default(cuid())
+  contentId String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime         @default(now())
+  content   VolunteerContent @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, userId])
+  @@index([contentId])
+  @@index([userId])
+}
+
+model InstructorValueScore {
+  id               String   @id @default(cuid())
+  instructorId     String
+  approvedContents Int      @default(0)
+  feedbackCount    Int      @default(0)
+  averageRating    Decimal  @default(0)
+  score            Decimal  @default(0)
+  computedAt       DateTime @default(now())
+  recordedById     String?
+  instructor       User     @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+  recordedBy       User?    @relation("InstructorValueScoreRecords", fields: [recordedById], references: [id])
+
+  @@index([instructorId])
+  @@index([computedAt])
+}
+
+model DocumentSequence {
+  id        String   @id @default(cuid())
+  docType   String   @unique
+  year      Int
+  counter   Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String?
+  entityId  String?
+  meta      Json?
+  ip        String?
+  ua        String?
+  createdAt DateTime @default(now())
+  actor     User?    @relation(fields: [actorId], references: [id])
+}
+
+model SecurityEvent {
+  id             String                @id @default(cuid())
+  tenantId       String?               @default("public")
+  source         String
+  category       String?
+  eventType      String?
+  severity       SecurityEventSeverity @default(MEDIUM)
+  status         SecurityEventStatus   @default(OPEN)
+  description    String?
+  actorIp        String?
+  userAgent      String?
+  payload        Json?
+  detectedAt     DateTime              @default(now())
+  createdAt      DateTime              @default(now())
+  defenseActions DefenseAction[]
+  tenant         Tenant?               @relation(fields: [tenantId], references: [id])
+
+  @@index([severity, detectedAt])
+  @@index([status, detectedAt])
+  @@index([tenantId])
+}
+
+model DefenseAction {
+  id           String             @id @default(cuid())
+  eventId      String?
+  actionType   DefenseActionType
+  target       String?
+  params       Json?
+  state        DefenseActionState @default(PROPOSED)
+  reason       String?
+  createdBy    String?
+  createdAt    DateTime           @default(now())
+  appliedAt    DateTime?
+  rolledBackAt DateTime?
+  event        SecurityEvent?     @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+  @@index([actionType, state])
+}
+
+model LtiTool {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  issuer      String
+  clientId    String          @unique
+  publicKey   String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deployments LtiDeployment[]
+}
+
+model LtiDeployment {
+  id          String           @id @default(cuid())
+  toolId      String
+  courseId    String
+  instructors String[]
+  learners    String[]
+  status      DeploymentStatus @default(ACTIVE)
+  keyRotation DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tool        LtiTool          @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  launches    LtiLaunch[]
+}
+
+model LtiLaunch {
+  id           String        @id @default(cuid())
+  deploymentId String
+  userId       String
+  role         String
+  rawPayload   Json
+  createdAt    DateTime      @default(now())
+  deployment   LtiDeployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+}
+
+model AiAgentProfile {
+  id           String       @id @default(cuid())
+  userId       String?
+  name         String
+  contextMap   Json         @default("{}")
+  lastActivity DateTime     @default(now())
+  status       AgentStatus  @default(ACTIVE)
+  logs         AiAgentLog[]
+}
+
+model AiAgentLog {
+  id        String         @id @default(cuid())
+  agentId   String
+  type      String
+  payload   Json
+  createdAt DateTime       @default(now())
+  agent     AiAgentProfile @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model PerformanceSnapshot {
+  id         String   @id @default(cuid())
+  userId     String?
+  role       Role?
+  context    String?
+  metrics    Json
+  notes      String?
+  recordedAt DateTime @default(now())
+
+  @@index([role])
+  @@index([recordedAt])
+}
+
+model LearningEvent {
+  id        String            @id @default(cuid())
+  tenantId  String
+  userId    String?
+  eventType LearningEventType
+  payload   Json?
+  createdAt DateTime          @default(now())
+  tenant    Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User?             @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, eventType])
+  @@index([userId])
+}
+
+model CustomerSignal {
+  id          String   @id @default(cuid())
+  tenantId    String
+  companyName String
+  segment     String
+  userCount   Int
+  vertical    String?
+  status      String   @default("prospect")
+  lastContact DateTime
+  score       Decimal  @default(0)
+  metadata    Json
+  createdAt   DateTime @default(now())
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, score])
+}
+
+model PricingRule {
+  id            String   @id @default(cuid())
+  tenantId      String
+  name          String
+  basePerUser   Decimal
+  minUsers      Int      @default(1)
+  maxUsers      Int?
+  moduleSupport Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, name])
+}
+
+model PricingProposal {
+  id         String   @id @default(cuid())
+  tenantId   String
+  amount     Decimal
+  currency   String   @default("USD")
+  confidence Decimal  @default(0)
+  reason     String
+  createdAt  DateTime @default(now())
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@ignore
+}
+
+model Recommendation {
+  id           String             @id @default(cuid())
+  tenantId     String
+  userId       String?
+  type         RecommendationType
+  payload      Json
+  reason       String
+  score        Decimal
+  context      Json?
+  createdAt    DateTime           @default(now())
+  explainedBy  String?
+  modelVersion String?
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id])
+}
+
+model AIMetric {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  resource  String?
+  value     Decimal
+  metadata  Json?
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, name])
+}
+
+model IntegrationConnector {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  provider  String
+  type      String
+  config    Json
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, name])
+}
+
+model LiveSession {
+  id                   String                   @id @default(cuid())
+  courseId             String
+  instructorId         String
+  topic                String?
+  status               LiveSessionStatus        @default(SCHEDULED)
+  isRecording          Boolean                  @default(false)
+  activeSpeakerId      String?
+  startedAt            DateTime?
+  endedAt              DateTime?
+  metadata             Json?
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+  messages             CommunicationMessage[]   @relation("SessionMessages")
+  schedules            CourseSchedule[]
+  course               Course                   @relation("CourseLiveSessions", fields: [courseId], references: [id], onDelete: Cascade)
+  instructor           User                     @relation("InstructorLiveSessions", fields: [instructorId], references: [id], onDelete: Cascade)
+  participants         LiveSessionParticipant[]
+  presentationRequests PresentationRequest[]    @relation("SessionPresentationRequests")
+  whiteboardSessions   WhiteboardSession?
+
+  @@index([courseId, status])
+}
+
+model LiveSessionParticipant {
+  id          String      @id @default(cuid())
+  sessionId   String
+  userId      String
+  micOn       Boolean     @default(false)
+  cameraOn    Boolean     @default(false)
+  screenShare Boolean     @default(false)
+  joinedAt    DateTime    @default(now())
+  role        Role
+  session     LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user        User        @relation("UserLiveParticipants", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([sessionId])
+}
+
+model WhiteboardSession {
+  id            String             @id @default(cuid())
+  liveSessionId String             @unique
+  createdAt     DateTime           @default(now())
+  actions       WhiteboardAction[]
+  layers        WhiteboardLayer[]
+  liveSession   LiveSession        @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+}
+
+model WhiteboardAction {
+  id             String            @id @default(cuid())
+  sessionId      String
+  userId         String?
+  type           String
+  payload        Json?
+  socketId       String?
+  createdAt      DateTime          @default(now())
+  layerId        String?           @default("default")
+  reverted       Boolean           @default(false)
+  targetActionId String?
+  session        WhiteboardSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user           User?             @relation("UserWhiteboardActions", fields: [userId], references: [id])
+
+  @@index([sessionId, createdAt])
+  @@index([targetActionId])
+}
+
+model WhiteboardLayer {
+  id        String            @id @default(cuid())
+  sessionId String
+  name      String
+  createdBy String?
+  createdAt DateTime          @default(now())
+  creator   User?             @relation("UserLayerCreator", fields: [createdBy], references: [id])
+  session   WhiteboardSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, name])
+  @@index([sessionId])
+}
+
+model PresentationRequest {
+  id          String             @id @default(cuid())
+  sessionId   String
+  requesterId String
+  status      PresentationStatus @default(PENDING)
+  requestedAt DateTime           @default(now())
+  respondedAt DateTime?
+  notes       String?
+  requester   User               @relation("UserPresentationRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  session     LiveSession        @relation("SessionPresentationRequests", fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, status])
+}
+
+model CommunicationMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  senderId  String
+  type      MessageType @default(CHAT)
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  role      Role
+  sender    User        @relation("UserCommunicationMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  session   LiveSession @relation("SessionMessages", fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+}
+
+model PricePlan {
+  id             String          @id @default(cuid())
+  name           String
+  type           String
+  amount         Decimal
+  currency       String          @default("USD")
+  interval       String?
+  courseId       String?
+  features       Json?
+  createdAt      DateTime        @default(now())
+  paymentIntents PaymentIntent[]
+  subscriptions  Subscription[]
+}
+
+model PaymentIntent {
+  id                String        @id @default(cuid())
+  provider          String
+  providerPaymentId String?
+  amount            Decimal
+  currency          String        @default("USD")
+  status            PaymentStatus @default(PENDING)
+  userId            String?
+  tenantId          String?
+  courseId          String?
+  planId            String?
+  seats             Int?
+  installments      Int?
+  metadata          Json?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  course            Course?       @relation(fields: [courseId], references: [id])
+  plan              PricePlan?    @relation(fields: [planId], references: [id])
+  user              User?         @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([tenantId])
+}
+
+model Subscription {
+  id                     String    @id @default(cuid())
+  tenantId               String
+  planId                 String
+  seats                  Int       @default(1)
+  status                 String    @default("ACTIVE")
+  provider               String
+  providerSubscriptionId String?
+  currentPeriodEnd       DateTime?
+  metadata               Json?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  plan                   PricePlan @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+  @@index([planId])
+}
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum ScheduledReportFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum ScheduledReportFormat {
+  PDF
+  CSV
+  XLSX
+  DOC
+}
+
+enum VolunteerContentStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InstructorPaymentStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum CertificationStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum DeploymentStatus {
+  ACTIVE
+  ARCHIVED
+  PENDING_ROTATION
+}
+
+enum LearningEventType {
+  CONTENT_VIEWED
+  VIDEO_DROPOFF
+  QUIZ_ANSWERED
+  ASSIGNMENT_SUBMITTED
+  LIVE_JOIN
+  LIVE_CHAT
+  GRADE_POSTED
+  CALIPER_EVENT
+}
+
+enum RecommendationType {
+  STUDENT_NEXT_STEP
+  MICRO_CONTENT
+  RISK_ALERT
+  CONTENT_REVISION
+  INSTRUCTOR_INSIGHT
+}
+
+enum AgentStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum SecurityEventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SecurityEventStatus {
+  OPEN
+  INVESTIGATING
+  MITIGATED
+  CLOSED
+}
+
+enum DefenseActionType {
+  RATE_LIMIT
+  WAF_RULE
+  QUARANTINE
+  RESTART_SERVICE
+  BLOCK_IDENTITY
+  ALERT_ONLY
+}
+
+enum DefenseActionState {
+  PROPOSED
+  APPROVED
+  APPLIED
+  ROLLED_BACK
+  FAILED
+}
+
+enum LiveSessionStatus {
+  SCHEDULED
+  RUNNING
+  PAUSED
+  ENDED
+}
+
+enum PresentationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MessageType {
+  CHAT
+  ASSIGNMENT
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model Class {
+  id           String   @id
+  tenantId     String   @default("public")
+  name         String   @default("Demo Class")
+  instructorId String
+  instructor   User     @relation(fields: [instructorId], references: [id])
+  courseId     String?
+  course       Course?  @relation(fields: [courseId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  actions      InstructorAction[]
+
+  @@index([tenantId])
+  @@index([instructorId])
+  @@index([courseId])
+  @@map("Class")
+}
+
+model InstructorAction {
+  id           String   @id @default(cuid())
+  tenantId     String   @default("public")
+  classId      String
+  class        Class    @relation(fields: [classId], references: [id])
+
+  createdById  String
+  createdBy    User     @relation(fields: [createdById], references: [id])
+
+  targetType   String
+  targetUserId String?
+  targetUser   User?    @relation(fields: [targetUserId], references: [id])
+
+  actionType   String
+  payload      Json     @default("{}")
+  status       String   @default("active")
+  dueAt        DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([classId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([tenantId, createdAt])
+  @@map("InstructorAction")
+}

@@ -1,0 +1,62 @@
+<nav class="nav-bar"><div class="gold-text">ATLASIO ACADEMY</div><div class="nav-links"><a href="dashboard.html">Merkeze Dön</a></div></nav><!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Atlasio Prime | Eğitmen Paneli</title>
+    <link rel="stylesheet" href="master_design.css">
+    <style>
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .admin-table th, .admin-table td { border: 1px solid #333; padding: 12px; text-align: left; }
+        .admin-table th { background: var(--gold); color: black; }
+        .control-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
+        .btn-action { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 10px; cursor: pointer; transition: 0.3s; }
+        .btn-action:hover { background: var(--gold); color: black; }
+    </style>
+</head>
+<body style="padding:40px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <h1 class="gold-text">EĞİTMEN KOMUTA MERKEZİ</h1>
+        <span id="status">SİSTEM DURUMU: <span style="color:#00ff00;">ONLINE</span></span>
+    </div>
+
+    <div class="control-panel">
+        <button class="btn-action" onclick="alert('Yeni Canlı Ders Başlatıldı!')">▶ CANLI DERSİ BAŞLAT</button>
+        <button class="btn-action" onclick="alert('Siber Saldırı Simülasyonu Aktif!')">🛡️ SALDIRI SİMÜLASYONU</button>
+        <button class="btn-action" onclick="alert('Tüm Öğrencilere Bildirim Gönderildi')">📢 DUYURU YAYINLA</button>
+    </div>
+
+    <div class="premium-card">
+        <h3 class="gold-text">AKTİF ÖĞRENCİ LİSTESİ</h3>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Öğrenci Kodu</th>
+                    <th>İlerleme</th>
+                    <th>Son Aktivite</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>STU_4421</td>
+                    <td>%85</td>
+                    <td>Kriptoloji Modülü</td>
+                    <td style="color:#00ff00;">AKTİF</td>
+                </tr>
+                <tr>
+                    <td>STU_1092</td>
+                    <td>%42</td>
+                    <td>Network Güvenliği</td>
+                    <td style="color:#888;">OFFLINE</td>
+                </tr>
+                <tr>
+                    <td>STU_8830</td>
+                    <td>%12</td>
+                    <td>Başlangıç Testi</td>
+                    <td style="color:#00ff00;">AKTİF</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Atlasio | Master Control</title>
+    <link rel="stylesheet" href="master_design.css">
+    <style>
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .danger-zone { border: 2px solid #ff0000; padding: 20px; margin-top: 30px; background: rgba(255,0,0,0.05); }
+        .status-light { height: 10px; width: 10px; border-radius: 50%; display: inline-block; background: #00ff00; margin-right: 5px; }
+    </style>
+</head>
+<body style="padding:40px;">
+    <h1 class="gold-text">STRATEJİK YÖNETİM MERKEZİ</h1>
+    <div class="action-grid">
+        <div class="premium-card">
+            <h3>ÖĞRENCİ YÖNETİMİ</h3>
+            <p><span class="status-light"></span> STU_99 - <button onclick="alert('Öğrenci Yetkileri Askıya Alındı')">BANLA</button></p>
+            <p><span class="status-light"></span> STU_12 - <button onclick="alert('Notlandırma Paneli Açıldı')">PUAN VER</button></p>
+        </div>
+        <div class="premium-card">
+            <h3>SİSTEM DUYURUSU</h3>
+            <input type="text" id="globalMsg" placeholder="Tüm ekranlara mesaj..." style="width:80%; background:#000; border:1px solid var(--gold); color:#fff; padding:5px;">
+            <button class="gold-text" onclick="alert('Mesaj Yayınlandı: ' + document.getElementById('globalMsg').value)">YAYINLA</button>
+        </div>
+        <div class="premium-card">
+            <h3>DERS İÇERİK YÜKLE</h3>
+            <input type="file" style="font-size: 0.7rem;">
+            <button class="gold-text" style="margin-top:10px;">BULUTA YÜKLE</button>
+        </div>
+    </div>
+    <div class="danger-zone">
+        <h2 style="color:red;">KRİTİK SİSTEM BÖLGESİ</h2>
+        <button onclick="confirm('TÜM SİSTEM KİLİTLENSİN Mİ?') ? alert('LOCKDOWN AKTİF!') : null" style="background:red; color:white; padding:15px; width:100%; border:none; cursor:pointer; font-weight:bold;">SİSTEMİ TAMAMEN KİLİTLE (TOTAL LOCKDOWN)</button>
+    </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "atlasio-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "ci:check": "pnpm --filter @atlasio/api prisma:generate && pnpm --filter @atlasio/api test && pnpm typecheck && pnpm --filter @atlasio/web lint && pnpm build",
+    "smoke:prod": "bash ./scripts/smoke-prod.sh",
+    "smtp:probe": "pnpm --filter @atlasio/api exec node scripts/smtp-probe.mjs",
+    "db:migrate": "pnpm --filter @atlasio/api prisma:migrate",
+    "db:seed": "pnpm --filter @atlasio/api prisma:seed",
+    "db:setup": "pnpm --filter @atlasio/api prisma:generate && pnpm --filter @atlasio/api prisma:migrate && pnpm --filter @atlasio/api prisma:seed",
+    "db:studio": "pnpm --filter @atlasio/api prisma:studio"
+  },
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "turbo": "^2.0.0"
+  },
+  "dependencies": {
+    "argon2": "^0.41.1",
+    "bcryptjs": "^3.0.3"
+  }
+}

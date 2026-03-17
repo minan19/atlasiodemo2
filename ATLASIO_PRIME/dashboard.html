@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Atlasio Prime | Smart Dashboard</title>
+    <link rel="stylesheet" href="master_design.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>ATLASIO</h2>
+        <a href="dashboard.html" class="active">🏠 Dashboard</a>
+        <a href="academy.html">📚 Courses</a>
+        <a href="reports.html">📈 Reports</a>
+        <a href="certificates.html">📜 Certificates</a> <a href="whiteboard.html">🎨 SmartBoard</a>
+        <a href="settings.html">⚙️ Settings</a>
+        <div style="margin-top:auto; font-size:0.7rem; color:#666;">All Systems Operational</div>
+    </div>
+
+    <div class="main-content">
+        <div class="status-bar">
+            <span>🔍 Search for courses, optimized...</span>
+            <div style="color: green;">● System Secure & Optimized</div>
+        </div>
+
+        <div class="premium-card" style="background: url('https://via.placeholder.com/800x200') center/cover; color:white; min-height:200px; display:flex; flex-direction:column; justify-content:flex-end;">
+            <div style="background:rgba(0,0,0,0.5); padding:20px; border-radius:12px;">
+                <h3>Continue Learning: Advanced AI</h3>
+                <p>Eğitmen: Dr. Elara Vance</p>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+                <p style="text-align:right;">%75</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="premium-card">
+                <h4>Weekly Progress</h4>
+                <p><strong>12.5 hours spent</strong></p>
+            </div>
+            <div class="premium-card">
+                <span style="background:orange; padding:3px 8px; border-radius:4px; font-size:0.7rem;">LIVE</span>
+                <h4>Prompt Engineering QA</h4>
+                <p>Today, 19:00 TRT</p>
+                <button class="btn-join">JOIN NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function updateStats() {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/stats');
+            const data = await response.json();
+            
+            if(document.getElementById('sys-status')) document.getElementById('sys-status').innerText = data.status;
+            if(document.getElementById('sys-load')) document.getElementById('sys-load').innerText = data.system_load;
+            if(document.getElementById('sys-nodes')) document.getElementById('sys-nodes').innerText = data.active_nodes;
+            if(document.getElementById('sys-threat')) document.getElementById('sys-threat').innerText = data.threat_level;
+            console.log("Atlasio Veri Akışı: Aktif", data);
+        } catch (err) {
+            console.log("Yerel köprü bekleniyor...");
+        }
+    }
+    setInterval(updateStats, 2000);
+    updateStats();
+    </script>
+    </body>
+</html>

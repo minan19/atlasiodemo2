@@ -60,3 +60,9 @@ atlasio-monorepo/infra/terraform/--*
 atlasio_dosyalari/
 CLAUDE_OPUS_PROMPT.txt
 atlasio-monorepo/infra/terraform/aws
+
+# Extra security exclusions
+**/*.tfvars
+atlasio-monorepo/infra/terraform/aws
+**/*Terminal*Çıkışı*.txt
+**/logs.txt

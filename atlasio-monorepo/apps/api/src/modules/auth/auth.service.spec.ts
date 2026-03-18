@@ -52,7 +52,7 @@ function buildService(
   const prisma = makePrisma(prismaOverrides) as unknown as PrismaService;
   const jwt = { ...makeJwt(), ...jwtOverrides } as unknown as JwtService;
   const audit = makeAudit() as unknown as AuditService;
-  const redis = { ...makeRedis(), ...redisOverrides } as any;
+  const redis = { ...makeRedis(), ...redisOverrides };
   const notifications = makeNotifications() as unknown as NotificationsService;
   return { service: new AuthService(prisma, jwt, audit, redis, notifications), prisma, jwt, audit, redis };
 }
@@ -145,7 +145,7 @@ describe('AuthService.login', () => {
 
   it('aynı IP 10 denemeden fazlasında 429 fırlatır', async () => {
     const redis = makeRedis();
-    (redis.incr as jest.Mock).mockResolvedValue(11); // limit aşıldı
+    (redis.incr).mockResolvedValue(11); // limit aşıldı
     const { service, prisma } = buildService({}, {}, redis);
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
     (argon2.verify as jest.Mock).mockResolvedValue(true);
@@ -166,7 +166,7 @@ describe('AuthService.refresh', () => {
 
     // JWT verify mock
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockResolvedValue({
+    (jwtService.verifyAsync).mockResolvedValue({
       sub: 'user-1',
       type: 'refresh',
       jti: 'test-jti-123',
@@ -187,7 +187,7 @@ describe('AuthService.refresh', () => {
 
   it('geçersiz token tipinde UnauthorizedException fırlatır', async () => {
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockResolvedValue({
+    (jwtService.verifyAsync).mockResolvedValue({
       sub: 'user-1',
       type: 'access', // yanlış tip
       jti: 'test-jti',
@@ -200,7 +200,7 @@ describe('AuthService.refresh', () => {
 
   it('süresi dolmuş token UnauthorizedException fırlatır', async () => {
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockRejectedValue(new Error('jwt expired'));
+    (jwtService.verifyAsync).mockRejectedValue(new Error('jwt expired'));
     const { service } = buildService({}, jwtService);
 
     await expect(service.refresh('expired_token'))
@@ -209,7 +209,7 @@ describe('AuthService.refresh', () => {
 
   it("Redis'te kayıt yoksa (iptal edilmiş) UnauthorizedException fırlatır", async () => {
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockResolvedValue({
+    (jwtService.verifyAsync).mockResolvedValue({
       sub: 'user-1',
       type: 'refresh',
       jti: 'revoked-jti',
@@ -227,7 +227,7 @@ describe('AuthService.refresh', () => {
 describe('AuthService.logout', () => {
   it('Redis token silinir ve başarı mesajı döner', async () => {
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockResolvedValue({ jti: 'logout-jti' });
+    (jwtService.verifyAsync).mockResolvedValue({ jti: 'logout-jti' });
     const redis = makeRedis();
     const { service } = buildService({}, jwtService, redis);
 
@@ -239,7 +239,7 @@ describe('AuthService.logout', () => {
 
   it('geçersiz token olsa bile hata fırlatmaz', async () => {
     const jwtService = { ...makeJwt() };
-    (jwtService.verifyAsync as jest.Mock).mockRejectedValue(new Error('invalid'));
+    (jwtService.verifyAsync).mockRejectedValue(new Error('invalid'));
     const { service } = buildService({}, jwtService);
 
     await expect(service.logout('invalid_token')).resolves.toBeDefined();

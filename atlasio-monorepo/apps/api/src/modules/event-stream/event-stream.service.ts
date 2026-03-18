@@ -216,10 +216,18 @@ export class EventStreamService {
       this.logger.warn(`Redis stream publish failed: ${(err as Error).message}`);
     }
 
-    // 3. In-process event emission
+    // 3. In-process event emission (Zero-latency AI Trigger)
     if (this.eventEmitter) {
       this.eventEmitter.emit('learning.event', event);
       this.eventEmitter.emit(`learning.${event.verb}`, event);
+      
+      // Bilişsel Yapay Zeka (Cognitive AI) motoru için spesifik event tetiklemeleri
+      if (event.eventType === 'QUIZ_ANSWERED') {
+          this.eventEmitter.emit('ai.quiz.analyzed', event);
+      }
+      if (event.eventType === 'VIDEO_DROPOFF' || event.eventType === 'CONTENT_VIEWED') {
+          this.eventEmitter.emit('ai.student.risk.evaluated', event);
+      }
     }
 
     // 4. Increment real-time counter in Redis
@@ -382,6 +390,7 @@ export class EventStreamService {
         by: ['createdAt'],
         where: { tenantId, createdAt: { gte: since } },
         _count: { _all: true },
+        orderBy: { createdAt: 'asc' },
       }),
       this.prisma.learningEvent.findMany({
         where: { tenantId, createdAt: { gte: since }, userId: { not: null } },

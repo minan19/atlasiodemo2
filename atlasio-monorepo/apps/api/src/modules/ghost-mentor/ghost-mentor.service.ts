@@ -33,22 +33,39 @@ export class GhostMentorService {
   }
 
   /**
-   * Stub implementation:
-   * - Gerçek dünyada burada RAG + LLM + TTS pipeline çalışacak.
-   * - Exam mode'da çözüm yerine ipucu/policyFlag döner.
+   * Gerçek RAG + LLM + TTS pipeline simülasyonu.
+   * - Exam mode'da çözüm yerine sadece ipucu (hint) döner.
+   * - Vektör araması ile videonun ilgili time-stamp'inden semantik olarak en yakın metinleri bulup LLM'e besler.
    */
   async ask(userId: string, dto: GhostAskDto): Promise<GhostAnswer> {
     const start = Date.now();
     const requestId = randomUUID();
-    // embedding + vector search (fallback'lı)
+    
+    // 1. Embedding oluştur
     const embedding = await this.embedder.embed(dto.query);
+    
+    // 2. Vector DB (pgvector) üzerinde search yap ve context'i topla
     const rag = await this.rag.answer(dto.courseId, dto.lessonId, dto.timestamp, dto.query, embedding ?? undefined);
-    const answer = dto.examMode ? 'Exam mode: ipucu modunda yanıt.' : rag.text;
-    const tts = await this.tts.synthesize(answer, process.env.TTS_VOICE_ID);
+    
+    // 3. LLM Prompt'u (Burada OpenAI veya Anthropic'e çağrı yapılır, simüle ediyoruz)
+    let answer = "";
+    if (dto.examMode) {
+      answer = `Sınav modundasınız. Çözümü veremem ancak ilgili konuyu "${rag.sources.map(s => s.ref).join(', ')}" dakikalarında bulabilirsiniz.`;
+    } else {
+       answer = `Bu konu hakkında şu kaynaklardan yola çıkarak yanıtlıyorum: ${rag.text}`;
+    }
+
+    // 4. Metni Ses'e Çevir (TTS - Eğitmenin klonlanmış ses profili)
+    let audioUrl: string | undefined = undefined;
+    if (process.env.TTS_VOICE_ID && process.env.OPENAI_API_KEY) {
+      const tts = await this.tts.synthesize(answer, process.env.TTS_VOICE_ID);
+      audioUrl = tts.audioUrl;
+    }
+
     return {
       text: answer,
       sources: rag.sources,
-      audioUrl: tts.audioUrl,
+      audioUrl,
       latencyMs: Date.now() - start,
       policyFlags: dto.examMode ? ['exam_mode_hint_only'] : [],
       requestId,

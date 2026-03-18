@@ -110,7 +110,7 @@ export class LiveService {
     });
     const meetingUrl =
       (session.metadata as any)?.meetingUrl ??
-      ((session as any).Course as any)?.meetingUrl ??
+      ((session as any).Course)?.meetingUrl ??
       undefined;
     return {
       sessionId,
@@ -248,5 +248,30 @@ export class LiveService {
       orderBy: { startedAt: 'desc' },
       include: { LiveSessionParticipant: true, CommunicationMessage: { take: 5, orderBy: { createdAt: 'desc' } } },
     });
+  }
+
+  // ─── ZOOM BENZERİ BREAKOUT ROOMS MANTIĞI ─────────────────────────────────
+  
+  async createBreakoutRooms(sessionId: string, instructorId: string, count: number) {
+    const session = await this.prisma.liveSession.findUnique({ where: { id: sessionId } });
+    if (!session || session.instructorId !== instructorId) {
+      throw new BadRequestException('Bunu yapmaya yetkiniz yok.');
+    }
+
+    const createdRooms: any[] = [];
+    for (let i = 1; i <= count; i++) {
+        const room = await this.prisma.liveSessionBreakout.create({
+            data: { liveSessionId: sessionId, name: `Room ${i}`, maxCapacity: 10 }
+        });
+        createdRooms.push(room);
+    }
+    return createdRooms;
+  }
+
+  async assignToBreakoutRoom(sessionId: string, participantId: string, breakoutRoomId: string) {
+      return this.prisma.liveSessionParticipant.update({
+          where: { sessionId_userId: { sessionId, userId: participantId } }, // Participant ID aslında User ID'dir.
+          data: { breakoutRoomId }
+      });
   }
 }

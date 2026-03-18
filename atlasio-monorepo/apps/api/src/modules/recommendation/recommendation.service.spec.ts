@@ -33,7 +33,7 @@ const makePrisma = () => ({
 function buildService(redisOv: any = {}) {
   const prisma = makePrisma() as unknown as PrismaService;
   const audit = makeAudit() as unknown as AuditService;
-  const redis = { ...makeRedis(), ...redisOv } as any;
+  const redis = { ...makeRedis(), ...redisOv };
   return { service: new RecommendationService(prisma, audit, redis), prisma, redis };
 }
 

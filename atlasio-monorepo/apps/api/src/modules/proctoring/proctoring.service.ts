@@ -119,7 +119,17 @@ export class ProctoringService {
     // Alarm eşiği örnek: trust < 0.5 → alert flag
     if (trust < 0.5) {
       await this.redis.hset(redisKey, { alert: 1 });
+      
+      // AI Gözetmen Uyarısı (Proctoring Alert)
+      await this.prisma.examSession.update({
+         where: { id: dto.sessionId },
+         data: {
+             aiDecision: 'SUSPICIOUS',
+             proctorNote: 'Yapay Zeka gözetmeni olağandışı aktivite (kopya şüphesi) tespit etti.'
+         }
+      });
     }
+
     return { trustScore: trust };
   }
 

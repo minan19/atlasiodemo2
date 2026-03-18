@@ -184,17 +184,40 @@ export class PaymentsService {
     }
     if (pi.planId && pi.tenantId) {
       const seats = pi.seats ?? 1;
-      await this.prisma.subscription.create({
-        data: {
-          tenantId: pi.tenantId,
-          planId: pi.planId,
-          seats,
-          status: 'ACTIVE',
-          provider: getProvider(),
-          providerSubscriptionId: pi.id,
-        },
-      });
-      await this.audit.log({ action: 'payment.subscription.activated', entity: 'Subscription', meta: { planId: pi.planId, tenantId: pi.tenantId, seats } });
+      const plan = await this.prisma.pricePlan.findUnique({ where: { id: pi.planId } });
+
+      if (plan && plan.type === 'MODULE_ADDON') {
+        const activeSub = await this.prisma.subscription.findFirst({
+           where: { tenantId: pi.tenantId, status: 'ACTIVE' }
+        });
+
+        if (activeSub && plan.features) {
+           const currentAddons = (activeSub.addons as string[]) || [];
+           const newAddonKeys = Object.keys(plan.features).filter(k => (plan.features as any)[k] === true);
+           
+           for (const addon of newAddonKeys) {
+              if (!currentAddons.includes(addon)) currentAddons.push(addon);
+           }
+
+           await this.prisma.subscription.update({
+              where: { id: activeSub.id },
+              data: { addons: currentAddons as any }
+           });
+           await this.audit.log({ action: 'payment.addon.activated', entity: 'Subscription', meta: { planId: pi.planId, tenantId: pi.tenantId, addons: newAddonKeys } });
+        }
+      } else {
+        await this.prisma.subscription.create({
+          data: {
+            tenantId: pi.tenantId,
+            planId: pi.planId,
+            seats,
+            status: 'ACTIVE',
+            provider: getProvider(),
+            providerSubscriptionId: pi.id,
+          },
+        });
+        await this.audit.log({ action: 'payment.subscription.activated', entity: 'Subscription', meta: { planId: pi.planId, tenantId: pi.tenantId, seats } });
+      }
     }
   }
 }

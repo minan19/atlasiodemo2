@@ -339,7 +339,7 @@ export class ReportsService {
     const totalWatch = agg._sum.watchSeconds ?? 0;
     const avgBitrate =
       agg._count > 0 && agg._sum.avgBitrateKbps
-        ? Math.round((agg._sum.avgBitrateKbps as number) / agg._count)
+        ? Math.round((agg._sum.avgBitrateKbps) / agg._count)
         : 0;
 
     const result = {
@@ -353,8 +353,8 @@ export class ReportsService {
         watchSeconds: c._sum?.watchSeconds ?? 0,
         avgBitrateKbps: c._avg?.avgBitrateKbps ? Math.round(c._avg.avgBitrateKbps) : null,
         hits:
-          typeof c._count === 'object' && (c._count as any)?._all
-            ? (c._count as any)._all
+          typeof c._count === 'object' && (c._count)?._all
+            ? (c._count)._all
             : 0,
       })),
       charts: {

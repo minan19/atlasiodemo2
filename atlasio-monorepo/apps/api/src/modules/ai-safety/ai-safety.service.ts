@@ -323,7 +323,7 @@ export class AiSafetyService {
   private extractTopPatterns(logs: any[]): Array<{ pattern: string; count: number }> {
     const counts = new Map<string, number>();
     for (const log of logs) {
-      const meta = log.meta as any;
+      const meta = log.meta;
       const patterns = meta?.patterns ?? [];
       for (const p of patterns) {
         counts.set(p, (counts.get(p) ?? 0) + 1);

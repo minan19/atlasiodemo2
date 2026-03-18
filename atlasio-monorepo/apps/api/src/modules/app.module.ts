@@ -44,6 +44,13 @@ import { ConnectorsModule } from './connectors/connectors.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { TenantGuard } from './auth/tenant.guard';
 import { TenantContextMiddleware } from './prisma/tenant-context.middleware';
+import { GamificationModule } from './gamification/gamification.module';
+import { EntitlementModule } from './entitlement/entitlement.service';
+import { DepartmentsModule } from './departments/departments.module';
+import { GuardiansModule } from './guardians/guardians.module';
+import { SmartClassroomModule } from './smart-classroom/smart-classroom.module';
+import { MathEngineModule } from './math-engine/math-engine.module';
+import { LanguageLabModule } from './language-lab/language-lab.module';
 
 @Module({
   imports: [
@@ -99,6 +106,13 @@ import { TenantContextMiddleware } from './prisma/tenant-context.middleware';
     RecommendationModule,
     ConnectorsModule,
     ObservabilityModule,
+    GamificationModule,
+    DepartmentsModule,
+    GuardiansModule,
+    EntitlementModule,
+    SmartClassroomModule,
+    MathEngineModule,
+    LanguageLabModule,
   ],
   providers: [
     // Tüm rotalar için global rate limit guard

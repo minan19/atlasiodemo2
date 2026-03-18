@@ -46,7 +46,7 @@ function buildService(prismaOv: any = {}, jwtOv: any = {}, redisOv: any = {}) {
   const prisma = makePrisma(prismaOv) as unknown as PrismaService;
   const jwt = { ...makeJwt(), ...jwtOv } as unknown as JwtService;
   const audit = makeAudit() as unknown as AuditService;
-  const redis = { ...makeRedis(), ...redisOv } as any;
+  const redis = { ...makeRedis(), ...redisOv };
   return { service: new SsoService(prisma, jwt, audit, redis), prisma, jwt, audit, redis };
 }
 

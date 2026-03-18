@@ -45,6 +45,16 @@ export class LtiController {
     return this.service.processLaunch(dto);
   }
 
+  @Get('jwks')
+  getJwks() {
+    return this.service.getJwks();
+  }
+
+  @Post('oidc-login')
+  oidcLogin(@Body() payload: any) {
+    return this.service.initiateOidcLogin(payload);
+  }
+
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
   @Get('tools/:id/deployments')

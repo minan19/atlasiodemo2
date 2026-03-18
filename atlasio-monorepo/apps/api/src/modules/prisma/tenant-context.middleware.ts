@@ -16,7 +16,7 @@ import { PrismaService } from './prisma.service';
 export class TenantContextMiddleware implements NestMiddleware {
   private readonly logger = new Logger(TenantContextMiddleware.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor() {}
 
   async use(req: Request & { tenantId?: string }, _res: Response, next: NextFunction) {
     const tenantId =
@@ -30,7 +30,8 @@ export class TenantContextMiddleware implements NestMiddleware {
 
     // Set Postgres session parameter for RLS policies
     try {
-      await this.prisma.$executeRaw`SELECT set_config('app.current_tenant', ${tenantId}, true)`;
+      // req.prisma comes from main.ts
+      await (req as any).prisma.$executeRaw`SELECT set_config('app.current_tenant', ${tenantId}, true)`;
     } catch (err) {
       this.logger.warn(`RLS session config failed for tenant=${tenantId}: ${(err as Error).message}`);
     }

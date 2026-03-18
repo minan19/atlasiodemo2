@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import rateLimit from 'express-rate-limit';
 import { randomUUID } from 'crypto';
-import express = require('express');
+import * as express from 'express';
 import { PrismaService } from './modules/prisma/prisma.service';
 import { TenantContextMiddleware } from './modules/prisma/tenant-context.middleware';
 import { OpsWebhookVerifyMiddleware } from './modules/ops/ops.webhook.verify.middleware';

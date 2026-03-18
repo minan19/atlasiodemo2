@@ -114,4 +114,13 @@ export class LiveController {
   listSessions(@Query('courseId') courseId?: string) {
     return this.live.listSessions(courseId);
   }
+
+  // --- Breakout Rooms ---
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN', 'INSTRUCTOR')
+  @Post('sessions/:id/breakout-rooms')
+  createBreakoutRooms(@Param('id') sessionId: string, @Body() dto: { count: number }, @Req() req: any) {
+    return this.live.createBreakoutRooms(sessionId, req.user.id ?? req.user.userId, dto.count);
+  }
 }

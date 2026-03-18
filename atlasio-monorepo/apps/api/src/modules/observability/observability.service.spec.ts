@@ -31,7 +31,7 @@ const makePrisma = () => ({
 
 function buildService(redisOv: any = {}) {
   const prisma = makePrisma() as unknown as PrismaService;
-  const redis = { ...makeRedis(), ...redisOv } as any;
+  const redis = { ...makeRedis(), ...redisOv };
   return { service: new ObservabilityService(prisma, redis), prisma, redis };
 }
 

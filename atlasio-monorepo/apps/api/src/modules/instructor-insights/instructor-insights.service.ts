@@ -142,6 +142,45 @@ export class InstructorInsightsService {
     const thresholds = getThresholds();
 
     const cls = await this.prisma.class.findUnique({ where: { id: classId }, select: { courseId: true } });
+
+    // OTONOM BİLİŞSEL ISI HARİTASI (Cognitive Class Heatmap) & DERS PLANI TAVSİYESİ (AI Lesson Recommender)
+    let aiRecommendation = "Sınıfın genel bilişsel durumu harika. Yeni konulara geçmek için ideal bir zaman.";
+    const conceptHeatmap: Record<string, any> = {};
+
+    if (cls?.courseId) {
+       const enrollments = await this.prisma.enrollment.findMany({
+          where: { courseId: cls.courseId },
+          select: { userId: true },
+       });
+       const studentIds = enrollments.map(e => e.userId);
+
+       if (studentIds.length > 0) {
+         const conceptMasteries = await this.prisma.conceptMastery.findMany({
+            where: { userId: { in: studentIds } },
+            include: { Concept: true }
+         });
+
+         const groupedByConcept = conceptMasteries.reduce((acc, curr) => {
+            if (!acc[curr.conceptId]) acc[curr.conceptId] = { sum: 0, count: 0, name: curr.Concept.name };
+            acc[curr.conceptId].sum += curr.masteryLevel;
+            acc[curr.conceptId].count += 1;
+            return acc;
+         }, {} as Record<string, { sum: number, count: number, name: string }>);
+
+         const criticalConcepts: any[] = [];
+         for (const [cId, data] of Object.entries(groupedByConcept)) {
+            const avg = data.sum / data.count;
+            const riskStatus = avg >= 0.75 ? 'GREEN' : avg >= 0.5 ? 'YELLOW' : 'RED';
+            conceptHeatmap[cId] = { conceptName: data.name, avgMastery: avg, riskStatus };
+            if (riskStatus === 'RED') criticalConcepts.push(conceptHeatmap[cId]);
+         }
+
+         if (criticalConcepts.length > 0) {
+            const conceptsList = criticalConcepts.map(c => c.conceptName).join(', ');
+            aiRecommendation = `Ghost-Mentor AI Tavsiyesi: Dünkü analizlere göre sınıfın büyük bir kısmı "${conceptsList}" konularında başarısız oldu. Bugünkü ders planınızın ilk 15 dakikasını bu konuları telafi etmeye ayırmanız önerilir.`;
+         }
+       }
+    }
     const enrollments = cls?.courseId
       ? await this.prisma.enrollment.findMany({
           where: { courseId: cls.courseId },
@@ -247,6 +286,8 @@ export class InstructorInsightsService {
         students: heatmapStudents,
       },
       recommendations,
+      cognitiveHeatmap: conceptHeatmap,
+      aiRecommendation,
     };
 
     await this.redis.set(cacheKey, JSON.stringify(response), 'EX', 600);

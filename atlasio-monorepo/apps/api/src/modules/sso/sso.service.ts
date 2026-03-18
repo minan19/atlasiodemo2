@@ -333,7 +333,7 @@ export class SsoService {
     const { providerId, tenantId, externalId, email, name, firstName, lastName, autoProvision, defaultRole } = params;
 
     // 1. Check existing SSO link
-    let ssoLink = await this.prisma.userSsoLink.findUnique({
+    const ssoLink = await this.prisma.userSsoLink.findUnique({
       where: { providerId_externalId: { providerId, externalId } },
       include: { User: true },
     });
@@ -352,7 +352,7 @@ export class SsoService {
           data: {
             email,
             passwordHash: '', // No password for SSO users
-            name: name ?? `${firstName ?? ''} ${lastName ?? ''}`.trim() || email.split('@')[0],
+            name: name ?? (`${firstName ?? ''} ${lastName ?? ''}`.trim() || email.split('@')[0]),
             firstName,
             lastName,
             role: defaultRole as any,

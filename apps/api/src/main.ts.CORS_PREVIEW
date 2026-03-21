@@ -1,0 +1,15 @@
+// PREVIEW: main.ts CORS + port düzeltmesi
+// Değişiklikler:
+// 1. CORS origin listesine 4100 eklendi
+// 2. ENV'den FRONTEND_BASE okunarak dinamik yapıldı
+
+app.enableCors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:4000',
+    'http://localhost:4100',
+    ...(process.env.FRONTEND_BASE ? [process.env.FRONTEND_BASE] : []),
+  ],
+  credentials: true,
+});

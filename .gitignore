@@ -1,2 +1,68 @@
-apps/api/dist
-apps/web/.next
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Workspace tooling
+.claude/
+.codex/
+
+# Dependency/cache/build artifacts
+**/node_modules/
+**/.pnpm-store/
+**/.next/
+**/dist/
+**/build/
+**/.cache/
+**/coverage/
+**/.turbo/
+**/.vercel/
+
+# Terraform and infra generated files
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/tf-apply.log
+
+# Secrets and local env
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+**/*secret*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.crt
+
+# Logs and runtime junk
+**/*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# Large/system junk files from accidental CLI output
+atlasio-monorepo/infra/terraform/AWS_*
+atlasio-monorepo/infra/terraform/--*
+
+# Requested exclusions (notes/architecture/stakeholder style docs)
+**/*stakeholder*
+**/*mimari*
+**/*Handoff*
+**/*HANDOFF*
+**/*handoff*
+**/*not*.pages
+**/notes/
+**/notes/**
+
+# Local archive/docs bucket (optional workspace notes)
+atlasio_dosyalari/
+CLAUDE_OPUS_PROMPT.txt
+atlasio-monorepo/infra/terraform/aws
+
+# Extra security exclusions
+**/*.tfvars
+atlasio-monorepo/infra/terraform/aws
+**/*Terminal*Çıkışı*.txt
+**/logs.txt

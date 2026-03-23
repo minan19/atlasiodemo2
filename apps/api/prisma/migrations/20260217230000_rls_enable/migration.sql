@@ -1,0 +1,2 @@
+-- placeholder migration (RLS plan) - no-op until tenantId columns are added
+-- When ready, replace with RLS policies.

@@ -9,13 +9,14 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { BypassAuthGuard } from '../auth/bypass.guard';
 import { WhiteboardService } from './whiteboard.service';
-import { StartWhiteboardDto, CreateLayerDto, DeleteLayerDto } from './dto';
+import { StartWhiteboardDto, CreateLayerDto, DeleteLayerDto, GrantRevokeDto } from './dto';
 import { Response } from 'express';
 
-@ApiTags('whiteboard')
+// SmartBoard — AI-powered collaborative workspace
+@ApiTags('smartboard')
 @ApiBearerAuth('access-token')
 @UseGuards(BypassAuthGuard)
 @Controller('whiteboard')
@@ -101,6 +102,29 @@ export class WhiteboardController {
     stream.pipe(res);
   }
 
+  @Post(':sessionId/ai-assist')
+  @ApiOperation({ summary: 'Get AI-generated whiteboard content suggestion' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['prompt'],
+      properties: {
+        prompt: { type: 'string', example: 'Draw a mind map for photosynthesis' },
+        context: { type: 'string', example: 'Current board has a title and two shapes' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'AI suggestion with whiteboard actions returned' })
+  aiAssist(
+    @Param('sessionId') sessionId: string,
+    @Body('prompt') prompt: string,
+    @Body('context') context?: string,
+    @Req() req?: any,
+  ) {
+    const userId = req?.user?.id ?? req?.user?.userId;
+    return this.whiteboard.aiAssist(sessionId, prompt, context, userId);
+  }
+
   /**
    * Büyük playback isteklerini gzip + chunk ile döndürür.
    */
@@ -153,5 +177,47 @@ export class WhiteboardController {
       clearTimeout(timeout);
       res.status(500).json({ message: 'playback failed', error: (err as Error).message });
     }
+  }
+
+  @Post(':sessionId/grant')
+  @ApiOperation({ summary: 'Grant write permission to a user for this whiteboard session' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['targetUserId'],
+      properties: {
+        targetUserId: { type: 'string', example: 'user-uuid-here' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Write access granted' })
+  grantWrite(
+    @Param('sessionId') sessionId: string,
+    @Body() dto: GrantRevokeDto,
+    @Req() req: any,
+  ) {
+    const grantedBy = req?.user?.id ?? req?.user?.userId;
+    return this.whiteboard.grantWrite(sessionId, dto.targetUserId, grantedBy);
+  }
+
+  @Post(':sessionId/revoke')
+  @ApiOperation({ summary: 'Revoke write permission from a user for this whiteboard session' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['targetUserId'],
+      properties: {
+        targetUserId: { type: 'string', example: 'user-uuid-here' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Write access revoked' })
+  revokeWrite(
+    @Param('sessionId') sessionId: string,
+    @Body() dto: GrantRevokeDto,
+    @Req() req: any,
+  ) {
+    const revokedBy = req?.user?.id ?? req?.user?.userId;
+    return this.whiteboard.revokeWrite(sessionId, dto.targetUserId, revokedBy);
   }
 }

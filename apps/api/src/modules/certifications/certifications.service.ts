@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { join } from 'path';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { IssueCertificationDto } from './dto';
 import PDFDocument from 'pdfkit';
 import * as QRCode from 'qrcode';
 import { PassThrough } from 'stream';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import type { Redis } from 'ioredis';
 
 /** Türkçe karakter desteği olan NotoSans font yolu */
 const FONT_REGULAR = join(__dirname, '../../../assets/fonts/NotoSans-Regular.ttf');
@@ -15,14 +18,17 @@ export class CertificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async issue(dto: IssueCertificationDto, actorId?: string) {
+    const verifyCode = randomUUID().replace(/-/g, '').slice(0, 12).toUpperCase();
     const certification = await this.prisma.certification.create({
       data: {
         userId: dto.userId,
         courseId: dto.courseId,
         expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
+        verifyCode,
       },
     });
     await this.audit.log({
@@ -51,12 +57,26 @@ export class CertificationsService {
   }
 
   async verify(key: string) {
+    const cacheKey = `cert:verify:${key}`;
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached) as {
+        valid: boolean;
+        status: string;
+        holder: string;
+        course: string;
+        issuedAt: Date;
+        expiresAt: Date | null;
+      };
+    }
+
     const cert = await this.prisma.certification.findFirst({
       where: { verifyCode: key },
       include: { User: true, Course: true },
     });
     if (!cert) throw new NotFoundException('Certificate not found or invalid key');
-    return {
+
+    const result = {
       valid: cert.status === 'ACTIVE',
       status: cert.status,
       holder: cert.User?.name ?? cert.User?.email ?? cert.userId,
@@ -64,6 +84,9 @@ export class CertificationsService {
       issuedAt: cert.issuedAt,
       expiresAt: cert.expiresAt,
     };
+
+    await this.redis.setex(cacheKey, 300, JSON.stringify(result));
+    return result;
   }
 
   async markExpiries(now = new Date()) {

@@ -7,6 +7,8 @@ import { VectorSearchService } from './vector';
 import { VectorRepository } from './vector.repository';
 import { EmbeddingService } from './embeddings';
 import { randomUUID } from 'crypto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import type { Redis } from 'ioredis';
 
 type GhostAnswer = {
   text: string;
@@ -28,8 +30,17 @@ export class GhostMentorService {
     private readonly vector: VectorSearchService,
     private readonly vectorRepo: VectorRepository,
     private readonly embedder: EmbeddingService,
+    @InjectRedis() private readonly redis: Redis,
   ) {
     this.rag = new RagEngine(this.prisma, this.vector);
+  }
+
+  /**
+   * Simple deterministic hash: lowercase the query, strip spaces, take first 32 chars.
+   * Cheap and collision-tolerant for FAQ key granularity.
+   */
+  private simpleHash(query: string): string {
+    return query.toLowerCase().replace(/\s+/g, '').slice(0, 32);
   }
 
   /**
@@ -40,6 +51,18 @@ export class GhostMentorService {
   async ask(userId: string, dto: GhostAskDto): Promise<GhostAnswer> {
     const start = Date.now();
     const requestId = randomUUID();
+
+    // 0. FAQ önbelleğini kontrol et - RAG'dan önce
+    const faqKey = `ghost:faq:${dto.courseId}:${this.simpleHash(dto.query)}`;
+    const cached = await this.redis.get(faqKey);
+    if (cached) {
+      const cachedAnswer = JSON.parse(cached) as GhostAnswer;
+      return {
+        ...cachedAnswer,
+        latencyMs: Date.now() - start,
+        requestId,
+      };
+    }
 
     // 1. Embedding oluştur
     const embedding = await this.embedder.embed(dto.query);
@@ -73,7 +96,43 @@ export class GhostMentorService {
   }
 
   async preloadFaq(userId: string, dto: GhostPreloadFaqDto) {
-    // FAQ cache taslağı (şimdilik no-op)
-    return { ok: true, cached: dto.faqs.length };
+    let cached = 0;
+    let skipped = 0;
+    const ttl = 60 * 60 * 24; // 24 saat
+
+    for (const faq of dto.faqs) {
+      const hash = this.simpleHash(faq.q);
+      // GhostPreloadFaqDto has lessonId; use it as the scope identifier for the cache key
+      const key = `ghost:faq:${dto.lessonId}:${hash}`;
+
+      // Zaten önbellekte varsa atla
+      const existing = await this.redis.get(key);
+      if (existing) {
+        skipped += 1;
+        continue;
+      }
+
+      let answerText: string;
+      if (faq.a) {
+        // Cevap doğrudan verilmişse RAG çalıştırmaya gerek yok
+        answerText = faq.a;
+      } else {
+        // RAG + embedding pipeline üzerinden cevabı üret
+        const embedding = await this.embedder.embed(faq.q);
+        const rag = await this.rag.answer(dto.lessonId, dto.lessonId, 0, faq.q, embedding ?? undefined);
+        answerText = `Bu konu hakkında şu kaynaklardan yola çıkarak yanıtlıyorum: ${rag.text}`;
+      }
+
+      const payload: Omit<GhostAnswer, 'latencyMs' | 'requestId'> = {
+        text: answerText,
+        sources: [],
+        policyFlags: [],
+      };
+
+      await this.redis.set(key, JSON.stringify(payload), 'EX', ttl);
+      cached += 1;
+    }
+
+    return { ok: true, cached, skipped };
   }
 }

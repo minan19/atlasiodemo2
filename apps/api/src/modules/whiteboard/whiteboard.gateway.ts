@@ -13,6 +13,7 @@ import { WhiteboardAlertsService } from './whiteboard.alerts';
 
 type JwtUser = { id?: string; userId?: string; role?: string; roles?: string[] };
 
+// SmartBoard — AI-powered collaborative workspace (WebSocket gateway)
 @WebSocketGateway({ namespace: '/whiteboard', cors: { origin: '*' } })
 export class WhiteboardGateway {
   @WebSocketServer()

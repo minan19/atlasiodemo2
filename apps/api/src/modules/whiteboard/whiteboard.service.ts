@@ -1,13 +1,30 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhiteboardActionDto } from './dto';
 import { Prisma } from '@prisma/client';
 import { PassThrough } from 'stream';
 import { createGzip } from 'zlib';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import type { Redis } from 'ioredis';
+
+export interface AiAssistAction {
+  type: 'TEXT' | 'SHAPE' | 'DRAW';
+  payload: Record<string, any>;
+}
+
+export interface AiAssistResult {
+  suggestion: string;
+  actions: AiAssistAction[];
+}
 
 @Injectable()
 export class WhiteboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(WhiteboardService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectRedis() private readonly redis: Redis,
+  ) {}
 
   async start(liveSessionId: string) {
     const live = await this.prisma.liveSession.findUnique({ where: { id: liveSessionId } });
@@ -152,17 +169,114 @@ export class WhiteboardService {
   }
 
   async canWrite(sessionId: string, userId?: string) {
-    // Basit kural: live session eğitmeni her zaman yazar; diğerleri için ileride grant tablosu eklenebilir.
-    const wb = await this.prisma.whiteboardSession.findUnique({ where: { id: sessionId }, include: { LiveSession: true } });
-    if (!wb) throw new NotFoundException('Whiteboard session not found');
+    return this.hasWritePermission(sessionId, userId);
+  }
+
+  /**
+   * Checks whether a user has write permission for a whiteboard session.
+   * INSTRUCTOR and ADMIN always have write access.
+   * Other users must have been explicitly granted access via grantWrite().
+   */
+  async hasWritePermission(sessionId: string, userId?: string, role?: string): Promise<boolean> {
     if (!userId) return false;
+
+    // INSTRUCTOR / ADMIN always allowed
+    if (role === 'INSTRUCTOR' || role === 'ADMIN') return true;
+
+    const wb = await this.prisma.whiteboardSession.findUnique({
+      where: { id: sessionId },
+      include: { LiveSession: true },
+    });
+    if (!wb) throw new NotFoundException('Whiteboard session not found');
+
+    // Session instructor always allowed
     if (wb.LiveSession.instructorId === userId) return true;
-    // Eğer participant rolü INSTRUCTOR veya ADMIN ise yazabilir
+
+    // Check participant role in the live session
     const participant = await this.prisma.liveSessionParticipant.findFirst({
       where: { sessionId: wb.liveSessionId, userId },
       select: { role: true },
     });
-    return participant?.role === 'INSTRUCTOR' || participant?.role === 'ADMIN';
+    if (participant?.role === 'INSTRUCTOR' || participant?.role === 'ADMIN') return true;
+
+    // Check Redis grant set
+    const isMember = await this.redis.sismember(`wb:write:${sessionId}`, userId);
+    return isMember === 1;
+  }
+
+  /**
+   * Grants write permission to targetUserId for the given whiteboard session.
+   * Only the session instructor or an INSTRUCTOR/ADMIN participant may grant.
+   */
+  async grantWrite(sessionId: string, targetUserId: string, grantedBy: string): Promise<{ granted: boolean; userId: string }> {
+    const wb = await this.prisma.whiteboardSession.findUnique({
+      where: { id: sessionId },
+      include: { LiveSession: true },
+    });
+    if (!wb) throw new NotFoundException('Whiteboard session not found');
+
+    // Verify grantedBy has authority
+    const isInstructor = wb.LiveSession.instructorId === grantedBy;
+    const participant = await this.prisma.liveSessionParticipant.findFirst({
+      where: { sessionId: wb.liveSessionId, userId: grantedBy },
+      select: { role: true },
+    });
+    const hasAuthority = isInstructor || participant?.role === 'INSTRUCTOR' || participant?.role === 'ADMIN';
+    if (!hasAuthority) throw new ForbiddenException('Only instructors or admins can grant write access');
+
+    // Persist in Redis with a 24-hour TTL
+    await this.redis.sadd(`wb:write:${sessionId}`, targetUserId);
+    await this.redis.expire(`wb:write:${sessionId}`, 60 * 60 * 24);
+
+    // Record action in the audit log
+    await this.prisma.whiteboardAction.create({
+      data: {
+        sessionId,
+        type: 'GRANT',
+        layerId: 'default',
+        payload: { targetUserId, grantedBy } as Prisma.InputJsonValue,
+        userId: grantedBy,
+      },
+    });
+
+    return { granted: true, userId: targetUserId };
+  }
+
+  /**
+   * Revokes write permission from targetUserId for the given whiteboard session.
+   * Only the session instructor or an INSTRUCTOR/ADMIN participant may revoke.
+   */
+  async revokeWrite(sessionId: string, targetUserId: string, revokedBy: string): Promise<{ revoked: boolean; userId: string }> {
+    const wb = await this.prisma.whiteboardSession.findUnique({
+      where: { id: sessionId },
+      include: { LiveSession: true },
+    });
+    if (!wb) throw new NotFoundException('Whiteboard session not found');
+
+    // Verify revokedBy has authority
+    const isInstructor = wb.LiveSession.instructorId === revokedBy;
+    const participant = await this.prisma.liveSessionParticipant.findFirst({
+      where: { sessionId: wb.liveSessionId, userId: revokedBy },
+      select: { role: true },
+    });
+    const hasAuthority = isInstructor || participant?.role === 'INSTRUCTOR' || participant?.role === 'ADMIN';
+    if (!hasAuthority) throw new ForbiddenException('Only instructors or admins can revoke write access');
+
+    // Remove from Redis grant set
+    await this.redis.srem(`wb:write:${sessionId}`, targetUserId);
+
+    // Record action in the audit log
+    await this.prisma.whiteboardAction.create({
+      data: {
+        sessionId,
+        type: 'REVOKE',
+        layerId: 'default',
+        payload: { targetUserId, revokedBy } as Prisma.InputJsonValue,
+        userId: revokedBy,
+      },
+    });
+
+    return { revoked: true, userId: targetUserId };
   }
 
   async getSnapshot(sessionId: string, limit = 2000, includeReverted = false) {
@@ -277,6 +391,122 @@ export class WhiteboardService {
       out.destroy(err);
     });
     return out.pipe(gzip);
+  }
+
+  /**
+   * AI Assist: generates a whiteboard content suggestion for a given prompt.
+   */
+  async aiAssist(
+    sessionId: string,
+    prompt: string,
+    context: string | undefined,
+    userId: string | undefined,
+  ): Promise<AiAssistResult> {
+    const wb = await this.prisma.whiteboardSession.findUnique({ where: { id: sessionId } });
+    if (!wb) throw new NotFoundException('Whiteboard session not found');
+
+    let result: AiAssistResult;
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (apiKey) {
+      result = await this.callOpenAIForWhiteboard(prompt, context, apiKey);
+    } else {
+      result = this.getMockWhiteboardAssist(prompt);
+    }
+
+    // Record the AI assist as a whiteboard action
+    await this.prisma.whiteboardAction.create({
+      data: {
+        sessionId,
+        type: 'AI_ASSIST',
+        layerId: 'default',
+        payload: { prompt, context, suggestion: result.suggestion, actions: result.actions } as Prisma.InputJsonValue,
+        userId,
+      },
+    });
+
+    return result;
+  }
+
+  private async callOpenAIForWhiteboard(
+    prompt: string,
+    context: string | undefined,
+    apiKey: string,
+  ): Promise<AiAssistResult> {
+    const systemMsg = 'You are an AI whiteboard assistant. Return JSON with: suggestion (string), actions (array of {type: "TEXT"|"SHAPE"|"DRAW", payload: object}). No markdown.';
+    const userMsg = context
+      ? `Context: ${context}\n\nUser request: ${prompt}`
+      : prompt;
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemMsg },
+            { role: 'user', content: userMsg },
+          ],
+          temperature: 0.7,
+          max_tokens: 800,
+        }),
+      });
+
+      if (!response.ok) {
+        this.logger.warn(`OpenAI whiteboard assist error ${response.status}, falling back to mock`);
+        return this.getMockWhiteboardAssist(prompt);
+      }
+
+      const data = await response.json() as any;
+      const raw = data.choices?.[0]?.message?.content ?? '{}';
+      return JSON.parse(raw) as AiAssistResult;
+    } catch (err) {
+      this.logger.warn('OpenAI whiteboard assist failed, falling back to mock');
+      return this.getMockWhiteboardAssist(prompt);
+    }
+  }
+
+  private getMockWhiteboardAssist(prompt: string): AiAssistResult {
+    return {
+      suggestion: `Here is a whiteboard layout suggestion for: "${prompt}". Consider adding a title at the top, main content in the center, and key points along the right side.`,
+      actions: [
+        {
+          type: 'TEXT',
+          payload: {
+            text: prompt,
+            x: 100,
+            y: 50,
+            fontSize: 24,
+            fontWeight: 'bold',
+          },
+        },
+        {
+          type: 'SHAPE',
+          payload: {
+            shape: 'rectangle',
+            x: 80,
+            y: 120,
+            width: 600,
+            height: 300,
+            strokeColor: '#4A90D9',
+            fillColor: 'transparent',
+          },
+        },
+        {
+          type: 'TEXT',
+          payload: {
+            text: 'Add your main content here',
+            x: 100,
+            y: 150,
+            fontSize: 16,
+          },
+        },
+      ],
+    };
   }
 
   /**

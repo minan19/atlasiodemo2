@@ -598,4 +598,141 @@ export class InstructorInsightsService {
 
     return { ok: true, item: updated };
   }
+
+  async getAiSummary(classId: string, window: Window, requesterId: string): Promise<{
+    narrative: string;
+    topRisks: string[];
+    recommendations: string[];
+    generatedAt: Date;
+  }> {
+    const requester = await this.prisma.user.findUnique({
+      where: { id: requesterId },
+      select: { id: true, role: true, tenantId: true },
+    });
+    if (!requester) throw new NotFoundException('Requester not found');
+
+    // Fetch class insights to build context for the AI
+    const insights = await this.getClassInsights({
+      classId,
+      window,
+      requester: { id: requester.id, role: requester.role ?? undefined, tenantId: requester.tenantId ?? undefined },
+    });
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    let narrative: string;
+    let topRisks: string[];
+    let recommendations: string[];
+
+    if (apiKey) {
+      const result = await this.callOpenAIForInsightsSummary(insights, apiKey);
+      narrative = result.narrative;
+      topRisks = result.topRisks;
+      recommendations = result.recommendations;
+    } else {
+      const mock = this.getMockInsightsSummary(insights);
+      narrative = mock.narrative;
+      topRisks = mock.topRisks;
+      recommendations = mock.recommendations;
+    }
+
+    return { narrative, topRisks, recommendations, generatedAt: new Date() };
+  }
+
+  private async callOpenAIForInsightsSummary(
+    insights: any,
+    apiKey: string,
+  ): Promise<{ narrative: string; topRisks: string[]; recommendations: string[] }> {
+    const context = JSON.stringify({
+      avgMastery: insights.summary?.avgMastery,
+      criticalStudents: insights.summary?.criticalStudents,
+      topWeakTopics: insights.summary?.topWeakTopics?.slice(0, 5),
+      window: insights.window,
+    });
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an educational data analyst. Given class performance data, return JSON with: narrative (string paragraph), topRisks (string[]), recommendations (string[]). No markdown.',
+            },
+            {
+              role: 'user',
+              content: `Class insights data: ${context}. Provide an executive summary for the instructor.`,
+            },
+          ],
+          temperature: 0.5,
+          max_tokens: 1000,
+        }),
+      });
+
+      if (!response.ok) {
+        return this.getMockInsightsSummary(null);
+      }
+
+      const data = await response.json() as any;
+      const raw = data.choices?.[0]?.message?.content ?? '{}';
+      return JSON.parse(raw);
+    } catch {
+      return this.getMockInsightsSummary(null);
+    }
+  }
+
+  private getMockInsightsSummary(insights: any): { narrative: string; topRisks: string[]; recommendations: string[] } {
+    const avgMastery = insights?.summary?.avgMastery ?? 0;
+    const criticalStudents = insights?.summary?.criticalStudents ?? 0;
+    const weakTopics: string[] = (insights?.summary?.topWeakTopics ?? []).map((t: any) => t.name);
+
+    const narrativeParts: string[] = [];
+    if (avgMastery > 0) {
+      narrativeParts.push(
+        avgMastery >= 70
+          ? `The class is performing well overall with an average mastery score of ${avgMastery}.`
+          : avgMastery >= 40
+          ? `The class shows moderate performance with an average mastery score of ${avgMastery}, indicating room for improvement.`
+          : `The class is struggling with an average mastery score of ${avgMastery}. Immediate intervention is recommended.`,
+      );
+    } else {
+      narrativeParts.push('Insufficient data is available to generate a comprehensive narrative for this period.');
+    }
+
+    if (criticalStudents > 0) {
+      narrativeParts.push(`${criticalStudents} student(s) are at critical risk and require targeted support.`);
+    }
+
+    if (weakTopics.length > 0) {
+      narrativeParts.push(`The weakest areas are: ${weakTopics.slice(0, 3).join(', ')}.`);
+    }
+
+    const topRisks: string[] = [];
+    if (criticalStudents > 0) topRisks.push(`${criticalStudents} student(s) below critical threshold`);
+    if (avgMastery < 40) topRisks.push('Class-wide mastery below 40% — consider re-teaching core concepts');
+    if (weakTopics.length > 0) topRisks.push(`Low mastery in: ${weakTopics.slice(0, 2).join(', ')}`);
+    if (topRisks.length === 0) topRisks.push('No critical risks identified at this time');
+
+    const recommendations: string[] = [];
+    if (weakTopics.length > 0) {
+      recommendations.push(`Schedule a focused review session on ${weakTopics[0]}`);
+    }
+    if (criticalStudents > 0) {
+      recommendations.push(`Reach out to at-risk students for one-on-one support`);
+    }
+    recommendations.push('Monitor progress weekly and adjust teaching pace accordingly');
+    if (avgMastery < 70) {
+      recommendations.push('Introduce additional practice sets targeting weak topics');
+    }
+
+    return {
+      narrative: narrativeParts.join(' '),
+      topRisks,
+      recommendations,
+    };
+  }
 }

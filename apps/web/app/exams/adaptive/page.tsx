@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import ProctoringHooks from "../../_components/proctoring/ProctoringHooks";
 
 type Choice = { id: string; text: string; isCorrect?: boolean };
 

@@ -35,6 +35,11 @@ export enum WhiteboardActionType {
   REVOKE = 'REVOKE',
 }
 
+export class GrantRevokeDto {
+  @IsString()
+  targetUserId!: string;
+}
+
 export class WhiteboardActionDto {
   @IsString()
   sessionId!: string;

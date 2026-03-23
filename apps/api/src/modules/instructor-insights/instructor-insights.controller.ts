@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { InstructorInsightsService } from './instructor-insights.service';
@@ -19,6 +19,19 @@ import { Body, Patch, Post } from '@nestjs/common';
 @Roles('instructor', 'admin')
 export class InstructorInsightsController {
   constructor(private readonly service: InstructorInsightsService) {}
+
+  @Get('classes/:classId/ai-summary')
+  @ApiOperation({ summary: 'Get AI-generated narrative summary for a class' })
+  @ApiQuery({ name: 'window', required: false, enum: ['7d', '30d', '90d'] })
+  @ApiResponse({ status: 200, description: 'AI narrative summary with risks and recommendations' })
+  async getAiSummary(
+    @Param('classId') classId: string,
+    @Query('window') window: '7d' | '30d' | '90d' = '30d',
+    @Req() req: any,
+  ) {
+    const requesterId = req.user?.id ?? req.user?.userId;
+    return this.service.getAiSummary(classId, window, requesterId);
+  }
 
   @Get('classes/:classId/insights')
   async getClassInsights(

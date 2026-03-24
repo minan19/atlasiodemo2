@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "../api/client";
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -45,7 +44,7 @@ export default function SkillProfilePage() {
   useEffect(() => {
     Promise.all([
       fetch(`${API}/quiz/insights`, { headers: authHeaders() }).then((r) => r.json()).catch(() => []),
-      fetch(`${API}/ai/recommendations?userId=me`, { headers: authHeaders() }).then((r) => r.json()).catch(() => []),
+      fetch(`${API}/recommendations/me`, { headers: authHeaders() }).then((r) => r.json()).catch(() => []),
     ]).then(([insightsData, recsData]) => {
       setStats(Array.isArray(insightsData) ? insightsData : []);
       setRecs(Array.isArray(recsData) ? recsData : []);

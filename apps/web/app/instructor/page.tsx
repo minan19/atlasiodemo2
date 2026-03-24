@@ -65,6 +65,7 @@ const navSections = [
       { label: "Ders İçerikleri", href: "/instructor", icon: "🗂️" },
       { label: "Kayıtlar", href: "/report-cards", icon: "🎥" },
       { label: "Analiz", href: "/instructor/insights", icon: "📊" },
+      { label: "⚠ Öğrenme Analitiği", href: "/instructor/analytics", icon: "🎯" },
       { label: "✦ AI Stüdyo", href: "/instructor/ai-studio", icon: "🤖" },
     ],
   },

@@ -36,7 +36,7 @@ function MindMapTree({ node, depth = 0 }: { node: MindMapNode; depth?: number })
 export default function AIContentStudioPage() {
   const [tab, setTab] = useState<StudioTab>("generate");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<unknown>(null);
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Generate
@@ -346,14 +346,14 @@ export default function AIContentStudioPage() {
             {result && !["presentation", "mindmap", "bulk"].includes(tab) && (
               <div className="space-y-4">
                 {/* Lesson */}
-                {(result as { title?: string; objectives?: string[]; sections?: { heading: string; content: string }[]; keyPoints?: string[]; questions?: { stem: string; choices: string[]; correctIndex: number; explanation: string }[]; modules?: { title: string; lessons: string[]; estimatedHours: number }[]; summary?: string; keyTakeaways?: string[]; expanded?: string; rewritten?: string }) && (() => {
+                {(() => {
                   const r = result as Record<string, unknown>;
                   return (
                     <div className="space-y-4">
-                      {r.title && <h2 className="text-lg font-bold text-slate-800">{String(r.title)}</h2>}
-                      {r.expanded && <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{String(r.expanded)}</p>}
-                      {r.rewritten && <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{String(r.rewritten)}</p>}
-                      {r.summary && <p className="text-sm text-slate-700 leading-relaxed">{String(r.summary)}</p>}
+                      {!!r.title && <h2 className="text-lg font-bold text-slate-800">{String(r.title)}</h2>}
+                      {!!r.expanded && <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{String(r.expanded)}</p>}
+                      {!!r.rewritten && <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{String(r.rewritten)}</p>}
+                      {!!r.summary && <p className="text-sm text-slate-700 leading-relaxed">{String(r.summary)}</p>}
                       {Array.isArray(r.objectives) && (
                         <div>
                           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Hedefler</h3>

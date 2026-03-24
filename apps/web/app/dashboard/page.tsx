@@ -30,6 +30,7 @@ const navSections = [
       { label: "Finans", href: "/admin/payments", icon: "💳" },
       { label: "Güvenlik", href: "/admin/security", icon: "🛡️" },
       { label: "Sınav Gözetimi", href: "/admin/proctoring", icon: "🔍" },
+      { label: "Risk Analitik", href: "/instructor/analytics", icon: "⚠" },
     ],
   },
 ];

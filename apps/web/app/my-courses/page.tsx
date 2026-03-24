@@ -131,6 +131,20 @@ export default function MyCoursesPage() {
         </div>
       )}
 
+      {/* Quick links */}
+      {!loading && !error && (
+        <div className="flex gap-2 flex-wrap">
+          <Link href="/my-courses/skill-profile"
+            className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700 hover:bg-violet-100 transition-all">
+            📊 Beceri Profilim
+          </Link>
+          <Link href="/exams/adaptive"
+            className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all">
+            🎯 Adaptif Sınav
+          </Link>
+        </div>
+      )}
+
       {/* Tab filter */}
       {!loading && !error && (
         <div className="flex gap-2 flex-wrap">

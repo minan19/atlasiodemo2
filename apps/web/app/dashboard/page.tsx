@@ -29,6 +29,7 @@ const navSections = [
       { label: "Onay Kuyruğu", href: "/admin/approvals", icon: "✅" },
       { label: "Finans", href: "/admin/payments", icon: "💳" },
       { label: "Güvenlik", href: "/admin/security", icon: "🛡️" },
+      { label: "Sınav Gözetimi", href: "/admin/proctoring", icon: "🔍" },
     ],
   },
 ];

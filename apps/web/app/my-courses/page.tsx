@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '../api/client';
+import { useTrackEvent } from '../_hooks/use-track-event';
 
 type Course = {
   id: string;
@@ -51,6 +52,7 @@ function ProgressBar({ pct }: { pct: number }) {
 
 export default function MyCoursesPage() {
   const router = useRouter();
+  const track = useTrackEvent();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [progressMap, setProgressMap] = useState<Map<string, ProgressItem>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,8 @@ export default function MyCoursesPage() {
       .then((data) => {
         setEnrollments(data);
         loadProgress(data.map((e) => e.courseId));
+        // Track page view as content event for AI recommendation engine
+        track('CONTENT_VIEWED', { page: 'my-courses', enrollmentCount: data.length });
       })
       .catch((e) => {
         if (e?.message?.includes('401')) router.push('/login');

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProctoringHooks from "../../_components/proctoring/ProctoringHooks";
+import { useTrackEvent } from "../../_hooks/use-track-event";
 
 type Choice = { id: string; text: string; isCorrect?: boolean };
 
@@ -83,6 +84,7 @@ const DIFFICULTY_LABELS: Record<number, { label: string; color: string; stars: n
 };
 
 export default function AdaptiveExamPage() {
+  const track = useTrackEvent();
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -159,6 +161,7 @@ export default function AdaptiveExamPage() {
 
     setLastResult(wasCorrect ? "correct" : "wrong");
     setFeedback(wasCorrect ? "✅ Doğru!" : `❌ Yanlış — Doğru: ${question.choices.find(c => c.id === question.correctChoiceId)?.text ?? "?"}`);
+    track('QUIZ_ANSWERED', { quizId: question.id, correct: wasCorrect, durationSeconds: timer });
     setStats((s) => ({
       correct: s.correct + (wasCorrect ? 1 : 0),
       total: s.total + 1,

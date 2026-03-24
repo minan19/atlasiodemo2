@@ -219,6 +219,15 @@ export default function AdaptiveExamPage() {
 
   return (
     <main className="space-y-5">
+      {/* Proctoring — headless, runs silently during exam */}
+      {sessionId && (
+        <ProctoringHooks
+          sessionId={sessionId}
+          enabled={!demoMode}
+          onAlert={(msg) => console.warn("[Proctoring]", msg)}
+        />
+      )}
+
       {/* Header */}
       <header className="glass p-5 rounded-2xl border border-slate-200 hero">
         <div className="hero-content flex flex-wrap items-center justify-between gap-4">

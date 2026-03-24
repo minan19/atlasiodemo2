@@ -25,6 +25,14 @@ interface AiSuggestion {
   raw?: unknown;
 }
 
+type AiStudioTab = "assist" | "write" | "brainstorm" | "mindmap" | "presentation" | "summarize";
+
+interface StickyNote { id: string; text: string; color: string; }
+interface MindMapNode { id: string; label: string; children: MindMapNode[]; }
+interface PresentationSlide { title: string; bullets: string[]; speakerNote?: string; }
+interface PresentationResult { title: string; subtitle: string; slides: PresentationSlide[]; }
+interface SummarizeResult { title: string; introduction: string; sections: { heading: string; content: string }[]; keyPoints: string[]; }
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -99,6 +107,31 @@ export default function SmartBoardPage({
 
   // --- Export status ---
   const [exporting, setExporting] = useState(false);
+
+  // --- AI Studio panel ---
+  const [showAiStudio, setShowAiStudio] = useState(false);
+  const [aiStudioTab, setAiStudioTab] = useState<AiStudioTab>("assist");
+  // Magic Write
+  const [mwText, setMwText] = useState("");
+  const [mwTone, setMwTone] = useState<"formal"|"casual"|"academic"|"simple">("formal");
+  const [mwResult, setMwResult] = useState<string | null>(null);
+  const [mwLoading, setMwLoading] = useState(false);
+  // Brainstorm sticky notes
+  const [bsTopic, setBsTopic] = useState("");
+  const [bsNotes, setBsNotes] = useState<StickyNote[]>([]);
+  const [bsLoading, setBsLoading] = useState(false);
+  // Mind Map
+  const [mmTopic, setMmTopic] = useState("");
+  const [mmData, setMmData] = useState<MindMapNode | null>(null);
+  const [mmLoading, setMmLoading] = useState(false);
+  // Presentation
+  const [pTopic, setPTopic] = useState("");
+  const [pSlides, setPSlides] = useState<PresentationResult | null>(null);
+  const [pLoading, setPLoading] = useState(false);
+  const [pActiveSlide, setPActiveSlide] = useState(0);
+  // Summarize
+  const [sumResult, setSumResult] = useState<SummarizeResult | null>(null);
+  const [sumLoading, setSumLoading] = useState(false);
 
   // -------------------------------------------------------------------------
   // WebSocket setup
@@ -352,6 +385,102 @@ export default function SmartBoardPage({
   }, [aiPrompt, sessionId]);
 
   // -------------------------------------------------------------------------
+  // AI Studio handlers
+  // -------------------------------------------------------------------------
+  const handleMagicWrite = useCallback(async () => {
+    if (!mwText.trim()) return;
+    setMwLoading(true); setMwResult(null);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/ai/content/rewrite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ text: mwText, tone: mwTone, language: "tr" }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setMwResult(data.rewritten ?? JSON.stringify(data));
+    } catch { setMwResult("(Sunucuya ulaşılamadı — demo modu)"); }
+    finally { setMwLoading(false); }
+  }, [mwText, mwTone]);
+
+  const handleBrainstorm = useCallback(async () => {
+    if (!bsTopic.trim()) return;
+    setBsLoading(true);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/whiteboard/${sessionId}/sticky-notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ topic: bsTopic, count: 6, language: "tr" }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setBsNotes(data.notes ?? []);
+    } catch {
+      setBsNotes([
+        { id: "1", text: `${bsTopic} temel kavramları`, color: "#fef08a" },
+        { id: "2", text: `${bsTopic} uygulama örnekleri`, color: "#bbf7d0" },
+        { id: "3", text: `${bsTopic} tarihsel gelişimi`, color: "#bfdbfe" },
+        { id: "4", text: `${bsTopic} avantajları`, color: "#fecaca" },
+        { id: "5", text: `${bsTopic} zorlukları`, color: "#e9d5ff" },
+        { id: "6", text: `${bsTopic} gelecek trendleri`, color: "#fed7aa" },
+      ]);
+    }
+    finally { setBsLoading(false); }
+  }, [bsTopic, sessionId]);
+
+  const handleMindMap = useCallback(async () => {
+    if (!mmTopic.trim()) return;
+    setMmLoading(true); setMmData(null);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/ai/mind-map`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ topic: mmTopic, depth: 2, language: "tr" }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setMmData(data.root ?? null);
+    } catch { setMmData({ id: "root", label: mmTopic, children: [{ id:"b1", label:"Temel Kavramlar", children:[] }, { id:"b2", label:"Uygulama", children:[] }, { id:"b3", label:"Örnekler", children:[] }] }); }
+    finally { setMmLoading(false); }
+  }, [mmTopic]);
+
+  const handlePresentation = useCallback(async () => {
+    if (!pTopic.trim()) return;
+    setPLoading(true); setPSlides(null); setPActiveSlide(0);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/ai/presentation/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ topic: pTopic, slideCount: 8, language: "tr" }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setPSlides(data);
+    } catch { setPSlides({ title: `${pTopic} Sunumu`, subtitle: "Atlasio AI", slides: [{ title: "Giriş", bullets: [`${pTopic} nedir?`, "Önem ve kapsam"] }] }); }
+    finally { setPLoading(false); }
+  }, [pTopic]);
+
+  const handleSummarize = useCallback(async () => {
+    setSumLoading(true); setSumResult(null);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}/whiteboard/${sessionId}/summarize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ language: "tr" }),
+      });
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      setSumResult(data);
+    } catch { setSumResult({ title: "Tahta Özeti", introduction: "Bu tahta oturumunun yapılandırılmış özeti.", sections: [], keyPoints: ["İçerik bulunamadı — tahtaya yazı ekleyin ve tekrar deneyin."] }); }
+    finally { setSumLoading(false); }
+  }, [sessionId]);
+
+  // -------------------------------------------------------------------------
   // Create / Delete Layer
   // -------------------------------------------------------------------------
   const handleCreateLayer = useCallback(async () => {
@@ -576,10 +705,17 @@ export default function SmartBoardPage({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* AI Studio */}
+            <button
+              onClick={() => setShowAiStudio((v) => !v)}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-md transition-all ${showAiStudio ? "bg-violet-700 text-white" : "bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500"}`}
+            >
+              ✦ AI Studio
+            </button>
             {/* AI Assist */}
             <button
               onClick={() => { setShowAiModal(true); setAiSuggestion(null); setAiError(null); setAiPrompt(""); }}
-              className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md hover:from-violet-500 hover:to-indigo-500 transition-all"
+              className="flex items-center gap-1.5 rounded-lg border border-violet-700/50 bg-slate-800 px-3 py-1.5 text-xs font-medium text-violet-300 hover:bg-slate-700 transition-all"
             >
               ✦ AI Assist
             </button>
@@ -697,6 +833,238 @@ export default function SmartBoardPage({
           </p>
         </div>
       </aside>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* AI STUDIO PANEL                                                     */}
+      {/* ------------------------------------------------------------------ */}
+      {showAiStudio && (
+        <aside className="flex w-80 flex-col border-l border-violet-800/40 bg-slate-900/95 backdrop-blur shrink-0 overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-slate-700/50 px-4 py-3">
+            <div>
+              <h2 className="text-sm font-bold text-slate-100">
+                <span className="text-violet-400">✦</span> AI Studio
+              </h2>
+              <p className="text-[10px] text-slate-500 mt-0.5">Canva Magic — Atlasio Edition</p>
+            </div>
+            <button onClick={() => setShowAiStudio(false)} className="text-slate-600 hover:text-slate-300 transition-colors">✕</button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b border-slate-700/50 overflow-x-auto">
+            {([ ["assist","✦","AI"], ["write","✏️","Write"], ["brainstorm","💡","Ideas"], ["mindmap","🗺","Map"], ["presentation","🎨","Slides"], ["summarize","📄","Switch"] ] as [AiStudioTab, string, string][]).map(([tab, icon, label]) => (
+              <button
+                key={tab}
+                onClick={() => setAiStudioTab(tab)}
+                className={`flex flex-col items-center gap-0.5 px-3 py-2 text-[10px] font-medium transition-colors shrink-0 ${aiStudioTab === tab ? "border-b-2 border-violet-500 text-violet-300" : "text-slate-500 hover:text-slate-300"}`}
+              >
+                <span>{icon}</span>
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+
+            {/* ── AI Assist ── */}
+            {aiStudioTab === "assist" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">Tahtaya ne çizmek istediğinizi açıklayın, AI önerisini alın.</p>
+                <textarea
+                  className="w-full resize-none rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+                  rows={4} placeholder="örn. Fotosentez için mind map oluştur" value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                />
+                <button onClick={handleAiAssist} disabled={aiLoading || !aiPrompt.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:from-violet-500 hover:to-indigo-500 transition-all">
+                  {aiLoading ? "Düşünüyor…" : "Oluştur"}
+                </button>
+                {aiError && <p className="text-xs text-red-400">{aiError}</p>}
+                {aiSuggestion?.text && <div className="rounded-xl border border-violet-800/40 bg-violet-950/20 p-3 text-xs text-slate-300 leading-relaxed">{aiSuggestion.text}</div>}
+              </div>
+            )}
+
+            {/* ── Magic Write ── */}
+            {aiStudioTab === "write" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">İçeriği yeniden yaz veya tonu değiştir.</p>
+                <textarea
+                  className="w-full resize-none rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+                  rows={4} placeholder="Yeniden yazmak istediğiniz metni girin…" value={mwText}
+                  onChange={(e) => setMwText(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  {(["formal","casual","academic","simple"] as const).map((t) => (
+                    <button key={t} onClick={() => setMwTone(t)}
+                      className={`flex-1 rounded-lg py-1.5 text-[10px] font-medium transition-all ${mwTone === t ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}>
+                      {t === "formal" ? "Resmi" : t === "casual" ? "Sade" : t === "academic" ? "Akademik" : "Basit"}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={handleMagicWrite} disabled={mwLoading || !mwText.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
+                  {mwLoading ? "Yazıyor…" : "✏️ Yeniden Yaz"}
+                </button>
+                {mwResult && (
+                  <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {mwResult}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Brainstorm Sticky Notes ── */}
+            {aiStudioTab === "brainstorm" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">Konu için yapışkan not fikirleri üret.</p>
+                <input
+                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+                  placeholder="örn. Fotosentez" value={bsTopic}
+                  onChange={(e) => setBsTopic(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleBrainstorm()}
+                />
+                <button onClick={handleBrainstorm} disabled={bsLoading || !bsTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
+                  {bsLoading ? "Üretiyor…" : "💡 Fikir Üret"}
+                </button>
+                {bsNotes.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {bsNotes.map((n) => (
+                      <div key={n.id} className="rounded-lg p-2.5 text-[11px] font-medium text-slate-800 shadow-sm leading-snug" style={{ background: n.color }}>
+                        {n.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Mind Map ── */}
+            {aiStudioTab === "mindmap" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">Konunun zihin haritasını oluştur.</p>
+                <input
+                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+                  placeholder="örn. Hücre Bölünmesi" value={mmTopic}
+                  onChange={(e) => setMmTopic(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleMindMap()}
+                />
+                <button onClick={handleMindMap} disabled={mmLoading || !mmTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
+                  {mmLoading ? "Oluşturuyor…" : "🗺 Harita Oluştur"}
+                </button>
+                {mmData && (
+                  <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                    <div className="text-xs font-bold text-violet-300 mb-2 text-center">{mmData.label}</div>
+                    <div className="space-y-1.5">
+                      {mmData.children.map((branch) => (
+                        <div key={branch.id} className="rounded-lg bg-slate-700/60 px-3 py-2">
+                          <div className="text-[11px] font-semibold text-slate-200 mb-1">{branch.label}</div>
+                          {branch.children.length > 0 && (
+                            <div className="space-y-1 pl-2 border-l border-slate-600">
+                              {branch.children.map((child) => (
+                                <div key={child.id} className="text-[10px] text-slate-400">{child.label}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Presentation ── */}
+            {aiStudioTab === "presentation" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">Konudan tam slayt sunumu oluştur.</p>
+                <input
+                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
+                  placeholder="örn. Makine Öğrenmesi" value={pTopic}
+                  onChange={(e) => setPTopic(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handlePresentation()}
+                />
+                <button onClick={handlePresentation} disabled={pLoading || !pTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
+                  {pLoading ? "Hazırlıyor…" : "🎨 Sunum Oluştur"}
+                </button>
+                {pSlides && (
+                  <div className="space-y-2">
+                    <div className="rounded-xl bg-gradient-to-br from-violet-900/60 to-indigo-900/60 border border-violet-700/40 p-4 text-center">
+                      <div className="text-sm font-bold text-slate-100">{pSlides.title}</div>
+                      <div className="text-[11px] text-violet-300 mt-0.5">{pSlides.subtitle}</div>
+                    </div>
+                    {/* Slide navigator */}
+                    <div className="flex gap-1 flex-wrap">
+                      {pSlides.slides.map((_, i) => (
+                        <button key={i} onClick={() => setPActiveSlide(i)}
+                          className={`rounded px-2 py-0.5 text-[10px] transition-all ${pActiveSlide === i ? "bg-violet-600 text-white" : "bg-slate-700 text-slate-400 hover:bg-slate-600"}`}>
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Active slide */}
+                    {pSlides.slides[pActiveSlide] && (
+                      <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
+                        <div className="text-xs font-bold text-slate-200 mb-2">{pSlides.slides[pActiveSlide].title}</div>
+                        <ul className="space-y-1">
+                          {pSlides.slides[pActiveSlide].bullets.map((b, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-[11px] text-slate-300">
+                              <span className="text-violet-400 mt-0.5">•</span>{b}
+                            </li>
+                          ))}
+                        </ul>
+                        {pSlides.slides[pActiveSlide].speakerNote && (
+                          <div className="mt-2 rounded-lg bg-amber-950/30 border border-amber-800/30 px-2 py-1.5 text-[10px] text-amber-300/80">
+                            Not: {pSlides.slides[pActiveSlide].speakerNote}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Magic Switch — Summarize ── */}
+            {aiStudioTab === "summarize" && (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">Tahta içeriğini yapılandırılmış ders dokümanına dönüştür.</p>
+                <div className="rounded-xl border border-slate-700 bg-slate-800/40 px-3 py-2.5 text-[11px] text-slate-500">
+                  Tahtadaki tüm TEXT eylemleri otomatik analiz edilir.
+                </div>
+                <button onClick={handleSummarize} disabled={sumLoading} className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:from-emerald-500 hover:to-teal-500 transition-all">
+                  {sumLoading ? "Analiz ediliyor…" : "📄 Dönüştür"}
+                </button>
+                {sumResult && (
+                  <div className="space-y-3">
+                    <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3">
+                      <div className="text-xs font-bold text-emerald-300 mb-1">{sumResult.title}</div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">{sumResult.introduction}</p>
+                    </div>
+                    {sumResult.sections.map((s, i) => (
+                      <div key={i} className="rounded-xl border border-slate-700 bg-slate-800/40 p-3">
+                        <div className="text-[11px] font-semibold text-slate-200 mb-1">{s.heading}</div>
+                        <p className="text-[10px] text-slate-400 leading-relaxed">{s.content}</p>
+                      </div>
+                    ))}
+                    {sumResult.keyPoints.length > 0 && (
+                      <div className="rounded-xl border border-blue-800/30 bg-blue-950/20 p-3">
+                        <div className="text-[11px] font-semibold text-blue-300 mb-2">Anahtar Noktalar</div>
+                        <ul className="space-y-1">
+                          {sumResult.keyPoints.map((kp, i) => (
+                            <li key={i} className="flex items-start gap-1.5 text-[10px] text-slate-300">
+                              <span className="text-blue-400 mt-0.5">✓</span>{kp}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+        </aside>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* AI ASSIST MODAL                                                     */}

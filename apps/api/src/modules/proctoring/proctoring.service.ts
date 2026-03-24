@@ -143,4 +143,28 @@ export class ProctoringService {
     });
     return { trustScore: (cached ? Number(cached) : session.trustScore) ?? null, latest };
   }
+
+  async getAllSessions(limit = 50) {
+    const sessions = await this.prisma.examSession.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        User: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    // Enrich with live Redis trust scores where available
+    const enriched = await Promise.all(
+      sessions.map(async (s) => {
+        const cached = await this.redis.hget(this.redisKey(s.id), 'trust');
+        const alert = await this.redis.hget(this.redisKey(s.id), 'alert');
+        return {
+          ...s,
+          liveTrustScore: cached ? Number(cached) : s.trustScore,
+          isAlerted: alert === '1',
+        };
+      }),
+    );
+    return enriched;
+  }
 }

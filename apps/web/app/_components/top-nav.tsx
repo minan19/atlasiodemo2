@@ -9,6 +9,7 @@ import { useI18n } from '../_i18n/use-i18n';
 import { api } from '../api/client';
 import { useTheme } from './theme-provider';
 import { NotificationBell } from './notification-bell';
+import { CommandPalette } from './command-palette';
 
 type CurrentUser = {
   role: string;
@@ -27,6 +28,19 @@ export function TopNav() {
   const alarmTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const t = useI18n();
   const { theme, toggle: toggleTheme } = useTheme();
+  const [cmdOpen, setCmdOpen] = useState(false);
+
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   // Giriş durumu + gerçek kullanıcı bilgisi
   useEffect(() => {
@@ -130,6 +144,26 @@ export function TopNav() {
             <option value="ar">AR</option>
           </select>
 
+          {/* Search / Command palette trigger */}
+          <button
+            onClick={() => setCmdOpen(true)}
+            className="theme-toggle"
+            aria-label="Arama — Cmd+K"
+            title="Ara (⌘K / Ctrl+K)"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+            </svg>
+          </button>
+
           {/* Dark mode toggle */}
           <button
             onClick={toggleTheme}
@@ -225,6 +259,7 @@ export function TopNav() {
         ))}
       </div>
 
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </header>
   );
 }

@@ -32,6 +32,7 @@ const navSections = [
       { label: "Güvenlik", href: "/admin/security", icon: "🛡️" },
       { label: "Sınav Gözetimi", href: "/admin/proctoring", icon: "🔍" },
       { label: "Risk Analitik", href: "/instructor/analytics", icon: "⚠️" },
+      { label: "Gözlemlenebilirlik", href: "/admin/observability", icon: "🔭" },
       { label: "Gönüllü İçerik", href: "/admin/volunteer", icon: "🙋" },
       { label: "Bildirimler", href: "/notifications", icon: "🔔" },
     ],

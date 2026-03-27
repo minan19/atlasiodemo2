@@ -41,13 +41,30 @@ const ROLE_BADGE_COLOR: Record<string, string> = {
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
-// Hardcoded gamification values
+// Hardcoded gamification values (used as fallback / XP bar)
 const BADGE_COUNT = 5;
 const XP_CURRENT = 2847;
 const XP_MAX = 3000;
 const XP_LEVEL = 4;
 const XP_PERCENT = Math.round((XP_CURRENT / XP_MAX) * 100);
 const STREAK_DAYS = 12;
+
+type GamificationStats = {
+  xp: number;
+  streak: number;
+  hearts: number;
+  coins: number;
+  streakFreezes: number;
+  league: 'BRONZE' | 'SILVER' | 'GOLD' | 'DIAMOND' | 'MASTER';
+};
+
+const LEAGUE_STYLES: Record<string, { label: string; pill: string; badge: string }> = {
+  BRONZE:  { label: 'Bronz',   pill: 'bg-amber-50 border-amber-300 text-amber-700',    badge: '🥉' },
+  SILVER:  { label: 'Gümüş',   pill: 'bg-slate-50 border-slate-300 text-slate-700',    badge: '🥈' },
+  GOLD:    { label: 'Altın',   pill: 'bg-yellow-50 border-yellow-300 text-yellow-700', badge: '🥇' },
+  DIAMOND: { label: 'Elmas',   pill: 'bg-cyan-50 border-cyan-300 text-cyan-700',       badge: '💎' },
+  MASTER:  { label: 'Usta',    pill: 'bg-violet-50 border-violet-300 text-violet-700', badge: '👑' },
+};
 
 const QUICK_LINKS = [
   { label: 'Derslerim', href: '/my-courses', icon: '📚', desc: 'Kayıtlı kurslarına git' },
@@ -88,6 +105,20 @@ export default function ProfilePage() {
 
   // Enrollments for stats
   const { data: enrollments } = useSWR<{ id: string }[]>('/me/enrollments', api);
+
+  // Live gamification stats
+  const [gamification, setGamification] = useState<GamificationStats | null>(null);
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!token) return;
+    fetch(`${API_URL}/gamification/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: GamificationStats | null) => { if (data) setGamification(data); })
+      .catch(() => null);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -259,6 +290,51 @@ export default function ProfilePage() {
           <p className="text-[11px] text-slate-400">Bir sonraki seviyeye {(XP_MAX - XP_CURRENT).toLocaleString('tr-TR')} XP kaldı</p>
         </div>
       </div>
+
+      {/* ── Gamification Stats ── */}
+      {gamification && (() => {
+        const league = LEAGUE_STYLES[gamification.league] ?? LEAGUE_STYLES.BRONZE;
+        return (
+          <div className="glass rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-yellow-300 inline-block" />
+                Gamification İstatistikleri
+              </h2>
+              <span className={`pill text-xs font-semibold ${league.pill}`}>
+                {league.badge} {league.label} Ligi
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="metric rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-amber-100/40 p-3 flex flex-col items-center gap-1">
+                <span className="text-xl">⚡</span>
+                <span className="text-lg font-bold text-amber-700">{gamification.xp.toLocaleString('tr-TR')}</span>
+                <span className="text-[11px] text-slate-500 text-center">Toplam XP</span>
+              </div>
+              <div className="metric rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 to-rose-100/40 p-3 flex flex-col items-center gap-1">
+                <span className="text-xl">🔥</span>
+                <span className="text-lg font-bold text-rose-700">{gamification.streak} gün</span>
+                <span className="text-[11px] text-slate-500 text-center">Günlük Seri</span>
+              </div>
+              <div className="metric rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50 to-pink-100/40 p-3 flex flex-col items-center gap-1">
+                <span className="text-xl">❤️</span>
+                <span className="text-lg font-bold text-pink-700">{gamification.hearts}</span>
+                <span className="text-[11px] text-slate-500 text-center">Can</span>
+              </div>
+              <div className="metric rounded-2xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-yellow-100/40 p-3 flex flex-col items-center gap-1">
+                <span className="text-xl">💰</span>
+                <span className="text-lg font-bold text-yellow-700">{gamification.coins.toLocaleString('tr-TR')}</span>
+                <span className="text-[11px] text-slate-500 text-center">Jeton</span>
+              </div>
+              <div className="metric rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50 to-cyan-100/40 p-3 flex flex-col items-center gap-1">
+                <span className="text-xl">🧊</span>
+                <span className="text-lg font-bold text-cyan-700">{gamification.streakFreezes}</span>
+                <span className="text-[11px] text-slate-500 text-center">Seri Dondurma</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Stats Row ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

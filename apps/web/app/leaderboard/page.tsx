@@ -55,6 +55,8 @@ const navSections = [
       { label: "Dil Laboratuvarı", href: "/language-lab", icon: "🎤" },
       { label: "Matematik Çözücü", href: "/math-lab", icon: "📐" },
       { label: "Adaptif Sınav", href: "/exams/adaptive", icon: "🎯" },
+      { label: "Yol Haritası", href: "/roadmap", icon: "🗺️" },
+      { label: "İlerleme", href: "/progress", icon: "📈" },
     ],
   },
 ];

@@ -72,6 +72,8 @@ const navSections = [
       { label: "AI Stüdyo", href: "/instructor/ai-studio", icon: "🤖" },
       { label: "Kazanç & Ödemeler", href: "/instructor/earnings", icon: "💰" },
       { label: "Akran Değerlendirmesi", href: "/peer-review", icon: "🤝" },
+      { label: "Kurs Oluşturucu", href: "/instructor/course-builder", icon: "🏗️" },
+      { label: "Sınav Sonuçları", href: "/exams/results", icon: "📋" },
     ],
   },
 ];

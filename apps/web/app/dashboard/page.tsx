@@ -22,6 +22,7 @@ const navSections = [
       { label: "Programlar", href: "/courses", icon: "📚" },
       { label: "Raporlar", href: "/admin/reports", icon: "📈" },
       { label: "Öğrenme Planları", href: "/learning-plans", icon: "🗺️" },
+      { label: "Analitik", href: "/analytics", icon: "📊" },
     ],
   },
   {
@@ -49,9 +50,19 @@ const navSections = [
     ],
   },
   {
+    title: "Öğrenme Araçları",
+    items: [
+      { label: "Adaptif Sınav", href: "/adaptive-quiz", icon: "🧠" },
+      { label: "Yol Haritası", href: "/roadmap", icon: "🗺️" },
+      { label: "İlerleme Takibi", href: "/progress", icon: "📈" },
+      { label: "Ghost Mentor", href: "/ghost-mentor", icon: "👻" },
+      { label: "Dil Lab", href: "/language-lab", icon: "🗣️" },
+      { label: "Math Lab", href: "/math-lab", icon: "🔢" },
+    ],
+  },
+  {
     title: "AI & Güvenlik",
     items: [
-      { label: "Ghost Mentor", href: "/ghost-mentor", icon: "👻" },
       { label: "AI Ajanlar", href: "/admin/ai-agents", icon: "🤖" },
       { label: "AI Güvenlik", href: "/admin/ai-safety", icon: "🛡️" },
       { label: "Savunma Merkezi", href: "/admin/defense", icon: "⚔️" },

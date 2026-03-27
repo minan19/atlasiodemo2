@@ -844,12 +844,12 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
                   className="h-6 w-6 rounded border border-slate-600 bg-transparent"
                   aria-label="Kalem rengi"
                 />
-                {["#0f172a", "#ef4444", "#10b981", "#3b82f6", "#f59e0b", "#a855f7"].map((c) => (
+                {["#0f172a", "#ffffff", "#ef4444", "#f97316", "#f59e0b", "#10b981", "#3b82f6", "#a855f7"].map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setPenColor(c)}
-                    className="h-4 w-4 rounded-full border border-slate-600"
+                    className={`h-4 w-4 rounded-full border transition-transform hover:scale-125 ${penColor === c ? "ring-2 ring-amber-300 ring-offset-1 ring-offset-slate-800 border-amber-300" : "border-slate-600"}`}
                     style={{ background: c }}
                     aria-label={`Renk ${c}`}
                   />
@@ -860,11 +860,12 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
                 <input
                   type="range"
                   min={1}
-                  max={16}
+                  max={20}
                   value={penWidth}
                   onChange={(e) => setPenWidth(Number(e.target.value))}
                   className="w-24"
                 />
+                <span className="text-[10px] text-amber-200 font-mono w-5 text-right">{penWidth}</span>
               </div>
               <div className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1">
                 <span className="text-[10px] text-slate-400">Silgi</span>
@@ -962,8 +963,64 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
             </div>
           </div>
 
+          {/* Birincil araçlar — pill-style hızlı erişim şeridi */}
+          <div className="flex items-center gap-2 border-t border-slate-100/20 pt-2 overflow-x-auto flex-nowrap">
+            {([
+              { label: "Kalem", icon: "✏️", tool: "pen" as WhiteboardTool },
+              { label: "Dikdörtgen", icon: "⬜", tool: "rect" as WhiteboardTool },
+              { label: "Daire", icon: "⭕", tool: "circle" as WhiteboardTool },
+              { label: "Ok", icon: "➡️", tool: "arrow" as WhiteboardTool },
+              { label: "Metin", icon: "📝", tool: "text" as WhiteboardTool },
+              { label: "Silgi", icon: "🧹", tool: "eraser" as WhiteboardTool },
+              { label: "Taşı", icon: "🖐️", tool: "move" as WhiteboardTool },
+            ] as ToolbarItem[]).map((item) => {
+              const isActive = activeTool === item.tool;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  aria-label={item.label}
+                  title={item.label}
+                  onClick={() => {
+                    if (item.tool) {
+                      setActiveTool(item.tool);
+                      boardRef.current?.setTool(item.tool);
+                    }
+                  }}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium border transition-all select-none ${
+                    isActive
+                      ? "bg-amber-400/25 border-amber-300 text-amber-100 shadow-inner"
+                      : "bg-slate-800/70 border-slate-600/60 text-slate-200 hover:bg-slate-700/80 hover:border-slate-500"
+                  }`}
+                >
+                  <span className="leading-none">{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+            <span className="mx-2 h-4 w-px bg-slate-700/60 flex-shrink-0" />
+            {/* Collaboration indicator */}
+            {mode === "live" ? (
+              <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium border border-emerald-400/60 bg-emerald-900/40 text-emerald-200">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                </span>
+                Canlı
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium border border-amber-400/60 bg-amber-900/30 text-amber-200">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+                </span>
+                Demo Modu
+              </span>
+            )}
+          </div>
+
           {/* Sayfa + kontrol barı (tek sıra) */}
-          <div className="flex items-center gap-2 border-t border-slate-100/20 pt-2 overflow-x-auto flex-nowrap rounded-xl bg-slate-900/60 px-2 py-2">
+          <div className="flex items-center gap-2 border-t border-slate-100/10 pt-2 overflow-x-auto flex-nowrap rounded-xl bg-slate-900/60 px-2 py-2">
             <button className="btn-dark btn-dark-xs disabled:opacity-45 disabled:cursor-not-allowed" aria-label="Önceki sayfa">⬅️</button>
             <div className="rounded-full px-3 py-1 text-[11px] border border-slate-600 bg-slate-800 text-slate-100">{wb.labels.pages} 1/1</div>
             <button className="btn-dark btn-dark-xs disabled:opacity-45 disabled:cursor-not-allowed" aria-label="Sonraki sayfa">➡️</button>
@@ -971,7 +1028,26 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
             <span className="mx-2 h-4 w-px bg-slate-700/60" />
             <button className="btn-dark btn-dark-xs disabled:opacity-45 disabled:cursor-not-allowed" aria-label="Geri al" onClick={() => boardRef.current?.undo()} disabled={viewRole === "student"}>↩️ {wb.labels.undo}</button>
             <button className="btn-dark btn-dark-xs disabled:opacity-45 disabled:cursor-not-allowed" aria-label="İleri al" onClick={() => boardRef.current?.redo()} disabled={viewRole === "student"}>↪️ {wb.labels.redo}</button>
-            <button className="btn-dark btn-dark-xs text-rose-200 border-rose-400/50 disabled:opacity-45 disabled:cursor-not-allowed" aria-label="Tahtayı temizle" onClick={() => boardRef.current?.clear()} disabled={viewRole === "student"}>🧹 {wb.labels.clear}</button>
+            <button
+              className="btn-dark btn-dark-xs text-rose-200 border-rose-400/50 disabled:opacity-45 disabled:cursor-not-allowed"
+              aria-label="Tahtayı temizle"
+              onClick={() => {
+                if (window.confirm("Tahtayı temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
+                  boardRef.current?.clear();
+                }
+              }}
+              disabled={viewRole === "student"}
+            >
+              🧹 {wb.labels.clear}
+            </button>
+            <button
+              className="btn-dark btn-dark-xs text-emerald-200 border-emerald-400/50 disabled:opacity-45 disabled:cursor-not-allowed"
+              aria-label="Oturumu kaydet"
+              onClick={() => boardRef.current?.download()}
+              disabled={viewRole === "student"}
+            >
+              💾 Oturumu Kaydet
+            </button>
             <span className="mx-2 h-4 w-px bg-slate-700/60" />
             <button className="btn-dark btn-dark-xs text-rose-200 border-rose-400/50 disabled:opacity-45 disabled:cursor-not-allowed" aria-label="Dersi kapat" disabled={viewRole === "student"}>⏹️ {wb.labels.close}</button>
           </div>
@@ -1378,8 +1454,53 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
 
           {activeTab === "participants" && (
             <div className="space-y-3 text-sm">
+              {/* Connection status header with "X kişi bağlı" */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="font-semibold text-slate-800">Oturum Katılımcıları</div>
+                  {mode === "live" ? (
+                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                      </span>
+                      Canlı
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400" />
+                      </span>
+                      Demo Modu
+                    </span>
+                  )}
+                </div>
+                {/* Colored avatar dots row */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {participantsList.map((p, idx) => {
+                    const dotColors = ["bg-sky-400", "bg-violet-400", "bg-rose-400", "bg-teal-400", "bg-orange-400"];
+                    return (
+                      <span
+                        key={p.name}
+                        title={`${p.name} — ${p.status === "online" ? "Çevrimiçi" : p.status === "idle" ? "Boşta" : "Çevrimdışı"}`}
+                        className={`relative flex h-7 w-7 items-center justify-center rounded-full text-white text-[10px] font-bold shadow ${dotColors[idx % dotColors.length]} ${p.status === "offline" ? "opacity-40" : ""}`}
+                      >
+                        {p.name.charAt(0)}
+                        <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white ${
+                          p.status === "online" ? "bg-emerald-400" : p.status === "idle" ? "bg-amber-400" : "bg-slate-300"
+                        }`} />
+                      </span>
+                    );
+                  })}
+                  <span className="text-xs text-slate-600 ml-1">
+                    <span className="font-semibold text-slate-800">{participantsList.filter(p => p.status !== "offline").length}</span> kişi bağlı
+                  </span>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between">
-                <div className="font-semibold">Katılımcılar ({participantsList.filter(p => p.status !== "offline").length} çevrimiçi)</div>
+                <div className="font-semibold">Katılımcı Listesi</div>
                 {handRaiseQueue.length > 0 && (
                   <span className="pill text-[10px] bg-amber-50 border-amber-300 text-amber-700 animate-pulse">
                     ✋ {handRaiseQueue.length} el kaldırıldı
@@ -1415,8 +1536,8 @@ const typeStyles: Record<string, { icon: string; chip: string }> = {
                 {participantsList.map((p, i) => (
                   <div key={p.name} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                        p.status === "online" ? "bg-emerald-400" : p.status === "idle" ? "bg-amber-400" : "bg-slate-300"
+                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm ${
+                        p.status === "online" ? "bg-emerald-400 shadow-emerald-200" : p.status === "idle" ? "bg-amber-400 shadow-amber-200" : "bg-slate-300"
                       }`} />
                       <span className="text-xs font-medium text-slate-800">{p.name}</span>
                       {p.handRaised && <span className="text-xs">✋</span>}

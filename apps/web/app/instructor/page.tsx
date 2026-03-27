@@ -55,6 +55,7 @@ const navSections = [
     items: [
       { label: "Panel", href: "/instructor", icon: "🏠" },
       { label: "Canlı Oturumlar", href: "/live", icon: "📡" },
+      { label: "Akıllı Sınıf", href: "/live/smart-classroom", icon: "🎓" },
       { label: "Akıllı Tahta", href: "/whiteboard", icon: "🧠" },
       { label: "Kurslar", href: "/courses", icon: "📚" },
     ],

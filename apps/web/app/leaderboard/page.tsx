@@ -42,6 +42,15 @@ const navSections = [
       { label: "Ödevler", href: "/leaderboard", icon: "📝" },
       { label: "Sertifikalar", href: "/certificates", icon: "🏅" },
       { label: "Raporlarım", href: "/report-cards", icon: "📈" },
+      { label: "Beceri Profilim", href: "/my-courses/skill-profile", icon: "📊" },
+    ],
+  },
+  {
+    title: "AI Araçlar",
+    items: [
+      { label: "Dil Laboratuvarı", href: "/language-lab", icon: "🎤" },
+      { label: "Matematik Çözücü", href: "/math-lab", icon: "📐" },
+      { label: "Adaptif Sınav", href: "/exams/adaptive", icon: "🎯" },
     ],
   },
 ];
@@ -69,17 +78,38 @@ const marketplace = [
   { name: "Rana Kılıç", lang: "AR", rating: 4.7, price: "₺360 / ders" },
 ];
 
+type GamificationStats = {
+  totalXp: number;
+  currentStreak: number;
+  longestStreak: number;
+  coins: number;
+  hearts: number;
+  streakFreezes: number;
+  league: string;
+  UserBadge?: { Badge: { name: string; description?: string; iconUrl?: string } }[];
+};
+
+const LEAGUE_LABELS: Record<string, string> = {
+  BRONZE: '🥉 Bronz', SILVER: '🥈 Gümüş', GOLD: '🥇 Altın',
+  DIAMOND: '💎 Elmas', MASTER: '🏆 Üstat',
+};
+
 export default function StudentHubPage() {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [materialsRemote, setMaterialsRemote] = useState<UploadItem[]>([]);
   const [assignments] = useState(assignmentsSeed);
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
-  const [myXP] = useState(2847);
-  const [myStreak] = useState(12);
-  const [myLevel] = useState(4);
   const [myRank] = useState(3);
   const XP_PER_LEVEL = 1000;
+
+  // Gerçek gamification istatistikleri
+  const { data: gamStats } = useSWR<GamificationStats>(
+    "/gamification/me", api, { revalidateOnFocus: false }
+  );
+  const myXP = gamStats?.totalXp ?? 2847;
+  const myStreak = gamStats?.currentStreak ?? 12;
+  const myLevel = Math.floor(myXP / XP_PER_LEVEL) + 1;
   const levelProgress = (myXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
 
   const { data: leaderboardData, isLoading: leaderboardLoading } = useSWR<LeaderboardEntry[]>(

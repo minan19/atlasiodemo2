@@ -33,6 +33,14 @@ const navSections = [
       { label: "Risk Analitik", href: "/instructor/analytics", icon: "⚠" },
     ],
   },
+  {
+    title: "Kurumsal",
+    items: [
+      { label: "SSO Entegrasyonları", href: "/admin/sso", icon: "🔑" },
+      { label: "Bölümler", href: "/admin/departments", icon: "🏛️" },
+      { label: "Araçlar & LTI", href: "/admin/tools", icon: "🔧" },
+    ],
+  },
 ];
 
 type VolunteerContentItem = {

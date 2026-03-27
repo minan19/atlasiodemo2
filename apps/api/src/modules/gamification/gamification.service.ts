@@ -192,6 +192,29 @@ export class GamificationService {
     }
   }
 
+  async getMyStats(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        league: true,
+        totalXp: true,
+        coins: true,
+        hearts: true,
+        currentStreak: true,
+        longestStreak: true,
+        streakFreezes: true,
+        lastActiveDate: true,
+        UserBadge: {
+          include: { Badge: true },
+          orderBy: { awardedAt: 'desc' },
+        },
+      },
+    });
+    return user;
+  }
+
   async getLeaderboard(tenantId: string) {
     return this.prisma.user.findMany({
       where: { tenantId, role: 'STUDENT' },

@@ -90,6 +90,7 @@ const quickActions = [
   { label: "Eğitmen onboarding", href: "/instructor" },
   { label: "Rapor oluştur", href: "/admin/reports" },
   { label: "Fiyatlandırma", href: "/admin/payments" },
+  { label: "🔔 Bildirimler", href: "/notifications" },
 ];
 
 const notifications = [

@@ -48,6 +48,15 @@ const navSections = [
       { label: "Sertifika Yenileme", href: "/certificates/renewal", icon: "🏅" },
     ],
   },
+  {
+    title: "AI & Güvenlik",
+    items: [
+      { label: "Ghost Mentor", href: "/ghost-mentor", icon: "👻" },
+      { label: "AI Ajanlar", href: "/admin/ai-agents", icon: "🤖" },
+      { label: "AI Güvenlik", href: "/admin/ai-safety", icon: "🛡️" },
+      { label: "Savunma Merkezi", href: "/admin/defense", icon: "⚔️" },
+    ],
+  },
 ];
 
 type VolunteerContentItem = {

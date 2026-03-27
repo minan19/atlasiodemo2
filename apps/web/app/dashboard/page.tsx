@@ -21,6 +21,7 @@ const navSections = [
       { label: "Kullanıcılar", href: "/admin", icon: "👥" },
       { label: "Programlar", href: "/courses", icon: "📚" },
       { label: "Raporlar", href: "/admin/reports", icon: "📈" },
+      { label: "Öğrenme Planları", href: "/learning-plans", icon: "🗺️" },
     ],
   },
   {
@@ -30,7 +31,9 @@ const navSections = [
       { label: "Finans", href: "/admin/payments", icon: "💳" },
       { label: "Güvenlik", href: "/admin/security", icon: "🛡️" },
       { label: "Sınav Gözetimi", href: "/admin/proctoring", icon: "🔍" },
-      { label: "Risk Analitik", href: "/instructor/analytics", icon: "⚠" },
+      { label: "Risk Analitik", href: "/instructor/analytics", icon: "⚠️" },
+      { label: "Gönüllü İçerik", href: "/admin/volunteer", icon: "🙋" },
+      { label: "Bildirimler", href: "/notifications", icon: "🔔" },
     ],
   },
   {
@@ -39,6 +42,8 @@ const navSections = [
       { label: "SSO Entegrasyonları", href: "/admin/sso", icon: "🔑" },
       { label: "Bölümler", href: "/admin/departments", icon: "🏛️" },
       { label: "Araçlar & LTI", href: "/admin/tools", icon: "🔧" },
+      { label: "Entegrasyonlar", href: "/admin/connectors", icon: "🔌" },
+      { label: "Otomasyon", href: "/admin/automation", icon: "⚙️" },
       { label: "Sertifika Yenileme", href: "/certificates/renewal", icon: "🏅" },
     ],
   },

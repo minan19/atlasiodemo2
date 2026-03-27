@@ -34,16 +34,19 @@ const navSections = [
       { label: "Derslerim", href: "/courses", icon: "📚" },
       { label: "Canlı Ders", href: "/live", icon: "📡" },
       { label: "Akıllı Tahta", href: "/whiteboard", icon: "🧠" },
+      { label: "Bildirimler", href: "/notifications", icon: "🔔" },
+      { label: "Seans Rezervasyonu", href: "/booking", icon: "📅" },
     ],
   },
   {
-    title: "Takip",
+    title: "Takip & Gelişim",
     items: [
       { label: "Ödevler", href: "/leaderboard", icon: "📝" },
       { label: "Akran Değerlendirmesi", href: "/peer-review", icon: "🤝" },
       { label: "Sertifikalar", href: "/certificates", icon: "🏅" },
       { label: "Raporlarım", href: "/report-cards", icon: "📈" },
       { label: "Beceri Profilim", href: "/my-courses/skill-profile", icon: "📊" },
+      { label: "Öğrenme Planım", href: "/learning-plans", icon: "🗺️" },
     ],
   },
   {

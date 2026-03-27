@@ -439,6 +439,8 @@ export default function ProfilePage() {
             onClick={() => {
               localStorage.removeItem('accessToken');
               localStorage.removeItem('refreshToken');
+              document.cookie = 'atlasio_auth=; path=/; max-age=0';
+              document.cookie = 'atlasio_role=; path=/; max-age=0';
               window.location.href = '/login';
             }}
             className="btn-link border-rose-200 text-rose-700 hover:bg-rose-50"

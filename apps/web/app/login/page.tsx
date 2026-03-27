@@ -57,8 +57,12 @@ function LoginForm() {
       localStorage.setItem("accessToken", data.accessToken);
       if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
 
-      // Rolü doğrudan API yanıtından al — e-posta tahminine gerek yok
+      // Middleware auth guard için cookie set et (token değeri değil, varlık işareti)
       const role = normalizeRole(data.user?.role ?? "STUDENT");
+      const maxAge = 60 * 60 * 24 * 7; // 7 gün
+      document.cookie = `atlasio_auth=1; path=/; max-age=${maxAge}; SameSite=Lax`;
+      document.cookie = `atlasio_role=${role}; path=/; max-age=${maxAge}; SameSite=Lax`;
+
       setRole(role);
       router.push(redirectTo ?? redirectForRole(role));
     } catch (err: unknown) {

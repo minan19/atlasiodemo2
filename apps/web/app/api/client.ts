@@ -25,6 +25,9 @@ function saveTokens(access: string, refresh: string) {
 function clearTokens() {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  // Middleware cookie'lerini de temizle
+  document.cookie = 'atlasio_auth=; path=/; max-age=0';
+  document.cookie = 'atlasio_role=; path=/; max-age=0';
 }
 
 function redirectToLogin() {

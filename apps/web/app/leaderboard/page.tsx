@@ -40,6 +40,7 @@ const navSections = [
     title: "Takip",
     items: [
       { label: "Ödevler", href: "/leaderboard", icon: "📝" },
+      { label: "Akran Değerlendirmesi", href: "/peer-review", icon: "🤝" },
       { label: "Sertifikalar", href: "/certificates", icon: "🏅" },
       { label: "Raporlarım", href: "/report-cards", icon: "📈" },
       { label: "Beceri Profilim", href: "/my-courses/skill-profile", icon: "📊" },

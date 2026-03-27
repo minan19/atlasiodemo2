@@ -39,6 +39,7 @@ const navSections = [
       { label: "SSO Entegrasyonları", href: "/admin/sso", icon: "🔑" },
       { label: "Bölümler", href: "/admin/departments", icon: "🏛️" },
       { label: "Araçlar & LTI", href: "/admin/tools", icon: "🔧" },
+      { label: "Sertifika Yenileme", href: "/certificates/renewal", icon: "🏅" },
     ],
   },
 ];

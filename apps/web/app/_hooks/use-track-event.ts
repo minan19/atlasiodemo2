@@ -45,7 +45,17 @@ export function useTrackEvent() {
     const token = getToken();
     if (!token) return; // not authenticated — skip
 
-    const body = JSON.stringify({ eventType, payload });
+    // Map to EventStreamService.emit() shape
+    const objectId = payload.courseId ?? payload.lessonId ?? payload.quizId ?? 'unknown';
+    const objectType = payload.courseId ? 'Course' : payload.lessonId ? 'Lesson' : payload.quizId ? 'Quiz' : 'Page';
+    const body = JSON.stringify({
+      eventType,
+      objectType,
+      objectId,
+      objectName: payload.page as string | undefined,
+      result: { correct: payload.correct, score: payload.score, duration: payload.durationSeconds },
+      metadata: payload,
+    });
 
     // Fire and forget — no await
     fetch(`${API}/event-stream/emit`, {

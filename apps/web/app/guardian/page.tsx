@@ -1,382 +1,223 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { PanelShell } from "../_components/panel-shell";
 
-/* ─────────────────────────────────────────────
-   NAV
-───────────────────────────────────────────── */
+/* ─── Nav ─── */
 const navSections = [
   {
     title: "Veli",
     items: [
-      { label: "Özet", href: "/guardian", icon: "👪" },
-      { label: "Ödevler", href: "/leaderboard", icon: "📝" },
-      { label: "Takvim", href: "/booking", icon: "🗓️" },
-      { label: "Raporlar", href: "/report-cards", icon: "📈" },
+      { label: "Özet",     href: "/guardian" },
+      { label: "Ödevler",  href: "/leaderboard" },
+      { label: "Takvim",   href: "/booking" },
+      { label: "Raporlar", href: "/report-cards" },
     ],
   },
   {
     title: "İletişim",
     items: [
-      { label: "Eğitmenler", href: "/instructor", icon: "👩‍🏫" },
-      { label: "Destek", href: "/portal", icon: "💬" },
+      { label: "Eğitmenler", href: "/instructor" },
+      { label: "Destek",     href: "/portal" },
     ],
   },
 ];
 
-/* ─────────────────────────────────────────────
-   TYPES
-───────────────────────────────────────────── */
-type Activity = {
-  id: string;
-  label: string;
-  detail: string;
-  timeAgo: string;
-  icon: string;
+/* ─── Types ─── */
+type Activity  = { id: string; label: string; detail: string; timeAgo: string; type: "lesson"|"quiz"|"assignment"|"live"|"badge"|"read"|"practice"|"exam"|"plan" };
+type Course    = { title: string; progress: number; grad: string };
+type WeeklyXP  = { week: string; xp: number };
+type TeacherMsg= { id: string; teacher: string; initials: string; text: string; time: string; accent: string };
+type Child     = {
+  id: string; name: string; age: number; initials: string; avatarGrad: string;
+  instructorEmail: string; lastActiveDaysAgo: number;
+  weeklyStats: { lessonsCompleted: number; timeSpentHours: number; xpEarned: number; streak: number };
+  overallCompletion: number; activeCourses: Course[]; activities: Activity[];
+  weeklyXP: WeeklyXP[]; teacherMessages: TeacherMsg[];
+  attendanceDays: number; totalDays: number;
 };
 
-type Course = {
-  title: string;
-  progress: number;
-  color: string;
-};
-
-type WeeklyXP = {
-  week: string;
-  xp: number;
-};
-
-type TeacherMessage = {
-  id: string;
-  teacher: string;
-  initials: string;
-  text: string;
-  time: string;
-  color: string;
-};
-
-type Child = {
-  id: string;
-  name: string;
-  age: number;
-  initials: string;
-  avatarGrad: string;
-  instructorEmail: string;
-  lastActiveDaysAgo: number;
-  weeklyStats: {
-    lessonsCompleted: number;
-    timeSpentHours: number;
-    xpEarned: number;
-    streak: number;
-  };
-  overallCompletion: number;
-  activeCourses: Course[];
-  activities: Activity[];
-  weeklyXP: WeeklyXP[];
-  teacherMessages: TeacherMessage[];
-  attendanceDays: number;
-  totalDays: number;
-};
-
-/* ─────────────────────────────────────────────
-   DEMO DATA
-───────────────────────────────────────────── */
+/* ─── Demo data ─── */
 const CHILDREN: Child[] = [
   {
-    id: "ahmet",
-    name: "Ahmet",
-    age: 15,
-    initials: "AK",
-    avatarGrad: "from-violet-500 to-blue-500",
-    instructorEmail: "egitmen@atlasio.app",
-    lastActiveDaysAgo: 4,
-    weeklyStats: {
-      lessonsCompleted: 5,
-      timeSpentHours: 8.5,
-      xpEarned: 420,
-      streak: 3,
-    },
+    id: "ahmet", name: "Ahmet", age: 15, initials: "AK",
+    avatarGrad: "linear-gradient(135deg,#8b5cf6,#3b82f6)",
+    instructorEmail: "egitmen@atlasio.app", lastActiveDaysAgo: 4,
+    weeklyStats: { lessonsCompleted: 5, timeSpentHours: 8.5, xpEarned: 420, streak: 3 },
     overallCompletion: 68,
     activeCourses: [
-      { title: "React Temelleri", progress: 82, color: "from-blue-500 to-cyan-400" },
-      { title: "Matematik – Türev", progress: 55, color: "from-amber-500 to-orange-400" },
-      { title: "İngilizce B2", progress: 40, color: "from-emerald-500 to-teal-400" },
+      { title: "React Temelleri",    progress: 82, grad: "linear-gradient(90deg,#3b82f6,#06b6d4)" },
+      { title: "Matematik – Türev",  progress: 55, grad: "linear-gradient(90deg,#f59e0b,#f97316)" },
+      { title: "İngilizce B2",        progress: 40, grad: "linear-gradient(90deg,#10b981,#14b8a6)" },
     ],
     activities: [
-      { id: "a1", label: "React dersi izledi", detail: "Komponent Yaşam Döngüsü", timeAgo: "2 saat önce", icon: "🎬" },
-      { id: "a2", label: "Quiz tamamladı", detail: "Skor: 85/100", timeAgo: "dün", icon: "✅" },
-      { id: "a3", label: "Ödev teslim etti", detail: "Türev Alıştırmaları", timeAgo: "dün", icon: "📝" },
-      { id: "a4", label: "Canlı derse katıldı", detail: "İngilizce Konuşma Pratiği", timeAgo: "2 gün önce", icon: "🎤" },
-      { id: "a5", label: "Rozet kazandı", detail: "Haftalık Hedef Tamamlandı", timeAgo: "3 gün önce", icon: "🏅" },
-      { id: "a6", label: "Video izledi", detail: "Türev – Limit Kavramı", timeAgo: "3 gün önce", icon: "▶️" },
-      { id: "a7", label: "Alıştırma yaptı", detail: "React Hooks – 15 soruluk set", timeAgo: "4 gün önce", icon: "🧠" },
-      { id: "a8", label: "Okuma tamamladı", detail: "B2 Grammar – Conditionals", timeAgo: "4 gün önce", icon: "📖" },
-      { id: "a9", label: "Sınava girdi", detail: "Ünite Sonu Testi – Matematik", timeAgo: "5 gün önce", icon: "📋" },
-      { id: "a10", label: "Ders planı açtı", detail: "Yeni hafta müfredatını inceledi", timeAgo: "6 gün önce", icon: "🗓️" },
+      { id: "a1", label: "React dersi izledi",      detail: "Komponent Yaşam Döngüsü",          timeAgo: "2 saat önce",  type: "lesson"     },
+      { id: "a2", label: "Quiz tamamladı",           detail: "Skor: 85/100",                    timeAgo: "dün",          type: "quiz"       },
+      { id: "a3", label: "Ödev teslim etti",         detail: "Türev Alıştırmaları",             timeAgo: "dün",          type: "assignment" },
+      { id: "a4", label: "Canlı derse katıldı",      detail: "İngilizce Konuşma Pratiği",       timeAgo: "2 gün önce",   type: "live"       },
+      { id: "a5", label: "Rozet kazandı",             detail: "Haftalık Hedef Tamamlandı",      timeAgo: "3 gün önce",   type: "badge"      },
+      { id: "a6", label: "Video izledi",             detail: "Türev – Limit Kavramı",           timeAgo: "3 gün önce",   type: "lesson"     },
+      { id: "a7", label: "Alıştırma yaptı",          detail: "React Hooks – 15 soruluk set",    timeAgo: "4 gün önce",   type: "practice"   },
+      { id: "a8", label: "Okuma tamamladı",          detail: "B2 Grammar – Conditionals",       timeAgo: "4 gün önce",   type: "read"       },
+      { id: "a9", label: "Sınava girdi",             detail: "Ünite Sonu Testi – Matematik",    timeAgo: "5 gün önce",   type: "exam"       },
+      { id: "a10", label: "Ders planı açtı",         detail: "Yeni hafta müfredatını inceledi", timeAgo: "6 gün önce",   type: "plan"       },
     ],
-    weeklyXP: [
-      { week: "H-4", xp: 210 },
-      { week: "H-3", xp: 380 },
-      { week: "H-2", xp: 295 },
-      { week: "Bu Hafta", xp: 420 },
-    ],
+    weeklyXP: [{ week: "H-4", xp: 210 },{ week: "H-3", xp: 380 },{ week: "H-2", xp: 295 },{ week: "Bu Hafta", xp: 420 }],
     teacherMessages: [
-      {
-        id: "tm1",
-        teacher: "Öğrt. Elif Kaya",
-        initials: "EK",
-        text: "Ahmet bu hafta React konusunda büyük ilerleme kaydetti. Ödev kalitesi oldukça yüksek.",
-        time: "Bugün 10:30",
-        color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-      },
-      {
-        id: "tm2",
-        teacher: "Öğrt. Mert Demir",
-        initials: "MD",
-        text: "Türev konusunda biraz daha pratik yapması gerekiyor. Ek alıştırmalar gönderdim.",
-        time: "Dün 15:20",
-        color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-      },
-      {
-        id: "tm3",
-        teacher: "Öğrt. Sara Yıldız",
-        initials: "SY",
-        text: "İngilizce konuşma pratiğine daha fazla katılım sağlaması faydalı olacak.",
-        time: "3 gün önce",
-        color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-      },
+      { id: "tm1", teacher: "Öğrt. Elif Kaya", initials: "EK", text: "Ahmet bu hafta React konusunda büyük ilerleme kaydetti. Ödev kalitesi oldukça yüksek.", time: "Bugün 10:30", accent: "var(--accent-2)" },
+      { id: "tm2", teacher: "Öğrt. Mert Demir", initials: "MD", text: "Türev konusunda biraz daha pratik yapması gerekiyor. Ek alıştırmalar gönderdim.", time: "Dün 15:20", accent: "var(--accent)" },
+      { id: "tm3", teacher: "Öğrt. Sara Yıldız", initials: "SY", text: "İngilizce konuşma pratiğine daha fazla katılım sağlaması faydalı olacak.", time: "3 gün önce", accent: "var(--accent-3)" },
     ],
-    attendanceDays: 18,
-    totalDays: 22,
+    attendanceDays: 18, totalDays: 22,
   },
   {
-    id: "zeynep",
-    name: "Zeynep",
-    age: 12,
-    initials: "ZK",
-    avatarGrad: "from-pink-500 to-rose-500",
-    instructorEmail: "egitmen2@atlasio.app",
-    lastActiveDaysAgo: 1,
-    weeklyStats: {
-      lessonsCompleted: 7,
-      timeSpentHours: 6.0,
-      xpEarned: 310,
-      streak: 7,
-    },
+    id: "zeynep", name: "Zeynep", age: 12, initials: "ZK",
+    avatarGrad: "linear-gradient(135deg,#ec4899,#f43f5e)",
+    instructorEmail: "egitmen2@atlasio.app", lastActiveDaysAgo: 1,
+    weeklyStats: { lessonsCompleted: 7, timeSpentHours: 6.0, xpEarned: 310, streak: 7 },
     overallCompletion: 74,
     activeCourses: [
-      { title: "Fen Bilgisi 6. Sınıf", progress: 91, color: "from-emerald-500 to-green-400" },
-      { title: "Türkçe Kompozisyon", progress: 63, color: "from-pink-500 to-rose-400" },
-      { title: "Temel Matematik", progress: 78, color: "from-blue-500 to-indigo-400" },
+      { title: "Fen Bilgisi 6. Sınıf", progress: 91, grad: "linear-gradient(90deg,#10b981,#22c55e)" },
+      { title: "Türkçe Kompozisyon",   progress: 63, grad: "linear-gradient(90deg,#ec4899,#f43f5e)" },
+      { title: "Temel Matematik",      progress: 78, grad: "linear-gradient(90deg,#3b82f6,#6366f1)" },
     ],
     activities: [
-      { id: "z1", label: "Video izledi", detail: "Fotosentez – Bitkiler", timeAgo: "1 saat önce", icon: "🌱" },
-      { id: "z2", label: "Quiz tamamladı", detail: "Skor: 92/100", timeAgo: "bugün sabah", icon: "✅" },
-      { id: "z3", label: "Ödev teslim etti", detail: "Kompozisyon – Mevsimler", timeAgo: "dün", icon: "📝" },
-      { id: "z4", label: "Canlı derse katıldı", detail: "Matematik – Kesirler", timeAgo: "dün", icon: "🎤" },
-      { id: "z5", label: "Rozet kazandı", detail: "7 Günlük Seri!", timeAgo: "2 gün önce", icon: "🏅" },
-      { id: "z6", label: "Okuma tamamladı", detail: "Fen – Hücre Yapısı", timeAgo: "2 gün önce", icon: "📖" },
-      { id: "z7", label: "Alıştırma yaptı", detail: "Kesirlerle Çarpma – 20 soru", timeAgo: "3 gün önce", icon: "🧠" },
-      { id: "z8", label: "Sınava girdi", detail: "Ünite Sonu – Fen Bilgisi", timeAgo: "4 gün önce", icon: "📋" },
-      { id: "z9", label: "Video izledi", detail: "Türkçe – Noktalama İşaretleri", timeAgo: "5 gün önce", icon: "🎬" },
-      { id: "z10", label: "Ders planı açtı", detail: "Haftalık müfredat güncellendi", timeAgo: "6 gün önce", icon: "🗓️" },
+      { id: "z1", label: "Video izledi",      detail: "Fotosentez – Bitkiler",              timeAgo: "1 saat önce",   type: "lesson"     },
+      { id: "z2", label: "Quiz tamamladı",    detail: "Skor: 92/100",                       timeAgo: "bugün sabah",   type: "quiz"       },
+      { id: "z3", label: "Ödev teslim etti", detail: "Kompozisyon – Mevsimler",            timeAgo: "dün",           type: "assignment" },
+      { id: "z4", label: "Canlı derse katıldı", detail: "Matematik – Kesirler",            timeAgo: "dün",           type: "live"       },
+      { id: "z5", label: "Rozet kazandı",    detail: "7 Günlük Seri!",                     timeAgo: "2 gün önce",    type: "badge"      },
+      { id: "z6", label: "Okuma tamamladı",  detail: "Fen – Hücre Yapısı",                 timeAgo: "2 gün önce",    type: "read"       },
+      { id: "z7", label: "Alıştırma yaptı",  detail: "Kesirlerle Çarpma – 20 soru",        timeAgo: "3 gün önce",    type: "practice"   },
+      { id: "z8", label: "Sınava girdi",     detail: "Ünite Sonu – Fen Bilgisi",           timeAgo: "4 gün önce",    type: "exam"       },
+      { id: "z9", label: "Video izledi",     detail: "Türkçe – Noktalama İşaretleri",      timeAgo: "5 gün önce",    type: "lesson"     },
+      { id: "z10", label: "Ders planı açtı", detail: "Haftalık müfredat güncellendi",      timeAgo: "6 gün önce",    type: "plan"       },
     ],
-    weeklyXP: [
-      { week: "H-4", xp: 180 },
-      { week: "H-3", xp: 250 },
-      { week: "H-2", xp: 290 },
-      { week: "Bu Hafta", xp: 310 },
-    ],
+    weeklyXP: [{ week: "H-4", xp: 180 },{ week: "H-3", xp: 250 },{ week: "H-2", xp: 290 },{ week: "Bu Hafta", xp: 310 }],
     teacherMessages: [
-      {
-        id: "tz1",
-        teacher: "Öğrt. Ayşe Çelik",
-        initials: "AÇ",
-        text: "Zeynep fen dersinde çok başarılı! Projesini erken teslim etti, harika iş.",
-        time: "Bugün 09:15",
-        color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-      },
-      {
-        id: "tz2",
-        teacher: "Öğrt. Burak Şahin",
-        initials: "BŞ",
-        text: "Matematik konusunda çok iyi ilerleme. Kesirler artık rahatça yapıyor.",
-        time: "2 gün önce",
-        color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-      },
+      { id: "tz1", teacher: "Öğrt. Ayşe Çelik", initials: "AÇ", text: "Zeynep fen dersinde çok başarılı! Projesini erken teslim etti, harika iş.", time: "Bugün 09:15", accent: "var(--accent-3)" },
+      { id: "tz2", teacher: "Öğrt. Burak Şahin", initials: "BŞ", text: "Matematik konusunda çok iyi ilerleme. Kesirler artık rahatça yapıyor.", time: "2 gün önce", accent: "var(--accent-2)" },
     ],
-    attendanceDays: 21,
-    totalDays: 22,
+    attendanceDays: 21, totalDays: 22,
   },
 ];
 
-/* ─────────────────────────────────────────────
-   HELPERS / SUB-COMPONENTS
-───────────────────────────────────────────── */
+/* ─── API ─── */
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
-
 function authFetcher(url: string) {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-  return fetch(`${API_BASE}${url}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  }).then((r) => {
-    if (!r.ok) throw new Error(`${r.status}`);
-    return r.json();
-  });
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  return fetch(`${API_BASE}${url}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+    .then((r) => { if (!r.ok) throw new Error(); return r.json(); });
 }
 
-/* Donut SVG */
-function DonutChart({ value, size = 120 }: { value: number; size?: number }) {
-  const strokeWidth = 14;
-  const r = (size - strokeWidth) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (value / 100) * circ;
-  const cx = size / 2;
-  const cy = size / 2;
+/* ─── Activity icon map ─── */
+function ActivityIcon({ type }: { type: Activity["type"] }) {
+  const s = 13;
+  const icons: Record<Activity["type"], JSX.Element> = {
+    lesson: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>,
+    quiz: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>,
+    assignment: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+    live: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49M7.76 16.24a6 6 0 010-8.49"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 19.07a10 10 0 010-14.14"/></svg>,
+    badge: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>,
+    read: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>,
+    practice: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+    exam: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h4"/></svg>,
+    plan: <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  };
+  const colors: Record<Activity["type"], string> = {
+    lesson: "var(--accent-2)", quiz: "#22c55e", assignment: "var(--accent)",
+    live: "#ef4444", badge: "#f59e0b", read: "var(--accent-3)",
+    practice: "#8b5cf6", exam: "#f97316", plan: "var(--muted)",
+  };
   return (
-    <svg width={size} height={size} className="rotate-[-90deg]">
+    <div style={{
+      width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
+      background: `color-mix(in srgb,${colors[type]} 15%,var(--panel))`,
+      border: `1px solid color-mix(in srgb,${colors[type]} 30%,var(--line))`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      color: colors[type],
+    }}>
+      {icons[type]}
+    </div>
+  );
+}
+
+/* ─── Donut Chart ─── */
+function DonutChart({ value, size = 120 }: { value: number; size?: number }) {
+  const sw = 14, r = (size - sw) / 2, circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  const cx = size / 2, cy = size / 2;
+  return (
+    <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
       <defs>
-        <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#3b82f6" />
+        <linearGradient id="gDonut" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#5B6EFF" /><stop offset="100%" stopColor="#9B59FF" />
         </linearGradient>
       </defs>
-      <circle
-        cx={cx} cy={cy} r={r}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={strokeWidth}
-        className="text-slate-200 dark:text-slate-700"
-      />
-      <circle
-        cx={cx} cy={cy} r={r}
-        fill="none"
-        stroke="url(#donutGrad)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 0.8s ease" }}
-      />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--line)" strokeWidth={sw} />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="url(#gDonut)" strokeWidth={sw}
+        strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
+        style={{ transition: "stroke-dashoffset 0.8s ease" }} />
     </svg>
   );
 }
 
-/* Circular attendance progress */
-function AttendanceRing({
-  days,
-  total,
-  size = 96,
-}: {
-  days: number;
-  total: number;
-  size?: number;
-}) {
+/* ─── Attendance Ring ─── */
+function AttendanceRing({ days, total, size = 100 }: { days: number; total: number; size?: number }) {
   const pct = Math.round((days / total) * 100);
-  const sw = 10;
-  const r = (size - sw) / 2;
-  const circ = 2 * Math.PI * r;
+  const sw = 10, r = (size - sw) / 2, circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
-  const cx = size / 2;
-  const cy = size / 2;
+  const cx = size / 2, cy = size / 2;
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="rotate-[-90deg]">
+    <div style={{ position: "relative", width: size, height: size }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <defs>
-          <linearGradient id="attendGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#10b981" />
-            <stop offset="100%" stopColor="#06b6d4" />
+          <linearGradient id="gAttend" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#00D4B4" /><stop offset="100%" stopColor="#10b981" />
           </linearGradient>
         </defs>
-        <circle
-          cx={cx} cy={cy} r={r}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={sw}
-          className="text-slate-200 dark:text-slate-700"
-        />
-        <circle
-          cx={cx} cy={cy} r={r}
-          fill="none"
-          stroke="url(#attendGrad)"
-          strokeWidth={sw}
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.8s ease" }}
-        />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--line)" strokeWidth={sw} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="url(#gAttend)" strokeWidth={sw}
+          strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.8s ease" }} />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{pct}%</span>
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center", gap: 2,
+      }}>
+        <span style={{ fontSize: 18, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{pct}%</span>
+        <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 600 }}>devam</span>
       </div>
     </div>
   );
 }
 
-/* 4-week bar chart (SVG) */
+/* ─── Weekly Bar Chart ─── */
 function WeeklyBarChart({ data }: { data: WeeklyXP[] }) {
   const maxXP = Math.max(...data.map((d) => d.xp), 1);
-  const chartH = 80;
-  const barW = 32;
-  const gap = 16;
+  const chartH = 80, barW = 36, gap = 14;
   const totalW = data.length * (barW + gap) - gap;
-
   return (
-    <svg
-      width="100%"
-      viewBox={`0 0 ${totalW + 8} ${chartH + 28}`}
-      preserveAspectRatio="xMidYMid meet"
-      className="overflow-visible"
-    >
+    <svg width="100%" viewBox={`0 0 ${totalW + 8} ${chartH + 30}`} preserveAspectRatio="xMidYMid meet">
       <defs>
-        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#3b82f6" />
+        <linearGradient id="gBar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5B6EFF" /><stop offset="100%" stopColor="#9B59FF" />
         </linearGradient>
-        <linearGradient id="barGradActive" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f59e0b" />
-          <stop offset="100%" stopColor="#f97316" />
+        <linearGradient id="gBarNow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#f97316" />
         </linearGradient>
       </defs>
       {data.map((d, i) => {
         const barH = Math.max(6, (d.xp / maxXP) * chartH);
-        const x = i * (barW + gap);
-        const y = chartH - barH;
-        const isLast = i === data.length - 1;
+        const x = i * (barW + gap), y = chartH - barH;
+        const isNow = i === data.length - 1;
         return (
           <g key={d.week}>
-            <rect
-              x={x}
-              y={y}
-              width={barW}
-              height={barH}
-              rx={6}
-              fill={isLast ? "url(#barGradActive)" : "url(#barGrad)"}
-              opacity={isLast ? 1 : 0.65}
-            />
-            <text
-              x={x + barW / 2}
-              y={y - 5}
-              textAnchor="middle"
-              fontSize={9}
-              fill="currentColor"
-              className="text-slate-600 dark:text-slate-400"
-            >
-              {d.xp}
-            </text>
-            <text
-              x={x + barW / 2}
-              y={chartH + 18}
-              textAnchor="middle"
-              fontSize={9}
-              fill="currentColor"
-              className="text-slate-500 dark:text-slate-400"
-            >
-              {d.week}
-            </text>
+            <rect x={x} y={y} width={barW} height={barH} rx={7}
+              fill={isNow ? "url(#gBarNow)" : "url(#gBar)"} opacity={isNow ? 1 : 0.6} />
+            <text x={x + barW / 2} y={y - 5} textAnchor="middle" fontSize={9} fill="var(--ink-2)">{d.xp}</text>
+            <text x={x + barW / 2} y={chartH + 18} textAnchor="middle" fontSize={9} fill="var(--muted)">{d.week}</text>
           </g>
         );
       })}
@@ -384,443 +225,404 @@ function WeeklyBarChart({ data }: { data: WeeklyXP[] }) {
   );
 }
 
-/* Progress bar row */
+/* ─── Course Progress Bar ─── */
 function CourseProgressBar({ course }: { course: Course }) {
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="text-slate-700 dark:text-slate-300 font-medium truncate pr-2">
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, paddingRight: 8 }}>
           {course.title}
         </span>
-        <span className="text-slate-500 dark:text-slate-400 flex-shrink-0">{course.progress}%</span>
+        <span style={{ fontSize: 12, color: "var(--muted)", flexShrink: 0 }}>{course.progress}%</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-        <div
-          className={`h-full rounded-full bg-gradient-to-r ${course.color}`}
-          style={{ width: `${course.progress}%`, transition: "width 0.8s ease" }}
-        />
+      <div style={{ height: 7, borderRadius: "var(--r-full)", background: "var(--line)", overflow: "hidden" }}>
+        <div style={{ height: "100%", borderRadius: "var(--r-full)", background: course.grad, width: `${course.progress}%`, transition: "width 0.8s ease" }} />
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   MAIN PAGE
-───────────────────────────────────────────── */
+/* ─── Card Header ─── */
+function CardHead({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+      <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ width: 3, height: 18, borderRadius: 2, background: "linear-gradient(180deg,var(--accent-2),var(--accent))", display: "inline-block", flexShrink: 0 }} />
+        {title}
+      </h2>
+      {sub && (
+        <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: "var(--r-full)", background: "var(--accent-soft)", color: "var(--accent)", border: "1px solid color-mix(in srgb,var(--accent) 25%,var(--line))" }}>
+          {sub}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ─── Main Page ─── */
 export default function GuardianPage() {
   const [selectedChildId, setSelectedChildId] = useState<string>(CHILDREN[0].id);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [reportType, setReportType] = useState("Haftalık Özet");
 
   const child = CHILDREN.find((c) => c.id === selectedChildId) ?? CHILDREN[0];
 
-  /* API call – guardian summary (graceful fallback) */
-  const { data: _apiData } = useSWR<unknown>(
-    `/guardian/summary?childId=${child.id}`,
-    authFetcher,
-    { revalidateOnFocus: false, shouldRetryOnError: false }
-  );
+  useSWR<unknown>(`/guardian/summary?childId=${child.id}`, authFetcher, { revalidateOnFocus: false, shouldRetryOnError: false });
 
   const isInactive = child.lastActiveDaysAgo >= 3;
+  const attendPct = child.attendanceDays / child.totalDays;
 
   return (
-    <PanelShell
-      roleLabel="Veli Paneli"
-      userName="Aile Merkezi"
-      userSub="Öğrencinizin gelişimini takip edin"
-      navSections={navSections}
-    >
-      <div className="space-y-6">
+    <PanelShell roleLabel="Veli Paneli" userName="Aile Merkezi" userSub="Öğrencinizin gelişimini takip edin" navSections={navSections}>
+      <style>{`
+        @keyframes guardFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes guardPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+      `}</style>
 
-        {/* ── 1. HERO ─────────────────────────────── */}
-        <header className="glass hero rounded-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-slide-up">
-          <div className="hero-content space-y-2">
-            <div className="pill w-fit text-xs">👪 Veli Paneli</div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Öğrencinizin gelişimini takip edin
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-              İlerleme, devam ve eğitmen iletişimini tek ekranda görün. Şeffaf raporlama, net plan.
+      {/* ── Hero ── */}
+      <div
+        className="glass hero"
+        style={{
+          borderRadius: "var(--r-xl)", padding: "24px 24px 20px",
+          background: "linear-gradient(135deg,color-mix(in srgb,var(--accent-2) 8%,var(--panel)),color-mix(in srgb,var(--accent) 5%,var(--panel)))",
+          border: "1.5px solid color-mix(in srgb,var(--accent) 18%,var(--line))",
+          animation: "guardFadeIn 0.4s both",
+        }}
+      >
+        <div className="hero-content">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: "var(--r-sm)",
+              background: "linear-gradient(135deg,var(--accent-2),var(--accent))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--accent)", textTransform: "uppercase" }}>Veli Paneli</span>
+          </div>
+          <h1 style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: 800, color: "var(--ink)", margin: "0 0 6px", letterSpacing: "-0.03em" }}>
+            Öğrencinizin gelişimini takip edin
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--ink-2)", margin: 0, lineHeight: 1.6 }}>
+            İlerleme, devam ve eğitmen iletişimini tek ekranda görün. Şeffaf raporlama, net plan.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Child selector ── */}
+      {CHILDREN.length > 1 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>Öğrenci:</span>
+          {CHILDREN.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setSelectedChildId(c.id)}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "6px 14px", borderRadius: "var(--r-full)",
+                border: selectedChildId === c.id ? "none" : "1.5px solid var(--line)",
+                background: selectedChildId === c.id ? "linear-gradient(135deg,var(--accent-2),var(--accent))" : "var(--panel)",
+                color: selectedChildId === c.id ? "#fff" : "var(--ink-2)",
+                cursor: "pointer", fontSize: 13, fontWeight: 600,
+                boxShadow: selectedChildId === c.id ? "var(--glow-blue)" : "none",
+                transition: "all var(--t-fast)",
+              }}
+            >
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: c.avatarGrad, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
+                {c.initials}
+              </span>
+              {c.name}
+              <span style={{ opacity: 0.75 }}>{c.age} yaş</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Inactivity alert ── */}
+      {isInactive && (
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 12,
+          padding: "12px 16px", borderRadius: "var(--r-lg)",
+          background: "rgba(245,158,11,0.08)", border: "1.5px solid rgba(245,158,11,0.3)",
+        }}>
+          <div style={{ position: "relative", flexShrink: 0, marginTop: 2 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b", position: "relative", zIndex: 1 }} />
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#f59e0b", opacity: 0.4, animation: "guardPulse 1.5s infinite" }} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#92400e", margin: "0 0 2px" }}>
+              {child.name} {child.lastActiveDaysAgo} gündür giriş yapmadı
+            </p>
+            <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>
+              Eğitmenle iletişime geçebilirsiniz.
             </p>
           </div>
-        </header>
+          <button
+            onClick={() => setShowContactModal(true)}
+            style={{ fontSize: 12, fontWeight: 700, color: "#b45309", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", flexShrink: 0 }}
+          >
+            Eğitmene Yaz
+          </button>
+        </div>
+      )}
 
-        {/* ── 2. CHILD SELECTOR ───────────────────── */}
-        {CHILDREN.length > 1 && (
-          <section className="animate-fade-slide-up stagger-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Öğrenci:</span>
-              {CHILDREN.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedChildId(c.id)}
-                  className={`pill flex items-center gap-2 text-sm transition-all duration-200 ${
-                    selectedChildId === c.id
-                      ? "bg-violet-600 text-white border-violet-600 shadow-md scale-105"
-                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-violet-400"
-                  }`}
-                >
-                  <span
-                    className={`w-6 h-6 rounded-full bg-gradient-to-br ${c.avatarGrad} flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0`}
-                  >
-                    {c.initials}
-                  </span>
-                  {c.name}
-                  <span className="opacity-70">{c.age} yaş</span>
-                </button>
-              ))}
+      {/* ── Weekly stats ── */}
+      <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: "20px 20px 16px" }}>
+        <CardHead title="Haftalık Özet" sub="Son 7 gün" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12 }}>
+          {[
+            { label: "Tamamlanan Ders",  value: child.weeklyStats.lessonsCompleted, sub: "bu hafta",      grad: "linear-gradient(135deg,#5B6EFF,#9B59FF)", icon: "lesson"   },
+            { label: "Harcanan Süre",    value: `${child.weeklyStats.timeSpentHours}s`, sub: "aktif",     grad: "linear-gradient(135deg,#3b82f6,#06b6d4)",  icon: "clock"    },
+            { label: "Kazanılan XP",     value: child.weeklyStats.xpEarned,         sub: "XP puanı",     grad: "linear-gradient(135deg,#f59e0b,#f97316)",  icon: "star"     },
+            { label: "Seri",             value: `${child.weeklyStats.streak} gün`,   sub: "kesintisiz",  grad: "linear-gradient(135deg,#ef4444,#f97316)",  icon: "fire"     },
+          ].map((s) => {
+            const iconPaths: Record<string, JSX.Element> = {
+              lesson: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>,
+              clock: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+              star: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+              fire: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>,
+            };
+            return (
+              <div key={s.label} style={{ borderRadius: "var(--r-md)", padding: "14px 14px 12px", background: "color-mix(in srgb,var(--line) 30%,var(--panel))", border: "1px solid var(--line)" }}>
+                <div style={{ width: 32, height: 32, borderRadius: "var(--r-sm)", background: s.grad, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10, boxShadow: "0 4px 10px rgba(0,0,0,0.2)" }}>
+                  {iconPaths[s.icon]}
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1, marginBottom: 3 }}>{s.value}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-2)" }}>{s.label}</div>
+                <div style={{ fontSize: 10, color: "var(--muted)" }}>{s.sub}</div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ marginTop: 12, padding: "9px 14px", borderRadius: "var(--r-md)", background: "color-mix(in srgb,var(--accent-3) 8%,var(--panel))", border: "1px solid color-mix(in srgb,var(--accent-3) 25%,var(--line))", fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>
+          Bu hafta <strong>{child.weeklyStats.lessonsCompleted} ders</strong> tamamlandı —{" "}
+          <span style={{ color: "var(--accent-3)", fontWeight: 700 }}>harika ilerleme!</span>
+        </div>
+      </div>
+
+      {/* ── Progress + Courses ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "180px 1fr", gap: 16, alignItems: "start" }}>
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <div style={{ position: "relative" }}>
+            <DonutChart value={child.overallCompletion} size={120} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2 }}>
+              <span style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{child.overallCompletion}%</span>
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>tamamlandı</span>
             </div>
-          </section>
-        )}
+          </div>
+          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)", textAlign: "center" }}>Genel İlerleme</p>
+        </div>
 
-        {/* ── INACTIVITY ALERT BANNER ─────────────── */}
-        {isInactive && (
-          <div className="animate-fade-slide-up stagger-1 rounded-2xl border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
-            <span className="relative flex h-3 w-3 mt-0.5 flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
+          <CardHead title="Aktif Kurslar" sub={`${child.activeCourses.length} kurs`} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {child.activeCourses.map((c) => <CourseProgressBar key={c.title} course={c} />)}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Activity + XP Chart ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" }}>
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
+          <CardHead title="Son Aktiviteler" sub="Son 10 işlem" />
+          <div style={{ position: "relative" }}>
+            <div style={{ position: "absolute", left: 13, top: 0, bottom: 0, width: 1, background: "var(--line)" }} />
+            {child.activities.map((act, i) => (
+              <div
+                key={act.id}
+                style={{
+                  display: "flex", gap: 10, paddingBottom: i < child.activities.length - 1 ? 12 : 0, marginBottom: i < child.activities.length - 1 ? 12 : 0,
+                  borderBottom: i < child.activities.length - 1 ? "1px solid var(--line)" : "none",
+                  position: "relative", zIndex: 1,
+                }}
+              >
+                <ActivityIcon type={act.type} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.label}</p>
+                  <p style={{ fontSize: 11, color: "var(--muted)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.detail}</p>
+                </div>
+                <span style={{ fontSize: 10, color: "var(--muted)", flexShrink: 0, marginTop: 2, whiteSpace: "nowrap" }}>{act.timeAgo}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
+          <CardHead title="Haftalık XP Grafiği" sub="4 hafta" />
+          <div style={{ width: "100%", paddingTop: 4 }}>
+            <WeeklyBarChart data={child.weeklyXP} />
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 3, background: "linear-gradient(135deg,#f59e0b,#f97316)" }} />
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>Bu hafta (turuncu = aktif)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Teacher messages + Attendance ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 0.5fr", gap: 16, alignItems: "start" }}>
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
+          <CardHead title="Eğitmen Mesajları" sub="Son yorumlar" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {child.teacherMessages.map((msg) => (
+              <div
+                key={msg.id}
+                style={{
+                  display: "flex", gap: 12, padding: "12px 14px", borderRadius: "var(--r-md)",
+                  background: "color-mix(in srgb,var(--line) 20%,var(--panel))",
+                  border: "1px solid var(--line)",
+                }}
+              >
+                <div style={{
+                  width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                  background: `color-mix(in srgb,${msg.accent} 20%,var(--panel))`,
+                  border: `1.5px solid color-mix(in srgb,${msg.accent} 35%,var(--line))`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 11, fontWeight: 800, color: msg.accent,
+                }}>
+                  {msg.initials}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{msg.teacher}</span>
+                    <span style={{ fontSize: 10, color: "var(--muted)", flexShrink: 0 }}>{msg.time}</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "var(--ink-2)", margin: 0, lineHeight: 1.55 }}>{msg.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+          <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", margin: 0 }}>Devam</h2>
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>Bu ay</span>
+          </div>
+          <AttendanceRing days={child.attendanceDays} total={child.totalDays} size={100} />
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)", margin: "0 0 4px" }}>
+              {child.attendanceDays}/{child.totalDays} gün aktif
+            </p>
+            <p style={{ fontSize: 11, color: "var(--muted)", margin: "0 0 8px" }}>{child.totalDays - child.attendanceDays} gün eksik</p>
+            <span style={{
+              display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: "var(--r-full)",
+              background: attendPct >= 0.85 ? "rgba(34,197,94,0.12)" : attendPct >= 0.7 ? "rgba(245,158,11,0.12)" : "rgba(239,68,68,0.12)",
+              border: attendPct >= 0.85 ? "1px solid rgba(34,197,94,0.3)" : attendPct >= 0.7 ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(239,68,68,0.3)",
+              color: attendPct >= 0.85 ? "#22c55e" : attendPct >= 0.7 ? "#f59e0b" : "#ef4444",
+            }}>
+              {attendPct >= 0.85 ? "Mükemmel" : attendPct >= 0.7 ? "Orta" : "Düşük"}
             </span>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
-                {child.name} {child.lastActiveDaysAgo} gündür giriş yapmadı
-              </p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                Son aktivite {child.lastActiveDaysAgo} gün önce. Eğitmenle iletişime geçebilirsiniz.
-              </p>
-            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Contact instructor ── */}
+      <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
+          <div>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", margin: "0 0 4px" }}>Eğitmenle İletişime Geç</h2>
+            <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
+              {child.name} hakkında soru veya geri bildirim için eğitmene doğrudan yazın.
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <a
+              href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${child.name} hakkında`)}&body=${encodeURIComponent(`Merhaba,\n\n${child.name} ile ilgili görüşmek istiyorum.\n\nSaygılarımla,`)}`}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "9px 18px", borderRadius: "var(--r-md)",
+                background: "linear-gradient(135deg,var(--accent-2),var(--accent))",
+                color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none",
+                boxShadow: "var(--glow-blue)",
+              }}
+            >
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Eğitmene Yaz
+            </a>
             <button
               onClick={() => setShowContactModal(true)}
-              className="flex-shrink-0 text-xs font-semibold text-amber-700 dark:text-amber-300 underline hover:no-underline"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "9px 18px", borderRadius: "var(--r-md)",
+                border: "1.5px solid var(--line)", background: "var(--panel)",
+                color: "var(--ink-2)", fontSize: 13, fontWeight: 600, cursor: "pointer",
+              }}
             >
-              Eğitmene Yaz
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h4"/></svg>
+              Rapor İste
             </button>
           </div>
-        )}
-
-        {/* ── 3. WEEKLY SUMMARY CARD ──────────────── */}
-        <section className="animate-fade-slide-up stagger-2">
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Haftalık Özet
-              </h2>
-              <span className="pill text-xs">Son 7 gün</span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                {
-                  icon: "📚",
-                  value: child.weeklyStats.lessonsCompleted,
-                  label: "Tamamlanan Ders",
-                  sub: "bu hafta",
-                  grad: "from-violet-50 to-violet-100/50 border-violet-200 dark:from-violet-900/20 dark:border-violet-700",
-                  valColor: "text-violet-700 dark:text-violet-300",
-                },
-                {
-                  icon: "⏱️",
-                  value: `${child.weeklyStats.timeSpentHours}s`,
-                  label: "Harcanan Süre",
-                  sub: "aktif çalışma",
-                  grad: "from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-900/20 dark:border-blue-700",
-                  valColor: "text-blue-700 dark:text-blue-300",
-                },
-                {
-                  icon: "⭐",
-                  value: child.weeklyStats.xpEarned,
-                  label: "Kazanılan XP",
-                  sub: "deneyim puanı",
-                  grad: "from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:border-amber-700",
-                  valColor: "text-amber-700 dark:text-amber-300",
-                },
-                {
-                  icon: "🔥",
-                  value: `${child.weeklyStats.streak} gün`,
-                  label: "Seri",
-                  sub: "kesintisiz",
-                  grad: "from-rose-50 to-rose-100/50 border-rose-200 dark:from-rose-900/20 dark:border-rose-700",
-                  valColor: "text-rose-700 dark:text-rose-300",
-                },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className={`rounded-xl border p-4 bg-gradient-to-br ${stat.grad} flex flex-col gap-1`}
-                >
-                  <div className="text-xl">{stat.icon}</div>
-                  <div className={`metric text-2xl font-bold ${stat.valColor}`}>{stat.value}</div>
-                  <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{stat.label}</div>
-                  <div className="text-[10px] text-slate-400">{stat.sub}</div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 px-4 py-2 text-sm text-emerald-800 dark:text-emerald-200 font-medium">
-              Bu hafta{" "}
-              <span className="font-bold">{child.weeklyStats.lessonsCompleted} ders</span> tamamladı 🎉
-            </div>
-          </div>
-        </section>
-
-        {/* ── 4. PROGRESS OVERVIEW ────────────────── */}
-        <section className="animate-fade-slide-up stagger-2">
-          <div className="grid gap-4 lg:grid-cols-[200px_1fr]">
-            {/* Donut */}
-            <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col items-center justify-center gap-2">
-              <div className="relative">
-                <DonutChart value={child.overallCompletion} size={120} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
-                  <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {child.overallCompletion}%
-                  </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">tamamlandı</span>
-                </div>
-              </div>
-              <p className="text-xs text-center text-slate-600 dark:text-slate-400 font-medium">
-                Genel İlerleme
-              </p>
-            </div>
-
-            {/* Active courses */}
-            <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                  Aktif Kurslar
-                </h2>
-                <span className="pill text-xs">{child.activeCourses.length} kurs</span>
-              </div>
-              <div className="space-y-4">
-                {child.activeCourses.map((course) => (
-                  <CourseProgressBar key={course.title} course={course} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 5. ACTIVITY TIMELINE + 6. XP BAR CHART ─ */}
-        <div className="grid gap-4 lg:grid-cols-2 animate-fade-slide-up stagger-3">
-
-          {/* Activity Timeline */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Son Aktiviteler
-              </h2>
-              <span className="pill text-xs">Son 10 işlem</span>
-            </div>
-            <div className="space-y-0 relative">
-              <div className="absolute left-4 top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700" />
-              {child.activities.map((act, idx) => (
-                <div
-                  key={act.id}
-                  className={`relative flex gap-3 py-2 pl-2 ${
-                    idx < child.activities.length - 1
-                      ? "border-b border-slate-100 dark:border-slate-800"
-                      : ""
-                  }`}
-                >
-                  <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm flex-shrink-0 z-10">
-                    {act.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                      {act.label}
-                    </p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{act.detail}</p>
-                  </div>
-                  <span className="text-[10px] text-slate-400 flex-shrink-0 mt-0.5">{act.timeAgo}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 4-Week XP Bar Chart */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Haftalık XP Grafiği
-              </h2>
-              <span className="pill text-xs">4 hafta</span>
-            </div>
-            <div className="w-full px-2">
-              <WeeklyBarChart data={child.weeklyXP} />
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1">
-              <span className="w-3 h-3 rounded-sm bg-gradient-to-r from-amber-400 to-orange-400 inline-block" />
-              <span>Bu hafta (en yüksek: önceki haftaya göre)</span>
-            </div>
-          </div>
         </div>
-
-        {/* ── 7. TEACHER MESSAGES + 8. ATTENDANCE ─── */}
-        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr] animate-fade-slide-up stagger-4">
-
-          {/* Teacher Messages */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Eğitmen Mesajları
-              </h2>
-              <span className="pill text-xs">Son yorumlar</span>
-            </div>
-            <div className="space-y-3">
-              {child.teacherMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 p-3 flex gap-3"
-                >
-                  <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${msg.color}`}
-                  >
-                    {msg.initials}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                        {msg.teacher}
-                      </span>
-                      <span className="text-[10px] text-slate-400 flex-shrink-0">{msg.time}</span>
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {msg.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Attendance Rate */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col items-center gap-4">
-            <div className="flex items-center justify-between w-full">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Devam
-              </h2>
-              <span className="pill text-xs">Bu ay</span>
-            </div>
-            <AttendanceRing days={child.attendanceDays} total={child.totalDays} size={100} />
-            <div className="text-center space-y-1">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                {child.attendanceDays}/{child.totalDays} gün aktif
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {child.totalDays - child.attendanceDays} gün eksik
-              </p>
-              <div
-                className={`pill text-xs mt-1 ${
-                  child.attendanceDays / child.totalDays >= 0.85
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-300"
-                    : child.attendanceDays / child.totalDays >= 0.7
-                    ? "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300"
-                    : "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-700 dark:text-rose-300"
-                }`}
-              >
-                {child.attendanceDays / child.totalDays >= 0.85
-                  ? "Mükemmel"
-                  : child.attendanceDays / child.totalDays >= 0.7
-                  ? "Orta"
-                  : "Düşük"}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 10. CONTACT INSTRUCTOR ─────────────── */}
-        <section className="animate-fade-slide-up stagger-4">
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                  Eğitmenle İletişime Geç
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {child.name} hakkında soru veya geri bildirim paylaşmak için eğitmene doğrudan yazın.
-                </p>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <a
-                  href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(
-                    `${child.name} hakkında`
-                  )}&body=${encodeURIComponent(
-                    `Merhaba,\n\n${child.name} ile ilgili görüşmek istiyorum.\n\nSaygılarımla,`
-                  )}`}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity shadow-sm"
-                >
-                  ✉️ Eğitmene Yaz
-                </a>
-                <button
-                  onClick={() => setShowContactModal(true)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                  📋 Rapor İste
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── CONTACT MODAL ───────────────────────── */}
-        {showContactModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={() => setShowContactModal(false)}
-          >
-            <div
-              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-md shadow-xl space-y-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Rapor Talep Et
-                </h3>
-                <button
-                  onClick={() => setShowContactModal(false)}
-                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none"
-                >
-                  ✕
-                </button>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                {child.name} için detaylı performans raporu talebinde bulunabilirsiniz. Eğitmen 24 saat
-                içinde size geri dönecektir.
-              </p>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Rapor Türü
-                </label>
-                <select className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400">
-                  <option>Haftalık Özet</option>
-                  <option>Aylık Performans</option>
-                  <option>Ders Bazlı Analiz</option>
-                  <option>Devam Raporu</option>
-                </select>
-              </div>
-              <div className="flex gap-2">
-                <a
-                  href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(
-                    `${child.name} – Rapor Talebi`
-                  )}`}
-                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold py-2.5 hover:opacity-90 transition-opacity"
-                  onClick={() => setShowContactModal(false)}
-                >
-                  ✉️ Talep Gönder
-                </a>
-                <button
-                  onClick={() => setShowContactModal(false)}
-                  className="rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                >
-                  İptal
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
+
+      {/* ── Contact modal ── */}
+      {showContactModal && (
+        <div
+          onClick={() => setShowContactModal(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.65)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: 420, borderRadius: "var(--r-xl)",
+              background: "var(--panel)", border: "1.5px solid var(--line)",
+              boxShadow: "var(--shadow-lg)", padding: 26,
+              animation: "guardFadeIn 0.2s cubic-bezier(.2,.6,.3,1) both",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--ink)", margin: 0 }}>Rapor Talep Et</h3>
+              <button
+                onClick={() => setShowContactModal(false)}
+                style={{ width: 28, height: 28, borderRadius: "50%", border: "1px solid var(--line)", background: "var(--panel)", cursor: "pointer", color: "var(--muted)", display: "flex", alignItems: "center", justifyContent: "center" }}
+              >
+                <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <p style={{ fontSize: 13, color: "var(--ink-2)", marginBottom: 16, lineHeight: 1.6 }}>
+              {child.name} için detaylı performans raporu talebinde bulunabilirsiniz. Eğitmen 24 saat içinde geri dönecektir.
+            </p>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-2)", marginBottom: 7 }}>Rapor Türü</label>
+              <select
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-md)", border: "1.5px solid var(--line)", background: "color-mix(in srgb,var(--line) 20%,var(--panel))", color: "var(--ink)", fontSize: 14 }}
+              >
+                <option>Haftalık Özet</option>
+                <option>Aylık Performans</option>
+                <option>Ders Bazlı Analiz</option>
+                <option>Devam Raporu</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <a
+                href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${child.name} – ${reportType} Rapor Talebi`)}`}
+                onClick={() => setShowContactModal(false)}
+                style={{
+                  flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "10px", borderRadius: "var(--r-md)", textDecoration: "none",
+                  background: "linear-gradient(135deg,var(--accent-2),var(--accent))",
+                  color: "#fff", fontSize: 13, fontWeight: 700, boxShadow: "var(--glow-blue)",
+                }}
+              >
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Talep Gönder
+              </a>
+              <button
+                onClick={() => setShowContactModal(false)}
+                style={{ flex: 1, padding: "10px", borderRadius: "var(--r-md)", border: "1.5px solid var(--line)", background: "var(--panel)", color: "var(--ink-2)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+              >
+                İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PanelShell>
   );
 }

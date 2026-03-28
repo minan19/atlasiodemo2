@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { api } from "../api/client";
 import { PanelShell } from "../_components/panel-shell";
 
+/* ─────────────────────────────────────────────
+   NAV
+───────────────────────────────────────────── */
 const navSections = [
   {
     title: "Veli",
     items: [
-      { label: "Özet", href: "/guardian", icon: "🏠" },
+      { label: "Özet", href: "/guardian", icon: "👪" },
       { label: "Ödevler", href: "/leaderboard", icon: "📝" },
       { label: "Takvim", href: "/booking", icon: "🗓️" },
       { label: "Raporlar", href: "/report-cards", icon: "📈" },
@@ -24,644 +26,800 @@ const navSections = [
   },
 ];
 
-type Student = {
+/* ─────────────────────────────────────────────
+   TYPES
+───────────────────────────────────────────── */
+type Activity = {
+  id: string;
+  label: string;
+  detail: string;
+  timeAgo: string;
+  icon: string;
+};
+
+type Course = {
+  title: string;
+  progress: number;
+  color: string;
+};
+
+type WeeklyXP = {
+  week: string;
+  xp: number;
+};
+
+type TeacherMessage = {
+  id: string;
+  teacher: string;
+  initials: string;
+  text: string;
+  time: string;
+  color: string;
+};
+
+type Child = {
   id: string;
   name: string;
+  age: number;
   initials: string;
-  course: string;
-  progress: number;
-  attendance: number;
-  lastLogin: string;
-  risk: "Düşük" | "Orta" | "Yüksek";
-  subjects: { label: string; score: number }[];
+  avatarGrad: string;
+  instructorEmail: string;
+  lastActiveDaysAgo: number;
+  weeklyStats: {
+    lessonsCompleted: number;
+    timeSpentHours: number;
+    xpEarned: number;
+    streak: number;
+  };
+  overallCompletion: number;
+  activeCourses: Course[];
+  activities: Activity[];
+  weeklyXP: WeeklyXP[];
+  teacherMessages: TeacherMessage[];
+  attendanceDays: number;
+  totalDays: number;
 };
 
-const demoStudents: Student[] = [
+/* ─────────────────────────────────────────────
+   DEMO DATA
+───────────────────────────────────────────── */
+const CHILDREN: Child[] = [
   {
-    id: "demo1",
-    name: "Ece Kaplan",
-    initials: "EK",
-    course: "Python 101",
-    progress: 78,
-    attendance: 91,
-    lastLogin: "Bugün 14:22",
-    risk: "Düşük",
-    subjects: [
-      { label: "Algoritma", score: 85 },
-      { label: "Veri Yapıları", score: 72 },
-      { label: "Proje", score: 90 },
+    id: "ahmet",
+    name: "Ahmet",
+    age: 15,
+    initials: "AK",
+    avatarGrad: "from-violet-500 to-blue-500",
+    instructorEmail: "egitmen@atlasio.app",
+    lastActiveDaysAgo: 4,
+    weeklyStats: {
+      lessonsCompleted: 5,
+      timeSpentHours: 8.5,
+      xpEarned: 420,
+      streak: 3,
+    },
+    overallCompletion: 68,
+    activeCourses: [
+      { title: "React Temelleri", progress: 82, color: "from-blue-500 to-cyan-400" },
+      { title: "Matematik – Türev", progress: 55, color: "from-amber-500 to-orange-400" },
+      { title: "İngilizce B2", progress: 40, color: "from-emerald-500 to-teal-400" },
     ],
+    activities: [
+      { id: "a1", label: "React dersi izledi", detail: "Komponent Yaşam Döngüsü", timeAgo: "2 saat önce", icon: "🎬" },
+      { id: "a2", label: "Quiz tamamladı", detail: "Skor: 85/100", timeAgo: "dün", icon: "✅" },
+      { id: "a3", label: "Ödev teslim etti", detail: "Türev Alıştırmaları", timeAgo: "dün", icon: "📝" },
+      { id: "a4", label: "Canlı derse katıldı", detail: "İngilizce Konuşma Pratiği", timeAgo: "2 gün önce", icon: "🎤" },
+      { id: "a5", label: "Rozet kazandı", detail: "Haftalık Hedef Tamamlandı", timeAgo: "3 gün önce", icon: "🏅" },
+      { id: "a6", label: "Video izledi", detail: "Türev – Limit Kavramı", timeAgo: "3 gün önce", icon: "▶️" },
+      { id: "a7", label: "Alıştırma yaptı", detail: "React Hooks – 15 soruluk set", timeAgo: "4 gün önce", icon: "🧠" },
+      { id: "a8", label: "Okuma tamamladı", detail: "B2 Grammar – Conditionals", timeAgo: "4 gün önce", icon: "📖" },
+      { id: "a9", label: "Sınava girdi", detail: "Ünite Sonu Testi – Matematik", timeAgo: "5 gün önce", icon: "📋" },
+      { id: "a10", label: "Ders planı açtı", detail: "Yeni hafta müfredatını inceledi", timeAgo: "6 gün önce", icon: "🗓️" },
+    ],
+    weeklyXP: [
+      { week: "H-4", xp: 210 },
+      { week: "H-3", xp: 380 },
+      { week: "H-2", xp: 295 },
+      { week: "Bu Hafta", xp: 420 },
+    ],
+    teacherMessages: [
+      {
+        id: "tm1",
+        teacher: "Öğrt. Elif Kaya",
+        initials: "EK",
+        text: "Ahmet bu hafta React konusunda büyük ilerleme kaydetti. Ödev kalitesi oldukça yüksek.",
+        time: "Bugün 10:30",
+        color: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+      },
+      {
+        id: "tm2",
+        teacher: "Öğrt. Mert Demir",
+        initials: "MD",
+        text: "Türev konusunda biraz daha pratik yapması gerekiyor. Ek alıştırmalar gönderdim.",
+        time: "Dün 15:20",
+        color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+      },
+      {
+        id: "tm3",
+        teacher: "Öğrt. Sara Yıldız",
+        initials: "SY",
+        text: "İngilizce konuşma pratiğine daha fazla katılım sağlaması faydalı olacak.",
+        time: "3 gün önce",
+        color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+      },
+    ],
+    attendanceDays: 18,
+    totalDays: 22,
   },
   {
-    id: "demo2",
-    name: "Arda Demir",
-    initials: "AD",
-    course: "SAT Verbal",
-    progress: 52,
-    attendance: 67,
-    lastLogin: "Dün 19:05",
-    risk: "Orta",
-    subjects: [
-      { label: "Okuma", score: 58 },
-      { label: "Kelime", score: 47 },
-      { label: "Yazma", score: 61 },
+    id: "zeynep",
+    name: "Zeynep",
+    age: 12,
+    initials: "ZK",
+    avatarGrad: "from-pink-500 to-rose-500",
+    instructorEmail: "egitmen2@atlasio.app",
+    lastActiveDaysAgo: 1,
+    weeklyStats: {
+      lessonsCompleted: 7,
+      timeSpentHours: 6.0,
+      xpEarned: 310,
+      streak: 7,
+    },
+    overallCompletion: 74,
+    activeCourses: [
+      { title: "Fen Bilgisi 6. Sınıf", progress: 91, color: "from-emerald-500 to-green-400" },
+      { title: "Türkçe Kompozisyon", progress: 63, color: "from-pink-500 to-rose-400" },
+      { title: "Temel Matematik", progress: 78, color: "from-blue-500 to-indigo-400" },
     ],
+    activities: [
+      { id: "z1", label: "Video izledi", detail: "Fotosentez – Bitkiler", timeAgo: "1 saat önce", icon: "🌱" },
+      { id: "z2", label: "Quiz tamamladı", detail: "Skor: 92/100", timeAgo: "bugün sabah", icon: "✅" },
+      { id: "z3", label: "Ödev teslim etti", detail: "Kompozisyon – Mevsimler", timeAgo: "dün", icon: "📝" },
+      { id: "z4", label: "Canlı derse katıldı", detail: "Matematik – Kesirler", timeAgo: "dün", icon: "🎤" },
+      { id: "z5", label: "Rozet kazandı", detail: "7 Günlük Seri!", timeAgo: "2 gün önce", icon: "🏅" },
+      { id: "z6", label: "Okuma tamamladı", detail: "Fen – Hücre Yapısı", timeAgo: "2 gün önce", icon: "📖" },
+      { id: "z7", label: "Alıştırma yaptı", detail: "Kesirlerle Çarpma – 20 soru", timeAgo: "3 gün önce", icon: "🧠" },
+      { id: "z8", label: "Sınava girdi", detail: "Ünite Sonu – Fen Bilgisi", timeAgo: "4 gün önce", icon: "📋" },
+      { id: "z9", label: "Video izledi", detail: "Türkçe – Noktalama İşaretleri", timeAgo: "5 gün önce", icon: "🎬" },
+      { id: "z10", label: "Ders planı açtı", detail: "Haftalık müfredat güncellendi", timeAgo: "6 gün önce", icon: "🗓️" },
+    ],
+    weeklyXP: [
+      { week: "H-4", xp: 180 },
+      { week: "H-3", xp: 250 },
+      { week: "H-2", xp: 290 },
+      { week: "Bu Hafta", xp: 310 },
+    ],
+    teacherMessages: [
+      {
+        id: "tz1",
+        teacher: "Öğrt. Ayşe Çelik",
+        initials: "AÇ",
+        text: "Zeynep fen dersinde çok başarılı! Projesini erken teslim etti, harika iş.",
+        time: "Bugün 09:15",
+        color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+      },
+      {
+        id: "tz2",
+        teacher: "Öğrt. Burak Şahin",
+        initials: "BŞ",
+        text: "Matematik konusunda çok iyi ilerleme. Kesirler artık rahatça yapıyor.",
+        time: "2 gün önce",
+        color: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+      },
+    ],
+    attendanceDays: 21,
+    totalDays: 22,
   },
 ];
 
-type Alert = { title: string; detail: string; severity: "critical" | "warning" | "info" };
+/* ─────────────────────────────────────────────
+   HELPERS / SUB-COMPONENTS
+───────────────────────────────────────────── */
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
-const alerts: Alert[] = [
-  { title: "Katılım uyarısı", detail: "Arda son 2 canlıya katılmadı.", severity: "critical" },
-  { title: "Haftalık hedef", detail: "Ece haftalık hedefini %110 tamamladı.", severity: "info" },
-  { title: "Ödev hatırlatma", detail: "Perşembe 20:00'ye kadar teslim.", severity: "warning" },
-];
+function authFetcher(url: string) {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  return fetch(`${API_BASE}${url}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  }).then((r) => {
+    if (!r.ok) throw new Error(`${r.status}`);
+    return r.json();
+  });
+}
 
-type Message = { from: string; text: string; time: string };
-
-const inboxSeed: Message[] = [
-  { from: "Baş Eğitmen", text: "Yeni hedefler sisteme eklendi.", time: "Dün 18:10" },
-  { from: "Eğitmen Elif", text: "Ödev geri bildirimi hazır.", time: "Bugün 09:40" },
-];
-
-const weekDays = ["Pzt", "Sal", "Çrş", "Per", "Cum", "Cmt", "Paz"];
-const weekSchedule: Record<string, number[]> = {
-  demo1: [0, 2, 4],
-  demo2: [1, 3],
-};
-
-type ScheduleEntry = {
-  id: string;
-  startsAt: string;
-  Course?: { title: string } | null;
-};
-
-function ProgressRing({ value, size = 56 }: { value: number; size?: number }) {
-  const r = (size - 8) / 2;
+/* Donut SVG */
+function DonutChart({ value, size = 120 }: { value: number; size?: number }) {
+  const strokeWidth = 14;
+  const r = (size - strokeWidth) / 2;
   const circ = 2 * Math.PI * r;
   const offset = circ - (value / 100) * circ;
+  const cx = size / 2;
+  const cy = size / 2;
   return (
     <svg width={size} height={size} className="rotate-[-90deg]">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={4} className="text-slate-200 dark:text-slate-700" />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke="url(#ringGrad)"
-        strokeWidth={4}
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 0.6s ease" }}
-      />
       <defs>
-        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#10b981" />
+        <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#8b5cf6" />
           <stop offset="100%" stopColor="#3b82f6" />
         </linearGradient>
       </defs>
+      <circle
+        cx={cx} cy={cy} r={r}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={strokeWidth}
+        className="text-slate-200 dark:text-slate-700"
+      />
+      <circle
+        cx={cx} cy={cy} r={r}
+        fill="none"
+        stroke="url(#donutGrad)"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        style={{ transition: "stroke-dashoffset 0.8s ease" }}
+      />
     </svg>
   );
 }
 
-function RiskBadge({ risk }: { risk: Student["risk"] }) {
-  const map: Record<Student["risk"], string> = {
-    Düşük: "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-300",
-    Orta: "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300",
-    Yüksek: "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-700 dark:text-rose-300",
-  };
-  return <span className={`pill text-xs font-medium ${map[risk]}`}>{risk} risk</span>;
+/* Circular attendance progress */
+function AttendanceRing({
+  days,
+  total,
+  size = 96,
+}: {
+  days: number;
+  total: number;
+  size?: number;
+}) {
+  const pct = Math.round((days / total) * 100);
+  const sw = 10;
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  const cx = size / 2;
+  const cy = size / 2;
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        <defs>
+          <linearGradient id="attendGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#06b6d4" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx={cx} cy={cy} r={r}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={sw}
+          className="text-slate-200 dark:text-slate-700"
+        />
+        <circle
+          cx={cx} cy={cy} r={r}
+          fill="none"
+          stroke="url(#attendGrad)"
+          strokeWidth={sw}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.8s ease" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{pct}%</span>
+      </div>
+    </div>
+  );
 }
 
-function SparkBar({ score }: { score: number }) {
+/* 4-week bar chart (SVG) */
+function WeeklyBarChart({ data }: { data: WeeklyXP[] }) {
+  const maxXP = Math.max(...data.map((d) => d.xp), 1);
+  const chartH = 80;
+  const barW = 32;
+  const gap = 16;
+  const totalW = data.length * (barW + gap) - gap;
+
   return (
-    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-      <div className="h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 flex-1 overflow-hidden">
+    <svg
+      width="100%"
+      viewBox={`0 0 ${totalW + 8} ${chartH + 28}`}
+      preserveAspectRatio="xMidYMid meet"
+      className="overflow-visible"
+    >
+      <defs>
+        <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#8b5cf6" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+        <linearGradient id="barGradActive" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#f97316" />
+        </linearGradient>
+      </defs>
+      {data.map((d, i) => {
+        const barH = Math.max(6, (d.xp / maxXP) * chartH);
+        const x = i * (barW + gap);
+        const y = chartH - barH;
+        const isLast = i === data.length - 1;
+        return (
+          <g key={d.week}>
+            <rect
+              x={x}
+              y={y}
+              width={barW}
+              height={barH}
+              rx={6}
+              fill={isLast ? "url(#barGradActive)" : "url(#barGrad)"}
+              opacity={isLast ? 1 : 0.65}
+            />
+            <text
+              x={x + barW / 2}
+              y={y - 5}
+              textAnchor="middle"
+              fontSize={9}
+              fill="currentColor"
+              className="text-slate-600 dark:text-slate-400"
+            >
+              {d.xp}
+            </text>
+            <text
+              x={x + barW / 2}
+              y={chartH + 18}
+              textAnchor="middle"
+              fontSize={9}
+              fill="currentColor"
+              className="text-slate-500 dark:text-slate-400"
+            >
+              {d.week}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* Progress bar row */
+function CourseProgressBar({ course }: { course: Course }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className="text-slate-700 dark:text-slate-300 font-medium truncate pr-2">
+          {course.title}
+        </span>
+        <span className="text-slate-500 dark:text-slate-400 flex-shrink-0">{course.progress}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-blue-500 to-violet-500"
-          style={{ width: `${score}%` }}
+          className={`h-full rounded-full bg-gradient-to-r ${course.color}`}
+          style={{ width: `${course.progress}%`, transition: "width 0.8s ease" }}
         />
       </div>
-      <span className="w-7 text-right font-medium">{score}</span>
     </div>
   );
 }
 
-function StudentCard({ s }: { s: Student }) {
-  const [flipped, setFlipped] = useState(false);
-
-  return (
-    <div
-      className="relative cursor-pointer"
-      style={{ perspective: "900px", minHeight: 220 }}
-      onClick={() => setFlipped((f) => !f)}
-    >
-      <div
-        className="w-full h-full transition-transform duration-500"
-        style={{
-          transformStyle: "preserve-3d",
-          transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
-          minHeight: 220,
-        }}
-      >
-        {/* Front */}
-        <div
-          className="absolute inset-0 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 p-4 flex flex-col gap-3 backface-hidden"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="avatar w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                {s.initials}
-              </div>
-              <div>
-                <div className="font-semibold text-slate-900 dark:text-slate-100">{s.name}</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">{s.course}</div>
-              </div>
-            </div>
-            <RiskBadge risk={s.risk} />
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative flex items-center justify-center">
-              <ProgressRing value={s.progress} size={56} />
-              <span className="absolute text-xs font-bold text-slate-800 dark:text-slate-200 rotate-0" style={{ transform: "rotate(90deg) translateX(-50%)", position: "absolute", top: "50%", left: "50%", translate: "-50% -50%" }}>
-                {s.progress}%
-              </span>
-            </div>
-            <div className="flex-1 space-y-1.5 text-xs">
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Devam</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-200">{s.attendance}%</span>
-              </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Son giriş</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-200">{s.lastLogin}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2 text-xs mt-auto pt-1 border-t border-slate-100 dark:border-slate-700">
-            <button className="btn-link flex-1" onClick={(e) => e.stopPropagation()}>Karne</button>
-            <button className="btn-link flex-1" onClick={(e) => e.stopPropagation()}>Ödevler</button>
-            <button className="btn-link flex-1" onClick={(e) => e.stopPropagation()}>Mesaj</button>
-          </div>
-          <div className="text-center text-[10px] text-slate-400">Ders dağılımı için çevir</div>
-        </div>
-
-        {/* Back */}
-        <div
-          className="absolute inset-0 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 p-4 flex flex-col gap-3"
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="font-semibold text-slate-900 dark:text-slate-100">Ders Analizi</div>
-            <span className="tag text-xs">{s.name}</span>
-          </div>
-          <div className="space-y-2 flex-1">
-            {s.subjects.map((sub) => (
-              <div key={sub.label}>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-0.5">{sub.label}</div>
-                <SparkBar score={sub.score} />
-              </div>
-            ))}
-          </div>
-          <div className="text-center text-[10px] text-slate-400 mt-auto">Geri dönmek için tıkla</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+/* ─────────────────────────────────────────────
+   MAIN PAGE
+───────────────────────────────────────────── */
 export default function GuardianPage() {
-  const [weeklyLimit, setWeeklyLimit] = useState(6);
-  const [inbox, setInbox] = useState<Message[]>(inboxSeed);
-  const [message, setMessage] = useState("");
-  const [contentFilter, setContentFilter] = useState(true);
-  const [lateNotifs, setLateNotifs] = useState(false);
-  const [weeklyReport, setWeeklyReport] = useState(true);
+  const [selectedChildId, setSelectedChildId] = useState<string>(CHILDREN[0].id);
+  const [showContactModal, setShowContactModal] = useState(false);
 
-  const { data: schedule, isLoading: scheduleLoading } = useSWR<ScheduleEntry[]>(
-    "/me/schedule",
-    api,
-    { revalidateOnFocus: false }
+  const child = CHILDREN.find((c) => c.id === selectedChildId) ?? CHILDREN[0];
+
+  /* API call – guardian summary (graceful fallback) */
+  const { data: _apiData } = useSWR<unknown>(
+    `/guardian/summary?childId=${child.id}`,
+    authFetcher,
+    { revalidateOnFocus: false, shouldRetryOnError: false }
   );
 
-  const upcoming = schedule
-    ? schedule.slice(0, 4).map((s) => ({
-        id: s.id,
-        time:
-          new Date(s.startsAt).toLocaleDateString("tr-TR", { weekday: "short" }) +
-          " " +
-          new Date(s.startsAt).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }),
-        title: s.Course?.title ?? "Ders",
-        teacher: "—",
-      }))
-    : null;
-
-  const avgAttendance = Math.round(
-    demoStudents.reduce((acc, s) => acc + s.attendance, 0) / demoStudents.length
-  );
-  const avgScore = Math.round(
-    demoStudents.reduce((acc, s) => acc + s.progress, 0) / demoStudents.length
-  );
-  const thisWeekSessions = Object.values(weekSchedule).flat().length;
-
-  const alertColorMap: Record<Alert["severity"], string> = {
-    critical: "border-l-4 border-rose-500 bg-rose-50/60 dark:bg-rose-900/20",
-    warning: "border-l-4 border-amber-400 bg-amber-50/60 dark:bg-amber-900/20",
-    info: "border-l-4 border-emerald-400 bg-emerald-50/60 dark:bg-emerald-900/20",
-  };
-  const alertBadgeMap: Record<Alert["severity"], string> = {
-    critical: "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-300",
-    warning: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-300",
-    info: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300",
-  };
-  const alertLabelMap: Record<Alert["severity"], string> = {
-    critical: "Kritik",
-    warning: "Uyarı",
-    info: "Bilgi",
-  };
-
-  const inboxInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+  const isInactive = child.lastActiveDaysAgo >= 3;
 
   return (
     <PanelShell
       roleLabel="Veli Paneli"
       userName="Aile Merkezi"
-      userSub="İlerleme ve iletişim"
+      userSub="Öğrencinizin gelişimini takip edin"
       navSections={navSections}
     >
       <div className="space-y-6">
-        {/* Hero */}
-        <header className="glass p-6 rounded-2xl border border-slate-200 dark:border-slate-700 hero">
-          <div className="space-y-2">
-            <div className="pill w-fit">Veli Paneli</div>
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100">
-              Çocuğunun eğitim yolculuğu burada
+
+        {/* ── 1. HERO ─────────────────────────────── */}
+        <header className="glass hero rounded-2xl border border-slate-200 dark:border-slate-700 p-6 animate-fade-slide-up">
+          <div className="hero-content space-y-2">
+            <div className="pill w-fit text-xs">👪 Veli Paneli</div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Öğrencinizin gelişimini takip edin
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-2xl">
-              Katılım, ilerleme ve destek ihtiyaçlarını tek ekranda gör. Şeffaf rapor, güvenli
-              iletişim, net plan.
+              İlerleme, devam ve eğitmen iletişimini tek ekranda görün. Şeffaf raporlama, net plan.
             </p>
           </div>
         </header>
 
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {(
-            [
-              { label: "Toplam Ders", value: "24", sub: "bu ay", icon: "📚", gradient: "bg-gradient-to-br from-violet-50 to-violet-100/50 border-violet-200 dark:from-violet-900/20 dark:to-violet-800/10 dark:border-violet-700" },
-              { label: "Devam %", value: `${avgAttendance}%`, sub: "ortalama", icon: "✅", gradient: "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/10 dark:border-emerald-700" },
-              { label: "Ortalama Puan", value: `${avgScore}`, sub: "/ 100", icon: "⭐", gradient: "bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700" },
-              { label: "Bu Hafta", value: `${thisWeekSessions}`, sub: "oturum planlandı", icon: "🗓️", gradient: "bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200 dark:from-rose-900/20 dark:to-rose-800/10 dark:border-rose-700" },
-            ] as const
-          ).map((stat) => (
-            <div
-              key={stat.label}
-              className={`rounded-2xl border p-4 flex flex-col gap-1 ${stat.gradient}`}
-            >
-              <div className="text-xl">{stat.icon}</div>
-              <div className="metric text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {stat.value}
-              </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">{stat.label}</div>
-              <div className="text-[10px] text-slate-400">{stat.sub}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Student Cards + Weekly Schedule */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Öğrenci Kartları
-              </h2>
-              <span className="pill text-xs">Çevir →</span>
-            </div>
-            <div className="grid gap-4">
-              {demoStudents.map((s) => (
-                <StudentCard key={s.id} s={s} />
-              ))}
-            </div>
-          </div>
-
-          {/* Weekly Schedule */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Haftalık Takvim
-              </h2>
-              <span className="pill text-xs">Bu hafta</span>
-            </div>
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((d) => (
-                <div key={d} className="text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 pb-1">
-                  {d}
-                </div>
-              ))}
-              {weekDays.map((_, dayIdx) => {
-                const ece = weekSchedule.demo1.includes(dayIdx);
-                const arda = weekSchedule.demo2.includes(dayIdx);
-                return (
-                  <div
-                    key={dayIdx}
-                    className={`rounded-lg min-h-[52px] p-1 border text-[10px] space-y-0.5 ${
-                      ece || arda
-                        ? "border-slate-300 dark:border-slate-600 bg-white/70 dark:bg-slate-800/70"
-                        : "border-slate-100 dark:border-slate-800 bg-slate-50/40 dark:bg-slate-900/20"
-                    }`}
-                  >
-                    {ece && (
-                      <div className="rounded px-1 py-0.5 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 leading-tight">
-                        Ece
-                      </div>
-                    )}
-                    {arda && (
-                      <div className="rounded px-1 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 leading-tight">
-                        Arda
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-3 text-xs">
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-sm bg-violet-400 inline-block" /> Ece
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-sm bg-amber-400 inline-block" /> Arda
-              </span>
-            </div>
-
-            {/* Upcoming from API */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-700">
-              <div className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Yaklaşan Dersler</div>
-              <div className="space-y-1.5">
-                {scheduleLoading
-                  ? Array.from({ length: 2 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/60 p-2 animate-pulse flex items-center justify-between"
-                      >
-                        <div className="space-y-1">
-                          <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
-                          <div className="h-2 w-16 bg-slate-100 dark:bg-slate-700 rounded" />
-                        </div>
-                        <div className="h-6 w-14 bg-slate-100 dark:bg-slate-700 rounded-xl" />
-                      </div>
-                    ))
-                  : !upcoming || upcoming.length === 0
-                  ? (
-                      <div className="text-xs text-slate-500 dark:text-slate-400 py-2 text-center">
-                        Yaklaşan ders bulunamadı.
-                      </div>
-                    )
-                  : upcoming.map((u) => (
-                      <div
-                        key={u.id}
-                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 px-3 py-2 flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{u.title}</div>
-                          <div className="text-[10px] text-slate-500 dark:text-slate-400">{u.time}</div>
-                        </div>
-                        <button className="btn-link text-xs">Hatırlat</button>
-                      </div>
-                    ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Alerts */}
-        <section className="glass p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-              Uyarılar & Bildirimler
-            </h2>
-            <span className="pill text-xs">Gerçek zamanlı</span>
-          </div>
-          <div className="space-y-2">
-            {alerts.map((a) => (
-              <div
-                key={a.title}
-                className={`rounded-xl p-3 flex items-start justify-between gap-3 hover:brightness-95 transition-colors ${alertColorMap[a.severity]}`}
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    {a.severity === "critical" && (
-                      <span className="relative flex h-2 w-2 flex-shrink-0 mt-0.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
-                      </span>
-                    )}
-                    <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{a.title}</div>
-                  </div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">{a.detail}</div>
-                </div>
-                <span className={`pill text-xs flex-shrink-0 ${alertBadgeMap[a.severity]}`}>
-                  {alertLabelMap[a.severity]}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Billing + Safety */}
-        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* Billing */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Finans & Abonelik
-              </h2>
-              <span className="pill text-xs">Güvenli ödeme</span>
-            </div>
-            <div className="rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 p-4 text-white space-y-1">
-              <div className="text-xs font-semibold opacity-80 uppercase tracking-wider">Aktif Plan</div>
-              <div className="text-xl font-bold">Kurumsal Plus</div>
-              <div className="text-xs opacity-80">•••• 4242 · Otomatik yenileme açık</div>
-            </div>
-            <div>
-              <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
-                <span>Aylık kullanım</span>
-                <span className="font-semibold">24 / 30 oturum</span>
-              </div>
-              <div className="h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500"
-                  style={{ width: "80%" }}
-                />
-              </div>
-            </div>
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 p-3 flex items-center justify-between">
-              <div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">Sonraki ödeme</div>
-                <div className="font-semibold text-slate-800 dark:text-slate-200">₺1.280 · 12 Nisan 2026</div>
-              </div>
-              <div className="tag text-xs">27 gün kaldı</div>
-            </div>
-            <div className="flex gap-2 text-xs">
-              <button className="btn-link flex-1">Ödeme Yap</button>
-              <button className="btn-link flex-1">Faturalar</button>
-              <button className="btn-link flex-1">Paket Değiştir</button>
-            </div>
-          </div>
-
-          {/* Safety Controls */}
-          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-                Güvenlik & Limitler
-              </h2>
-              <span className="pill text-xs">Kontrollü</span>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-sm text-slate-700 dark:text-slate-300 mb-2">
-                <span>Haftalık maks. ders</span>
-                <span className="font-bold text-violet-600 dark:text-violet-400">{weeklyLimit}</span>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={12}
-                value={weeklyLimit}
-                onChange={(e) => setWeeklyLimit(Number(e.target.value))}
-                className="w-full accent-violet-600"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
-                <span>1</span><span>12</span>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {(
-                [
-                  { label: "İçerik Filtresi", sub: "Uygunsuz içerikleri engelle", val: contentFilter, fn: setContentFilter },
-                  { label: "Gece Bildirimleri", sub: "22:00 sonrası bildirim gönder", val: lateNotifs, fn: setLateNotifs },
-                  { label: "Haftalık Rapor", sub: "Her Pazartesi e-posta özeti", val: weeklyReport, fn: setWeeklyReport },
-                ] as const
-              ).map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 px-3 py-2"
+        {/* ── 2. CHILD SELECTOR ───────────────────── */}
+        {CHILDREN.length > 1 && (
+          <section className="animate-fade-slide-up stagger-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">Öğrenci:</span>
+              {CHILDREN.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedChildId(c.id)}
+                  className={`pill flex items-center gap-2 text-sm transition-all duration-200 ${
+                    selectedChildId === c.id
+                      ? "bg-violet-600 text-white border-violet-600 shadow-md scale-105"
+                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-600 hover:border-violet-400"
+                  }`}
                 >
-                  <div>
-                    <div className="text-xs font-semibold text-slate-800 dark:text-slate-200">{item.label}</div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400">{item.sub}</div>
-                  </div>
-                  <button
-                    onClick={() => item.fn(!item.val)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${
-                      item.val ? "bg-violet-600" : "bg-slate-300 dark:bg-slate-600"
-                    }`}
-                    role="switch"
-                    aria-checked={item.val}
+                  <span
+                    className={`w-6 h-6 rounded-full bg-gradient-to-br ${c.avatarGrad} flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0`}
                   >
-                    <span
-                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-                        item.val ? "translate-x-4.5" : "translate-x-0.5"
-                      }`}
-                    />
-                  </button>
-                </div>
+                    {c.initials}
+                  </span>
+                  {c.name}
+                  <span className="opacity-70">{c.age} yaş</span>
+                </button>
               ))}
             </div>
-          </div>
-        </div>
+          </section>
+        )}
 
-        {/* Inbox */}
-        <section className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-              Gelen Kutusu
-            </h2>
-            <span className="pill text-xs">Resmî iletişim</span>
-          </div>
-          <div className="space-y-2">
-            {inbox.map((msg, i) => {
-              const isSelf = msg.from === "Siz";
-              return (
-                <div
-                  key={`${msg.from}-${i}`}
-                  className={`flex gap-3 ${isSelf ? "flex-row-reverse" : ""}`}
-                >
-                  <div
-                    className={`avatar w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      isSelf
-                        ? "bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
-                    }`}
-                  >
-                    {inboxInitials(msg.from)}
-                  </div>
-                  <div className={`flex-1 ${isSelf ? "items-end" : "items-start"} flex flex-col`}>
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">{msg.from}</span>
-                      <span className="text-[10px] text-slate-400">{msg.time}</span>
-                    </div>
-                    <div
-                      className={`rounded-xl px-3 py-2 text-sm max-w-xs ${
-                        isSelf
-                          ? "bg-violet-600 text-white"
-                          : "bg-white/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      {msg.text}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="flex gap-2 pt-1 border-t border-slate-100 dark:border-slate-700">
-            <input
-              className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/60 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
-              placeholder="Eğitmene mesaj yaz..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (!message.trim()) return;
-                  setInbox((prev) => [
-                    { from: "Siz", text: message.trim(), time: "Şimdi" },
-                    ...prev,
-                  ]);
-                  setMessage("");
-                }
-              }}
-            />
+        {/* ── INACTIVITY ALERT BANNER ─────────────── */}
+        {isInactive && (
+          <div className="animate-fade-slide-up stagger-1 rounded-2xl border border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 p-4 flex items-start gap-3">
+            <span className="relative flex h-3 w-3 mt-0.5 flex-shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                {child.name} {child.lastActiveDaysAgo} gündür giriş yapmadı
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Son aktivite {child.lastActiveDaysAgo} gün önce. Eğitmenle iletişime geçebilirsiniz.
+              </p>
+            </div>
             <button
-              className="btn-link px-4"
-              onClick={() => {
-                if (!message.trim()) return;
-                setInbox((prev) => [
-                  { from: "Siz", text: message.trim(), time: "Şimdi" },
-                  ...prev,
-                ]);
-                setMessage("");
-              }}
+              onClick={() => setShowContactModal(true)}
+              className="flex-shrink-0 text-xs font-semibold text-amber-700 dark:text-amber-300 underline hover:no-underline"
             >
-              Gönder
+              Eğitmene Yaz
             </button>
           </div>
+        )}
+
+        {/* ── 3. WEEKLY SUMMARY CARD ──────────────── */}
+        <section className="animate-fade-slide-up stagger-2">
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                Haftalık Özet
+              </h2>
+              <span className="pill text-xs">Son 7 gün</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                {
+                  icon: "📚",
+                  value: child.weeklyStats.lessonsCompleted,
+                  label: "Tamamlanan Ders",
+                  sub: "bu hafta",
+                  grad: "from-violet-50 to-violet-100/50 border-violet-200 dark:from-violet-900/20 dark:border-violet-700",
+                  valColor: "text-violet-700 dark:text-violet-300",
+                },
+                {
+                  icon: "⏱️",
+                  value: `${child.weeklyStats.timeSpentHours}s`,
+                  label: "Harcanan Süre",
+                  sub: "aktif çalışma",
+                  grad: "from-blue-50 to-blue-100/50 border-blue-200 dark:from-blue-900/20 dark:border-blue-700",
+                  valColor: "text-blue-700 dark:text-blue-300",
+                },
+                {
+                  icon: "⭐",
+                  value: child.weeklyStats.xpEarned,
+                  label: "Kazanılan XP",
+                  sub: "deneyim puanı",
+                  grad: "from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:border-amber-700",
+                  valColor: "text-amber-700 dark:text-amber-300",
+                },
+                {
+                  icon: "🔥",
+                  value: `${child.weeklyStats.streak} gün`,
+                  label: "Seri",
+                  sub: "kesintisiz",
+                  grad: "from-rose-50 to-rose-100/50 border-rose-200 dark:from-rose-900/20 dark:border-rose-700",
+                  valColor: "text-rose-700 dark:text-rose-300",
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className={`rounded-xl border p-4 bg-gradient-to-br ${stat.grad} flex flex-col gap-1`}
+                >
+                  <div className="text-xl">{stat.icon}</div>
+                  <div className={`metric text-2xl font-bold ${stat.valColor}`}>{stat.value}</div>
+                  <div className="text-xs font-medium text-slate-700 dark:text-slate-300">{stat.label}</div>
+                  <div className="text-[10px] text-slate-400">{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 px-4 py-2 text-sm text-emerald-800 dark:text-emerald-200 font-medium">
+              Bu hafta{" "}
+              <span className="font-bold">{child.weeklyStats.lessonsCompleted} ders</span> tamamladı 🎉
+            </div>
+          </div>
         </section>
+
+        {/* ── 4. PROGRESS OVERVIEW ────────────────── */}
+        <section className="animate-fade-slide-up stagger-2">
+          <div className="grid gap-4 lg:grid-cols-[200px_1fr]">
+            {/* Donut */}
+            <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col items-center justify-center gap-2">
+              <div className="relative">
+                <DonutChart value={child.overallCompletion} size={120} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
+                  <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                    {child.overallCompletion}%
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">tamamlandı</span>
+                </div>
+              </div>
+              <p className="text-xs text-center text-slate-600 dark:text-slate-400 font-medium">
+                Genel İlerleme
+              </p>
+            </div>
+
+            {/* Active courses */}
+            <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                  Aktif Kurslar
+                </h2>
+                <span className="pill text-xs">{child.activeCourses.length} kurs</span>
+              </div>
+              <div className="space-y-4">
+                {child.activeCourses.map((course) => (
+                  <CourseProgressBar key={course.title} course={course} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 5. ACTIVITY TIMELINE + 6. XP BAR CHART ─ */}
+        <div className="grid gap-4 lg:grid-cols-2 animate-fade-slide-up stagger-3">
+
+          {/* Activity Timeline */}
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                Son Aktiviteler
+              </h2>
+              <span className="pill text-xs">Son 10 işlem</span>
+            </div>
+            <div className="space-y-0 relative">
+              <div className="absolute left-4 top-2 bottom-2 w-px bg-slate-200 dark:bg-slate-700" />
+              {child.activities.map((act, idx) => (
+                <div
+                  key={act.id}
+                  className={`relative flex gap-3 py-2 pl-2 ${
+                    idx < child.activities.length - 1
+                      ? "border-b border-slate-100 dark:border-slate-800"
+                      : ""
+                  }`}
+                >
+                  <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-sm flex-shrink-0 z-10">
+                    {act.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      {act.label}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{act.detail}</p>
+                  </div>
+                  <span className="text-[10px] text-slate-400 flex-shrink-0 mt-0.5">{act.timeAgo}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 4-Week XP Bar Chart */}
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                Haftalık XP Grafiği
+              </h2>
+              <span className="pill text-xs">4 hafta</span>
+            </div>
+            <div className="w-full px-2">
+              <WeeklyBarChart data={child.weeklyXP} />
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1">
+              <span className="w-3 h-3 rounded-sm bg-gradient-to-r from-amber-400 to-orange-400 inline-block" />
+              <span>Bu hafta (en yüksek: önceki haftaya göre)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 7. TEACHER MESSAGES + 8. ATTENDANCE ─── */}
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_0.6fr] animate-fade-slide-up stagger-4">
+
+          {/* Teacher Messages */}
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                Eğitmen Mesajları
+              </h2>
+              <span className="pill text-xs">Son yorumlar</span>
+            </div>
+            <div className="space-y-3">
+              {child.teacherMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/60 p-3 flex gap-3"
+                >
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${msg.color}`}
+                  >
+                    {msg.initials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
+                        {msg.teacher}
+                      </span>
+                      <span className="text-[10px] text-slate-400 flex-shrink-0">{msg.time}</span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {msg.text}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Attendance Rate */}
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5 flex flex-col items-center gap-4">
+            <div className="flex items-center justify-between w-full">
+              <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                Devam
+              </h2>
+              <span className="pill text-xs">Bu ay</span>
+            </div>
+            <AttendanceRing days={child.attendanceDays} total={child.totalDays} size={100} />
+            <div className="text-center space-y-1">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                {child.attendanceDays}/{child.totalDays} gün aktif
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {child.totalDays - child.attendanceDays} gün eksik
+              </p>
+              <div
+                className={`pill text-xs mt-1 ${
+                  child.attendanceDays / child.totalDays >= 0.85
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-700 dark:text-emerald-300"
+                    : child.attendanceDays / child.totalDays >= 0.7
+                    ? "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300"
+                    : "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/30 dark:border-rose-700 dark:text-rose-300"
+                }`}
+              >
+                {child.attendanceDays / child.totalDays >= 0.85
+                  ? "Mükemmel"
+                  : child.attendanceDays / child.totalDays >= 0.7
+                  ? "Orta"
+                  : "Düşük"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 10. CONTACT INSTRUCTOR ─────────────── */}
+        <section className="animate-fade-slide-up stagger-4">
+          <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-1">
+                <h2 className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
+                  Eğitmenle İletişime Geç
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {child.name} hakkında soru veya geri bildirim paylaşmak için eğitmene doğrudan yazın.
+                </p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <a
+                  href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(
+                    `${child.name} hakkında`
+                  )}&body=${encodeURIComponent(
+                    `Merhaba,\n\n${child.name} ile ilgili görüşmek istiyorum.\n\nSaygılarımla,`
+                  )}`}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold px-4 py-2.5 hover:opacity-90 transition-opacity shadow-sm"
+                >
+                  ✉️ Eğitmene Yaz
+                </a>
+                <button
+                  onClick={() => setShowContactModal(true)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  📋 Rapor İste
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── CONTACT MODAL ───────────────────────── */}
+        {showContactModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowContactModal(false)}
+          >
+            <div
+              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-md shadow-xl space-y-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  Rapor Talep Et
+                </h3>
+                <button
+                  onClick={() => setShowContactModal(false)}
+                  className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xl leading-none"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {child.name} için detaylı performans raporu talebinde bulunabilirsiniz. Eğitmen 24 saat
+                içinde size geri dönecektir.
+              </p>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  Rapor Türü
+                </label>
+                <select className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400">
+                  <option>Haftalık Özet</option>
+                  <option>Aylık Performans</option>
+                  <option>Ders Bazlı Analiz</option>
+                  <option>Devam Raporu</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(
+                    `${child.name} – Rapor Talebi`
+                  )}`}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white text-sm font-semibold py-2.5 hover:opacity-90 transition-opacity"
+                  onClick={() => setShowContactModal(false)}
+                >
+                  ✉️ Talep Gönder
+                </a>
+                <button
+                  onClick={() => setShowContactModal(false)}
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-sm px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </PanelShell>
   );

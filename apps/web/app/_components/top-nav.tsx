@@ -124,7 +124,7 @@ export function TopNav() {
             aria-label={t.nav.roleLabel}
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="rounded-lg border border-slate-300 bg-white/90 text-slate-800 px-2 py-1 text-xs shadow-sm"
+            className="nav-select"
           >
             <option value="admin">Yönetici</option>
             <option value="head-instructor">Baş Eğitmen</option>
@@ -136,7 +136,7 @@ export function TopNav() {
             aria-label={t.nav.langLabel}
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white/90 text-slate-800 px-2 py-1 text-xs shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            className="nav-select"
           >
             <option value="tr">TR</option>
             <option value="en">EN</option>
@@ -207,10 +207,7 @@ export function TopNav() {
               )}
               {/* Admin paneli linki */}
               {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="btn-link text-xs bg-purple-600 text-white border-purple-600 hover:bg-purple-700"
-                >
+                <Link href="/admin" className="nav-admin-btn">
                   Admin
                 </Link>
               )}
@@ -226,7 +223,7 @@ export function TopNav() {
               </Link>
             </>
           ) : (
-            <Link href="/login" className="btn-link text-xs bg-slate-900 text-white border-slate-900 hover:bg-slate-800">{t.nav.login}</Link>
+            <Link href="/login" className="nav-login-btn">{t.nav.login}</Link>
           )}
         </div>
       </div>

@@ -3,6 +3,70 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
+   ORBIT DARK OVERRIDES — forces all legacy Tailwind light-mode
+   colors into the new dark palette. No page files need editing.
+═══════════════════════════════════════════════════════════════ */
+
+/* White / light backgrounds → dark card */
+.bg-white          { background-color: var(--card) !important; }
+.bg-gray-50,
+.bg-slate-50       { background-color: var(--card-2) !important; }
+.bg-gray-100,
+.bg-slate-100      { background-color: var(--card-2) !important; }
+.bg-gray-200,
+.bg-slate-200      { background-color: rgba(255,255,255,0.06) !important; }
+.bg-white\/90      { background-color: color-mix(in srgb, var(--card) 90%, transparent) !important; }
+.bg-white\/80      { background-color: color-mix(in srgb, var(--card) 80%, transparent) !important; }
+.bg-white\/10      { background-color: rgba(255,255,255,0.06) !important; }
+.bg-white\/5       { background-color: rgba(255,255,255,0.03) !important; }
+.bg-white\/20      { background-color: rgba(255,255,255,0.08) !important; }
+
+/* Slate text → ink vars */
+.text-slate-900,
+.text-gray-900     { color: var(--ink) !important; }
+.text-slate-800,
+.text-gray-800     { color: var(--ink) !important; }
+.text-slate-700,
+.text-gray-700     { color: var(--ink) !important; }
+.text-slate-600,
+.text-gray-600     { color: var(--ink-2) !important; }
+.text-slate-500,
+.text-gray-500     { color: var(--ink-2) !important; }
+.text-slate-400,
+.text-gray-400     { color: var(--muted) !important; }
+.text-slate-300,
+.text-gray-300     { color: var(--muted) !important; }
+
+/* Borders */
+.border-slate-100  { border-color: var(--line-2) !important; }
+.border-slate-200  { border-color: var(--line) !important; }
+.border-slate-300  { border-color: var(--line) !important; }
+.border-gray-200   { border-color: var(--line) !important; }
+.border-white\/10  { border-color: var(--line) !important; }
+.border-white\/5   { border-color: var(--line-2) !important; }
+
+/* Dark slate bg → slightly lighter dark */
+.bg-slate-900      { background-color: var(--bg-2) !important; }
+.bg-slate-800      { background-color: var(--surface) !important; }
+.bg-slate-700      { background-color: var(--card) !important; }
+
+/* Hover variants */
+.hover\:bg-white\/20:hover { background-color: rgba(255,255,255,0.08) !important; }
+.hover\:bg-slate-50:hover  { background-color: var(--card-2) !important; }
+.hover\:bg-slate-100:hover { background-color: var(--card-2) !important; }
+.hover\:bg-gray-50:hover   { background-color: var(--card-2) !important; }
+
+/* Input / select backgrounds */
+.bg-slate-950      { background-color: var(--bg) !important; }
+input.bg-slate-800,
+select.bg-slate-800,
+textarea.bg-slate-800 { background-color: var(--card-2) !important; }
+
+/* Divide lines */
+.divide-slate-200 > * + * { border-color: var(--line) !important; }
+.divide-white\/10 > * + * { border-color: var(--line) !important; }
+
+/* ═══════════════════════════════════════════════════════════════
    ATLASIO — ORBIT DESIGN SYSTEM  v2.0
    Designed by Claude · Orbit aesthetic · Always dark-first
    Single source of truth for all visual tokens

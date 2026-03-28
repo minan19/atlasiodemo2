@@ -353,7 +353,14 @@ export default function AiSafetyPage() {
   }, [modelId]);
 
   /* ── Derived stats ── */
-  const s = stats ?? DEMO_STATS;
+  const raw = stats ?? DEMO_STATS;
+  const s: SafetyStats = {
+    totalChecks: raw?.totalChecks ?? DEMO_STATS.totalChecks,
+    flagged:     raw?.flagged     ?? DEMO_STATS.flagged,
+    blocked:     raw?.blocked     ?? DEMO_STATS.blocked,
+    piiMasked:   raw?.piiMasked   ?? DEMO_STATS.piiMasked,
+    safeRate:    raw?.safeRate    ?? DEMO_STATS.safeRate,
+  };
 
   const safeRateColor =
     s.safeRate >= 95

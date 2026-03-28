@@ -420,7 +420,7 @@ export class WhiteboardService {
         sessionId,
         type: 'AI_ASSIST',
         layerId: 'default',
-        payload: { prompt, context, suggestion: result.suggestion, actions: result.actions } as Prisma.InputJsonValue,
+        payload: { prompt, context, suggestion: result.suggestion, actions: result.actions } as unknown as Prisma.InputJsonValue,
         userId,
       },
     });

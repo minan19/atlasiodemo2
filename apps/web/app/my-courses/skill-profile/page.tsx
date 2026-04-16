@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "../../_i18n/use-i18n";
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -35,6 +36,7 @@ const MASTERY_LABELS = (m: number) =>
   m >= 0.8 ? "Uzman" : m >= 0.5 ? "Gelişiyor" : "Zayıf";
 
 export default function SkillProfilePage() {
+  const t = useI18n();
   const [stats, setStats] = useState<TopicStat[]>([]);
   const [masteries, setMasteries] = useState<ConceptMastery[]>([]);
   const [recs, setRecs] = useState<AIRecommendation[]>([]);
@@ -52,8 +54,8 @@ export default function SkillProfilePage() {
   }, []);
 
   function authHeaders(): HeadersInit {
-    const t = getToken();
-    return t ? { Authorization: `Bearer ${t}` } : {};
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   async function generateAIInsights() {
@@ -111,27 +113,27 @@ export default function SkillProfilePage() {
           <div className="space-y-1">
             <div className="pill w-fit">
               <span className="status-dot online" />
-              Beceri Profili
+              {t.courses.skillProfile}
             </div>
-            <h1 className="text-2xl font-bold">Öğrenme Analizim</h1>
-            <p className="text-sm text-slate-500">Konu bazlı başarı · Zayıf alan tespiti · AI rehber önerisi</p>
+            <h1 className="text-2xl font-bold">{t.progress.title}</h1>
+            <p className="text-sm text-slate-500">{t.progress.subtitle}</p>
           </div>
           <div className="flex gap-4">
             <div className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center">
               <div className={`text-3xl font-extrabold ${overallAccuracy >= 70 ? "text-emerald-600" : overallAccuracy >= 50 ? "text-amber-600" : "text-rose-600"}`}>
                 {overallAccuracy}%
               </div>
-              <div className="text-xs text-slate-500 mt-0.5">Genel Doğruluk</div>
+              <div className="text-xs text-slate-500 mt-0.5">{t.tr("Genel Doğruluk")}</div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center">
               <div className="text-3xl font-extrabold text-slate-800">
-                {mockStats.reduce((s, t) => s + t.attempts, 0)}
+                {mockStats.reduce((s, stat) => s + stat.attempts, 0)}
               </div>
-              <div className="text-xs text-slate-500 mt-0.5">Toplam Soru</div>
+              <div className="text-xs text-slate-500 mt-0.5">{t.tr("Toplam Soru")}</div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center">
               <div className="text-3xl font-extrabold text-rose-600">{weakTopics.length}</div>
-              <div className="text-xs text-slate-500 mt-0.5">Zayıf Konu</div>
+              <div className="text-xs text-slate-500 mt-0.5">{t.tr("Zayıf Konu")}</div>
             </div>
           </div>
         </div>
@@ -141,14 +143,14 @@ export default function SkillProfilePage() {
         {/* Topic bars */}
         <div className="lg:col-span-2 space-y-4">
           <div className="glass rounded-2xl border border-slate-200 p-5">
-            <h2 className="mb-4 text-base font-semibold text-slate-800">Konu Bazlı Başarı</h2>
+            <h2 className="mb-4 text-base font-semibold text-slate-800">{t.tr("Konu Bazlı Başarı")}</h2>
             <div className="space-y-3">
               {mockStats.map((s) => (
                 <div key={s.topicId}>
                   <div className="mb-1 flex items-center justify-between text-sm">
                     <span className="font-medium text-slate-700">{s.topicId}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">{s.attempts} soru</span>
+                      <span className="text-xs text-slate-500">{s.attempts} {t.tr("soru")}</span>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-semibold text-white ${MASTERY_COLORS(s.accuracy / 100)}`}>
                         %{s.accuracy}
                       </span>
@@ -169,13 +171,13 @@ export default function SkillProfilePage() {
           {weakTopics.length > 0 && (
             <div className="glass rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-base font-semibold text-rose-800">⚠️ Çalışılması Gereken Konular</h2>
+                <h2 className="text-base font-semibold text-rose-800">{t.tr("⚠️ Çalışılması Gereken Konular")}</h2>
                 <button
                   onClick={generateAIInsights}
                   disabled={aiLoading}
                   className="rounded-xl bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 disabled:opacity-50 transition-all"
                 >
-                  {aiLoading ? "Üretiyor…" : "✦ AI Çalışma Planı"}
+                  {aiLoading ? t.common.loading : `✦ ${t.tr("AI Çalışma Planı")}`}
                 </button>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -183,12 +185,12 @@ export default function SkillProfilePage() {
                   <div key={s.topicId} className="rounded-xl border border-rose-200 bg-white p-3">
                     <div className="text-sm font-semibold text-slate-800">{s.topicId}</div>
                     <div className="mt-1 text-2xl font-bold text-rose-600">%{s.accuracy}</div>
-                    <div className="text-xs text-slate-500">{s.attempts} deneme</div>
+                    <div className="text-xs text-slate-500">{s.attempts} {t.tr("deneme")}</div>
                     <a
                       href={`/exams/adaptive?topic=${encodeURIComponent(s.topicId)}`}
                       className="mt-2 block rounded-lg bg-rose-50 px-2 py-1 text-center text-xs font-medium text-rose-700 hover:bg-rose-100 transition-all"
                     >
-                      Antrenman Yap →
+                      {t.adaptiveQuiz.startBtn} →
                     </a>
                   </div>
                 ))}
@@ -202,7 +204,7 @@ export default function SkillProfilePage() {
           {/* Strengths */}
           {strongTopics.length > 0 && (
             <div className="glass rounded-2xl border border-emerald-200 bg-emerald-50/30 p-5">
-              <h2 className="mb-3 text-sm font-semibold text-emerald-800">🏆 Güçlü Konular</h2>
+              <h2 className="mb-3 text-sm font-semibold text-emerald-800">{t.tr("🏆 Güçlü Konular")}</h2>
               <div className="space-y-1.5">
                 {strongTopics.map((s) => (
                   <div key={s.topicId} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm border border-emerald-100">
@@ -216,20 +218,20 @@ export default function SkillProfilePage() {
 
           {/* AI Recommendations */}
           <div className="glass rounded-2xl border border-violet-200 bg-violet-50/20 p-5">
-            <h2 className="mb-3 text-sm font-semibold text-violet-800">✦ AI Önerileri</h2>
+            <h2 className="mb-3 text-sm font-semibold text-violet-800">{t.tr("✦ AI Önerileri")}</h2>
             {recs.length === 0 ? (
               <div className="space-y-2">
                 <div className="rounded-xl border border-violet-100 bg-white p-3">
-                  <div className="text-xs font-semibold text-violet-700 mb-1">📚 Çalışma Önerisi</div>
-                  <p className="text-xs text-slate-600">Zayıf konulardan başlayarak her gün 15 dakika adaptif quiz yapın.</p>
+                  <div className="text-xs font-semibold text-violet-700 mb-1">{t.tr("📚 Çalışma Önerisi")}</div>
+                  <p className="text-xs text-slate-600">{t.tr("Zayıf konulardan başlayarak her gün 15 dakika adaptif quiz yapın.")}</p>
                 </div>
                 <div className="rounded-xl border border-violet-100 bg-white p-3">
                   <div className="text-xs font-semibold text-violet-700 mb-1">🔁 Spaced Repetition</div>
-                  <p className="text-xs text-slate-600">Yanlış cevapladığınız sorular tekrar karşınıza çıkacak.</p>
+                  <p className="text-xs text-slate-600">{t.tr("Yanlış cevapladığınız sorular tekrar karşınıza çıkacak.")}</p>
                 </div>
                 <div className="rounded-xl border border-violet-100 bg-white p-3">
                   <div className="text-xs font-semibold text-violet-700 mb-1">🎯 Hedef</div>
-                  <p className="text-xs text-slate-600">Her konuda %75+ başarıya ulaşın.</p>
+                  <p className="text-xs text-slate-600">{t.tr("Her konuda %75+ başarıya ulaşın.")}</p>
                 </div>
               </div>
             ) : (
@@ -246,14 +248,14 @@ export default function SkillProfilePage() {
 
           {/* SRS Next review */}
           <div className="glass rounded-2xl border border-blue-200 bg-blue-50/20 p-5">
-            <h2 className="mb-3 text-sm font-semibold text-blue-800">🔁 Bugün Tekrar Edilecekler</h2>
+            <h2 className="mb-3 text-sm font-semibold text-blue-800">{t.tr("🔁 Bugün Tekrar Edilecekler")}</h2>
             <div className="space-y-1.5">
-              {weakTopics.slice(0, 3).map((t) => (
-                <div key={t.topicId} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 border border-blue-100">
-                  <span className="text-xs font-medium text-slate-700">{t.topicId}</span>
-                  <a href={`/exams/adaptive?topic=${encodeURIComponent(t.topicId)}`}
+              {weakTopics.slice(0, 3).map((topic) => (
+                <div key={topic.topicId} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 border border-blue-100">
+                  <span className="text-xs font-medium text-slate-700">{topic.topicId}</span>
+                  <a href={`/exams/adaptive?topic=${encodeURIComponent(topic.topicId)}`}
                     className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100">
-                    Başla →
+                    {t.adaptiveQuiz.startBtn} →
                   </a>
                 </div>
               ))}

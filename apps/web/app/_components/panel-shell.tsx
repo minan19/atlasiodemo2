@@ -38,6 +38,12 @@ export function PanelShell({
     .join("");
 
   return (
+    <>
+      <style>{`
+        @media (min-width: 1024px) {
+          .panel-shell-grid { grid-template-columns: 240px 1fr !important; }
+        }
+      `}</style>
     <div
       style={{
         display: "grid",
@@ -47,11 +53,6 @@ export function PanelShell({
       }}
       className="panel-shell-grid"
     >
-      <style>{`
-        @media (min-width: 1024px) {
-          .panel-shell-grid { grid-template-columns: 240px 1fr !important; }
-        }
-      `}</style>
 
       {/* ── Sidebar ── */}
       <aside
@@ -234,5 +235,6 @@ export function PanelShell({
         {children}
       </div>
     </div>
+    </>
   );
 }

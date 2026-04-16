@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
 import { api } from '../api/client';
+import { useI18n } from '../_i18n/use-i18n';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -228,6 +229,7 @@ function generateStreakData(streakDays: number): { date: Date; active: boolean }
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BadgeCard({ ub }: { ub: UserBadge }) {
+  const t = useI18n();
   const cfg = RARITY_CONFIG[ub.badge.rarity];
   const awardedDate = new Date(ub.awardedAt).toLocaleDateString('tr-TR', {
     day: '2-digit', month: 'long', year: 'numeric',
@@ -249,7 +251,7 @@ function BadgeCard({ ub }: { ub: UserBadge }) {
       <span className="text-3xl drop-shadow-md">{ub.badge.icon}</span>
       <p className={`text-sm font-bold text-center ${cfg.text}`}>{ub.badge.name}</p>
       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.pillBg}`}>
-        {RARITY_CONFIG[ub.badge.rarity].label}
+        {t.tr(RARITY_CONFIG[ub.badge.rarity].label)}
       </span>
       <p className="text-[10px] text-slate-400 text-center">{awardedDate}</p>
     </div>
@@ -257,6 +259,7 @@ function BadgeCard({ ub }: { ub: UserBadge }) {
 }
 
 function ActivityCalendar({ weeks, startMonday }: { weeks: number[][]; startMonday: Date }) {
+  const t = useI18n();
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
 
   // Compute month label positions
@@ -334,17 +337,18 @@ function ActivityCalendar({ weeks, startMonday }: { weeks: number[][]; startMond
 
       {/* Legend */}
       <div className="flex items-center gap-1.5 mt-3 justify-end">
-        <span className="text-[10px] text-slate-500">Az</span>
+        <span className="text-[10px] text-slate-500">{t.tr("Az")}</span>
         {['bg-slate-800', 'bg-indigo-900', 'bg-indigo-600', 'bg-indigo-400'].map((cls) => (
           <div key={cls} className={`w-[10px] h-[10px] rounded-[2px] ${cls}`} />
         ))}
-        <span className="text-[10px] text-slate-500">Çok</span>
+        <span className="text-[10px] text-slate-500">{t.tr("Çok")}</span>
       </div>
     </div>
   );
 }
 
 function CertCard({ cert }: { cert: Certification }) {
+  const t = useI18n();
   const issuedDate = new Date(cert.issuedAt).toLocaleDateString('tr-TR', {
     day: '2-digit', month: 'long', year: 'numeric',
   });
@@ -358,19 +362,19 @@ function CertCard({ cert }: { cert: Certification }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-900 leading-tight">{cert.courseName}</p>
-          <p className="text-xs text-slate-500 mt-0.5">Verildi: {issuedDate}</p>
+          <p className="text-xs text-slate-500 mt-0.5">{t.tr("Verildi")}: {issuedDate}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">
-        <span className="text-[10px] text-slate-500 shrink-0">Kod:</span>
+        <span className="text-[10px] text-slate-500 shrink-0">{t.tr("Kod")}:</span>
         <code className="flex-1 text-xs font-mono text-indigo-700 font-semibold tracking-wider truncate">
           {cert.verifyCode}
         </code>
         <button
           onClick={() => navigator.clipboard.writeText(cert.verifyCode)}
           className="text-[10px] text-slate-400 hover:text-indigo-600 transition-colors"
-          title="Kodu kopyala"
+          title={t.tr("Kodu kopyala")}
         >
           📋
         </button>
@@ -381,7 +385,7 @@ function CertCard({ cert }: { cert: Certification }) {
           onClick={() => alert(`"${cert.courseName}" sertifikası indiriliyor...`)}
           className="flex-1 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 text-xs font-semibold py-2 hover:bg-indigo-100 transition-colors"
         >
-          İndir
+          {t.tr("İndir")}
         </button>
         <a
           href={linkedInUrl}
@@ -389,7 +393,7 @@ function CertCard({ cert }: { cert: Certification }) {
           rel="noopener noreferrer"
           className="flex-1 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 text-xs font-semibold py-2 hover:bg-blue-100 transition-colors text-center"
         >
-          LinkedIn'de Paylaş
+          {t.tr("LinkedIn'de Paylaş")}
         </a>
       </div>
     </div>
@@ -476,6 +480,15 @@ function StreakCalendar({ streakDays }: { streakDays: number }) {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const t = useI18n();
+
+  const roleLabels: Record<string, string> = {
+    ADMIN: t.roles.admin,
+    HEAD_INSTRUCTOR: t.roles.headInstructor,
+    INSTRUCTOR: t.roles.instructor,
+    STUDENT: t.roles.student,
+    GUARDIAN: t.roles.guardian,
+  };
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -678,7 +691,7 @@ export default function ProfilePage() {
       {shareToast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-slate-900 text-white text-sm font-semibold shadow-2xl flex items-center gap-2 animate-fade-slide-up">
           <span>✓</span>
-          Profil linki panoya kopyalandı!
+          {t.tr("Profil linki panoya kopyalandı!")}
         </div>
       )}
 
@@ -701,38 +714,38 @@ export default function ProfilePage() {
                 {profile.name || profile.email}
               </h1>
               <span className={`pill text-[11px] font-semibold ${roleBadgeColor}`}>
-                {ROLE_LABELS[profile.role] ?? profile.role}
+                {roleLabels[profile.role] ?? profile.role}
               </span>
             </div>
             <p className="text-sm text-slate-500">{profile.email}</p>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-400 pt-0.5">
               <span className="flex items-center gap-1">
                 <span>📅</span>
-                <span>Katılım: {joinDate}</span>
+                <span>{t.tr("Katılım")}: {joinDate}</span>
               </span>
               {profile.emailVerified ? (
                 <span className="flex items-center gap-1 text-emerald-600 font-medium">
                   <span>✓</span>
-                  <span>E-posta doğrulandı</span>
+                  <span>{t.tr("E-posta doğrulandı")}</span>
                 </span>
               ) : (
                 <span className="flex items-center gap-1 text-amber-600 font-medium">
                   <span>⚠</span>
-                  <span>E-posta doğrulanmadı</span>
+                  <span>{t.tr("E-posta doğrulanmadı")}</span>
                 </span>
               )}
             </div>
             {!profile.emailVerified && (
               <div className="pt-1">
                 {resendState === 'sent' ? (
-                  <p className="text-xs text-emerald-700">✓ Doğrulama e-postası gönderildi.</p>
+                  <p className="text-xs text-emerald-700">{t.tr("✓ Doğrulama e-postası gönderildi.")}</p>
                 ) : (
                   <button
                     onClick={resendVerification}
                     disabled={resendState === 'sending'}
                     className="text-xs text-emerald-600 hover:underline disabled:opacity-60 font-medium"
                   >
-                    {resendState === 'sending' ? 'Gönderiliyor…' : 'Doğrulama e-postası yeniden gönder →'}
+                    {resendState === 'sending' ? t.tr('Gönderiliyor…') : t.tr('Doğrulama e-postası yeniden gönder →')}
                   </button>
                 )}
               </div>
@@ -745,7 +758,7 @@ export default function ProfilePage() {
                 className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 transition-colors"
               >
                 <span>🔗</span>
-                Profili Paylaş
+                {t.tr("Profili Paylaş")}
               </button>
             </div>
           </div>
@@ -754,7 +767,7 @@ export default function ProfilePage() {
         {/* XP Level Bar */}
         <div className="px-6 pb-5 space-y-1.5">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-semibold text-slate-700">Seviye {XP_LEVEL}</span>
+            <span className="font-semibold text-slate-700">{t.tr("Seviye")} {XP_LEVEL}</span>
             <span>{XP_CURRENT.toLocaleString('tr-TR')} / {XP_MAX.toLocaleString('tr-TR')} XP</span>
           </div>
           <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
@@ -763,7 +776,7 @@ export default function ProfilePage() {
               style={{ width: `${XP_PERCENT}%` }}
             />
           </div>
-          <p className="text-[11px] text-slate-400">Bir sonraki seviyeye {(XP_MAX - XP_CURRENT).toLocaleString('tr-TR')} XP kaldı</p>
+          <p className="text-[11px] text-slate-400">{t.tr("Bir sonraki seviyeye")} {(XP_MAX - XP_CURRENT).toLocaleString('tr-TR')} XP {t.tr("kaldı")}</p>
         </div>
       </div>
 
@@ -775,37 +788,37 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
                 <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-yellow-300 inline-block" />
-                Gamification İstatistikleri
+                {t.tr("Gamification İstatistikleri")}
               </h2>
               <span className={`pill text-xs font-semibold ${league.pill}`}>
-                {league.badge} {league.label} Ligi
+                {league.badge} {t.tr(league.label)} Ligi
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               <div className="metric rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-amber-100/40 p-3 flex flex-col items-center gap-1">
                 <span className="text-xl">⚡</span>
                 <span className="text-lg font-bold text-amber-700">{gamification.xp.toLocaleString('tr-TR')}</span>
-                <span className="text-[11px] text-slate-500 text-center">Toplam XP</span>
+                <span className="text-[11px] text-slate-500 text-center">{t.tr("Toplam XP")}</span>
               </div>
               <div className="metric rounded-2xl border border-rose-100 bg-gradient-to-br from-rose-50 to-rose-100/40 p-3 flex flex-col items-center gap-1">
                 <span className="text-xl">🔥</span>
-                <span className="text-lg font-bold text-rose-700">{gamification.streak} gün</span>
-                <span className="text-[11px] text-slate-500 text-center">Günlük Seri</span>
+                <span className="text-lg font-bold text-rose-700">{gamification.streak} {t.tr("gün")}</span>
+                <span className="text-[11px] text-slate-500 text-center">{t.tr("Günlük Seri")}</span>
               </div>
               <div className="metric rounded-2xl border border-pink-100 bg-gradient-to-br from-pink-50 to-pink-100/40 p-3 flex flex-col items-center gap-1">
                 <span className="text-xl">❤️</span>
                 <span className="text-lg font-bold text-pink-700">{gamification.hearts}</span>
-                <span className="text-[11px] text-slate-500 text-center">Can</span>
+                <span className="text-[11px] text-slate-500 text-center">{t.tr("Can")}</span>
               </div>
               <div className="metric rounded-2xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-yellow-100/40 p-3 flex flex-col items-center gap-1">
                 <span className="text-xl">💰</span>
                 <span className="text-lg font-bold text-yellow-700">{gamification.coins.toLocaleString('tr-TR')}</span>
-                <span className="text-[11px] text-slate-500 text-center">Jeton</span>
+                <span className="text-[11px] text-slate-500 text-center">{t.tr("Jeton")}</span>
               </div>
               <div className="metric rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50 to-cyan-100/40 p-3 flex flex-col items-center gap-1">
                 <span className="text-xl">🧊</span>
                 <span className="text-lg font-bold text-cyan-700">{gamification.streakFreezes}</span>
-                <span className="text-[11px] text-slate-500 text-center">Seri Dondurma</span>
+                <span className="text-[11px] text-slate-500 text-center">{t.tr("Seri Dondurma")}</span>
               </div>
             </div>
           </div>
@@ -841,7 +854,7 @@ export default function ProfilePage() {
           },
           {
             label: '🔥 Seri',
-            value: `${streakDays} gün`,
+            value: `${streakDays} ${t.tr("gün")}`,
             icon: '',
             color: 'text-rose-700',
             bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50',
@@ -849,12 +862,12 @@ export default function ProfilePage() {
           },
         ].map((stat) => (
           <div
-            key={stat.label}
+            key={t.tr(stat.label)}
             className={`rounded-2xl border ${stat.border} ${stat.bg} p-4 flex flex-col items-center gap-1 shadow-sm`}
           >
             {stat.icon && <span className="text-2xl">{stat.icon}</span>}
             <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
-            <span className="text-xs text-slate-500 text-center leading-tight">{stat.label}</span>
+            <span className="text-xs text-slate-500 text-center leading-tight">{t.tr(stat.label)}</span>
           </div>
         ))}
       </div>
@@ -866,10 +879,10 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between px-1 mb-3">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-500 to-purple-400 inline-block" />
-            Kazanılan Rozetler
+            {t.tr("Kazanılan Rozetler")}
           </h2>
           <span className="pill text-xs font-semibold bg-violet-50 border-violet-200 text-violet-700">
-            {badges.length} rozet kazanıldı
+            {badges.length} {t.tr("rozet kazanıldı")}
           </span>
         </div>
 
@@ -888,13 +901,13 @@ export default function ProfilePage() {
       <div className="stagger-3">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 px-1 mb-3">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-500 to-cyan-400 inline-block" />
-          Aktivite Takvimi
+          {t.tr("Aktivite Takvimi")}
         </h2>
         <div className="glass rounded-2xl border border-slate-200 p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs text-slate-500">Son 52 haftadaki öğrenme aktiviteleriniz</p>
+            <p className="text-xs text-slate-500">{t.tr("Son 52 haftadaki öğrenme aktiviteleriniz")}</p>
             <span className="pill text-[10px] bg-indigo-50 border-indigo-200 text-indigo-700">
-              {activityWeeks.flat().filter(c => c > 0).length} aktif gün
+              {activityWeeks.flat().filter(c => c > 0).length} {t.tr("aktif gün")}
             </span>
           </div>
           <ActivityCalendar weeks={activityWeeks} startMonday={activityStartMonday} />
@@ -908,10 +921,10 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between px-1 mb-3">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-500 to-yellow-400 inline-block" />
-            Sertifikalarım
+            {t.tr("Sertifikalarım")}
           </h2>
           <span className="pill text-xs font-semibold bg-amber-50 border-amber-200 text-amber-700">
-            {certs.length} sertifika
+            {certs.length} {t.tr("sertifika")}
           </span>
         </div>
         <div className="grid sm:grid-cols-1 gap-3">
@@ -927,14 +940,14 @@ export default function ProfilePage() {
       <div className="stagger-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 px-1 mb-3">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-rose-500 to-orange-400 inline-block" />
-          Öğrenme Serisi
+          {t.tr("Öğrenme Serisi")}
         </h2>
         <div className="glass rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-slate-500">Son 30 günlük aktivite görünümü</p>
+            <p className="text-xs text-slate-500">{t.tr("Son 30 günlük aktivite görünümü")}</p>
             <div className="flex items-center gap-2">
               <span className="text-xl">🔥</span>
-              <span className="text-sm font-bold text-rose-600">{streakDays} gün seri</span>
+              <span className="text-sm font-bold text-rose-600">{streakDays} {t.tr("gün seri")}</span>
             </div>
           </div>
           <StreakCalendar streakDays={streakDays} />
@@ -943,15 +956,15 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4 pt-1 border-t border-slate-100">
             <div className="flex items-center gap-1.5">
               <div className="w-4 h-4 rounded-full bg-indigo-600" />
-              <span className="text-[11px] text-slate-500">Aktif gün</span>
+              <span className="text-[11px] text-slate-500">{t.tr("Aktif gün")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-4 h-4 rounded-full border border-slate-200" />
-              <span className="text-[11px] text-slate-500">Pasif gün</span>
+              <span className="text-[11px] text-slate-500">{t.tr("Pasif gün")}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-4 h-4 rounded-full bg-indigo-600 ring-2 ring-indigo-400 ring-offset-1" />
-              <span className="text-[11px] text-slate-500">Bugün</span>
+              <span className="text-[11px] text-slate-500">{t.tr("Bugün")}</span>
             </div>
           </div>
         </div>
@@ -961,7 +974,7 @@ export default function ProfilePage() {
       <div>
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 px-1 mb-3">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
-          Hızlı Erişim
+          {t.tr("Hızlı Erişim")}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {QUICK_LINKS.map((link) => (
@@ -971,8 +984,8 @@ export default function ProfilePage() {
               className="glass rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-2 text-center shadow-sm hover:border-emerald-300 hover:shadow-md transition-all group"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{link.icon}</span>
-              <span className="text-sm font-semibold text-slate-800">{link.label}</span>
-              <span className="text-[11px] text-slate-400 leading-tight">{link.desc}</span>
+              <span className="text-sm font-semibold text-slate-800">{t.tr(link.label)}</span>
+              <span className="text-[11px] text-slate-400 leading-tight">{t.tr(link.desc)}</span>
             </Link>
           ))}
         </div>
@@ -982,7 +995,7 @@ export default function ProfilePage() {
       <div>
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 px-1 mb-3">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-          Hesap Ayarları
+          {t.tr("Hesap Ayarları")}
         </h2>
         <div className="space-y-4">
 
@@ -990,26 +1003,27 @@ export default function ProfilePage() {
           <div className="glass p-5 rounded-2xl border border-slate-200 bg-white/90 shadow-sm space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-lg">✏️</span>
-              <h3 className="font-semibold text-slate-900">Ad Soyad</h3>
+              <h3 className="font-semibold text-slate-900">{t.tr("Ad Soyad")}</h3>
             </div>
             <form onSubmit={saveName} className="grid gap-3">
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Adınız Soyadınız"
+                placeholder={t.tr("Adınız Soyadınız")}
                 className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
               />
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
                   disabled={nameSaving}
-                  className="btn-link text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md disabled:opacity-60"
+                  className="btn-link text-sm font-semibold disabled:opacity-60"
+                  style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
                 >
-                  {nameSaving ? 'Kaydediliyor…' : 'Kaydet'}
+                  {nameSaving ? t.tr('Kaydediliyor…') : t.tr('Kaydet')}
                 </button>
                 {nameMsg && (
                   <span className={`text-xs ${nameMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
-                    {nameMsg.ok ? '✓ ' : '✗ '}{nameMsg.text}
+                    {nameMsg.ok ? '✓ ' : '✗ '}{t.tr(nameMsg.text)}
                   </span>
                 )}
               </div>
@@ -1020,11 +1034,11 @@ export default function ProfilePage() {
           <div className="glass p-5 rounded-2xl border border-slate-200 bg-white/90 shadow-sm space-y-3">
             <div className="flex items-center gap-2">
               <span className="text-lg">🔒</span>
-              <h3 className="font-semibold text-slate-900">Şifre Değiştir</h3>
+              <h3 className="font-semibold text-slate-900">{t.tr("Şifre Değiştir")}</h3>
             </div>
             <form onSubmit={savePassword} className="grid gap-3">
               <label className="space-y-1 text-sm">
-                <span className="text-slate-600">Mevcut şifre</span>
+                <span className="text-slate-600">{t.tr("Mevcut şifre")}</span>
                 <input
                   required
                   type="password"
@@ -1034,18 +1048,18 @@ export default function ProfilePage() {
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-slate-600">Yeni şifre</span>
+                <span className="text-slate-600">{t.tr("Yeni şifre")}</span>
                 <input
                   required
                   type="password"
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
-                  placeholder="En az 8 karakter"
+                  placeholder={t.tr("En az 8 karakter")}
                   className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
                 />
               </label>
               <label className="space-y-1 text-sm">
-                <span className="text-slate-600">Yeni şifre (tekrar)</span>
+                <span className="text-slate-600">{t.tr("Yeni şifre (tekrar)")}</span>
                 <input
                   required
                   type="password"
@@ -1058,20 +1072,21 @@ export default function ProfilePage() {
                   }`}
                 />
                 {confirmPw && confirmPw !== newPw && (
-                  <span className="text-xs text-red-500">Şifreler eşleşmiyor</span>
+                  <span className="text-xs text-red-500">{t.tr("Şifreler eşleşmiyor")}</span>
                 )}
               </label>
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
                   disabled={pwSaving}
-                  className="btn-link text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md disabled:opacity-60"
+                  className="btn-link text-sm font-semibold disabled:opacity-60"
+                  style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
                 >
-                  {pwSaving ? 'Güncelleniyor…' : 'Şifremi değiştir'}
+                  {pwSaving ? t.tr('Güncelleniyor…') : t.tr('Şifremi değiştir')}
                 </button>
                 {pwMsg && (
                   <span className={`text-xs ${pwMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
-                    {pwMsg.ok ? '✓ ' : '✗ '}{pwMsg.text}
+                    {pwMsg.ok ? '✓ ' : '✗ '}{t.tr(pwMsg.text)}
                   </span>
                 )}
               </div>
@@ -1083,7 +1098,7 @@ export default function ProfilePage() {
 
       {/* ── Diğer İşlemler ── */}
       <div className="glass p-5 rounded-2xl border border-rose-100 bg-rose-50/60 space-y-3">
-        <h2 className="font-semibold text-rose-800">Diğer işlemler</h2>
+        <h2 className="font-semibold text-rose-800">{t.tr("Diğer işlemler")}</h2>
         <div className="flex flex-wrap gap-3 text-sm">
           <button
             onClick={() => {
@@ -1095,10 +1110,10 @@ export default function ProfilePage() {
             }}
             className="btn-link border-rose-200 text-rose-700 hover:bg-rose-50"
           >
-            Çıkış yap
+            {t.tr("Çıkış yap")}
           </button>
           <Link href="/forgot-password" className="btn-link border-slate-200 text-slate-600">
-            Şifremi unuttum
+            {t.tr("Şifremi unuttum")}
           </Link>
         </div>
       </div>

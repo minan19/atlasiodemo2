@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PanelShell } from '../_components/panel-shell';
+import { useI18n } from '../_i18n/use-i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -226,6 +227,7 @@ interface ProgressRingProps {
 }
 
 function ProgressRing({ completed, total }: ProgressRingProps) {
+  const t = useI18n();
   const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
   const radius = 72;
   const circ = 2 * Math.PI * radius;
@@ -266,24 +268,25 @@ function ProgressRing({ completed, total }: ProgressRingProps) {
           <span className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 leading-none">
             {completed}/{total}
           </span>
-          <span className="text-xs text-slate-400 font-medium mt-1">Kurs</span>
+          <span className="text-xs text-slate-400 font-medium mt-1">{t.tr("Kurs")}</span>
         </div>
       </div>
       <div className="text-center">
         <div className="text-2xl font-bold" style={{ color: ringColor }}>
           %{pct}
         </div>
-        <div className="text-xs text-slate-400 mt-0.5">tamamlama oranı</div>
+        <div className="text-xs text-slate-400 mt-0.5">{t.tr("tamamlama oranı")}</div>
       </div>
     </div>
   );
 }
 
 function CourseCard({ enrollment }: { enrollment: Enrollment }) {
+  const t = useI18n();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 80);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMounted(true), 80);
+    return () => clearTimeout(timer);
   }, []);
 
   const isComplete = enrollment.completedAt !== null;
@@ -299,14 +302,14 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
             </h3>
             {isComplete && (
               <span className="pill-sm bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 font-semibold">
-                ✓ Tamamlandı
+                {t.tr("✓ Tamamlandı")}
               </span>
             )}
           </div>
           <div className="text-xs text-slate-400 mb-3">
-            Başlangıç: {formatDate(enrollment.startedAt)}
+            {t.tr("Başlangıç")}: {formatDate(enrollment.startedAt)}
             {isComplete && enrollment.completedAt
-              ? ` · Tamamlandı: ${formatDate(enrollment.completedAt)}`
+              ? ` · ${t.tr("Tamamlandı")}: ${formatDate(enrollment.completedAt)}`
               : ''}
           </div>
 
@@ -321,13 +324,13 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <span className="pill-sm bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">
-              {enrollment.completedLessons}/{enrollment.totalLessons} Ders
+              {enrollment.completedLessons}/{enrollment.totalLessons} {t.tr("Ders")}
             </span>
             <span className={`font-semibold ${progressTextColor(enrollment.progress)}`}>
-              %{enrollment.progress} tamamlandı
+              %{enrollment.progress} {t.tr("tamamlandı")}
             </span>
             <span className="text-slate-400 ml-auto">
-              Son aktivite: {relativeTime(enrollment.lastActivity)}
+              {t.tr("Son aktivite")}: {relativeTime(enrollment.lastActivity)}
             </span>
           </div>
         </div>
@@ -336,14 +339,14 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
         <div className="flex-shrink-0 self-center">
           {isComplete ? (
             <span className="pill bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
-              ✓ Bitti
+              {t.tr("✓ Bitti")}
             </span>
           ) : (
             <Link
               href={`/courses/${enrollment.courseId}`}
               className="inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white text-xs font-semibold px-4 py-2 shadow-sm transition-all duration-150"
             >
-              Devam Et →
+              {t.tr("Devam Et →")}
             </Link>
           )}
         </div>
@@ -353,9 +356,10 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
 }
 
 function BadgesRow({ badges }: { badges: UserBadge[] }) {
+  const t = useI18n();
   if (badges.length === 0) {
     return (
-      <p className="text-sm text-slate-400 italic">Henüz rozet kazanılmadı.</p>
+      <p className="text-sm text-slate-400 italic">{t.tr("Henüz rozet kazanılmadı.")}</p>
     );
   }
   return (
@@ -383,6 +387,7 @@ function BadgesRow({ badges }: { badges: UserBadge[] }) {
 }
 
 function GamificationCard({ gami }: { gami: Gamification }) {
+  const t = useI18n();
   const league = leagueMeta(gami.league);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -392,7 +397,7 @@ function GamificationCard({ gami }: { gami: Gamification }) {
         <span className="text-2xl font-extrabold text-violet-600 dark:text-violet-400 leading-none">
           {gami.totalXp.toLocaleString('tr-TR')}
         </span>
-        <span className="text-xs text-slate-400 font-medium">Toplam XP</span>
+        <span className="text-xs text-slate-400 font-medium">{t.tr("Toplam XP")}</span>
       </div>
       {/* Streak */}
       <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-1 shadow-sm">
@@ -401,9 +406,9 @@ function GamificationCard({ gami }: { gami: Gamification }) {
           {gami.currentStreak > 0 ? `${gami.currentStreak}` : '--'}
         </span>
         <span className="text-xs text-slate-400 font-medium">
-          Günlük Seri
+          {t.tr("Günlük Seri")}
           {gami.longestStreak > 0 && (
-            <span className="block text-[10px] text-slate-300">En uzun: {gami.longestStreak} gün</span>
+            <span className="block text-[10px] text-slate-300">{t.tr("En uzun")}: {gami.longestStreak} {t.tr("gün")}</span>
           )}
         </span>
       </div>
@@ -417,22 +422,23 @@ function GamificationCard({ gami }: { gami: Gamification }) {
             </span>
           ))}
         </div>
-        <span className="text-xs text-slate-400 font-medium">Canlar</span>
+        <span className="text-xs text-slate-400 font-medium">{t.tr("Canlar")}</span>
       </div>
       {/* League */}
       <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex flex-col gap-1 shadow-sm">
         <span className="text-lg">🏅</span>
         <span className={`text-lg font-extrabold leading-none px-2 py-0.5 rounded-lg inline-block w-fit ${league.color} ${league.bg}`}>
-          {league.label}
+          {t.tr(league.label)}
         </span>
-        <span className="text-xs text-slate-400 font-medium">Lig</span>
+        <span className="text-xs text-slate-400 font-medium">{t.tr("Lig")}</span>
       </div>
     </div>
   );
 }
 
 function WeeklyHeatmap({ enrollments }: { enrollments: Enrollment[] }) {
-  const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const t = useI18n();
+  const days = [t.tr('Pzt'), t.tr('Sal'), t.tr('Çar'), t.tr('Per'), t.tr('Cum'), t.tr('Cmt'), t.tr('Paz')];
   const today = new Date();
   // Build set of active days from last-activity dates
   const activeDayIndices = new Set<number>();
@@ -459,7 +465,7 @@ function WeeklyHeatmap({ enrollments }: { enrollments: Enrollment[] }) {
                   ? 'bg-indigo-500 shadow-sm shadow-indigo-300 dark:shadow-indigo-900'
                   : 'bg-slate-800/30 dark:bg-slate-700/50'
               }`}
-              title={active ? `${day}: Aktif` : `${day}: İnaktif`}
+              title={active ? `${day}: ${t.tr("Aktif")}` : `${day}: ${t.tr("İnaktif")}`}
             />
             <span className="text-[10px] text-slate-400 font-medium">{day}</span>
           </div>
@@ -474,10 +480,11 @@ function WeeklyHeatmap({ enrollments }: { enrollments: Enrollment[] }) {
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
 export default function ProgressPage() {
+  const t = useI18n();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [gamification, setGamification] = useState<Gamification | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userName, setUserName] = useState('Öğrenci');
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     const token =
@@ -538,9 +545,9 @@ export default function ProgressPage() {
       <div className="bg-grid" />
 
       <PanelShell
-        roleLabel="Öğrenci"
+        roleLabel={t.tr("Öğrenci")}
         userName={userName}
-        userSub="İlerleme Takibi"
+        userSub={t.tr("İlerleme Takibi")}
         navSections={navSections}
       >
         {/* ── Hero ── */}
@@ -550,10 +557,10 @@ export default function ProgressPage() {
               <span className="text-4xl">📊</span>
               <div>
                 <h1 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
-                  İlerleme Takibi
+                  {t.progress.title}
                 </h1>
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-                  Öğrenme yolculuğunun haritası
+                  {t.progress.subtitle}
                 </p>
               </div>
             </div>
@@ -570,29 +577,29 @@ export default function ProgressPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <StatCard
-              label="Kayıtlı Kurs"
+              label={t.progress.coursesInProgress}
               value={totalCourses}
               accent="text-indigo-600 dark:text-indigo-400"
               icon="📚"
               delay="stagger-1"
             />
             <StatCard
-              label="Tamamlanan"
+              label={t.progress.completedCourses}
               value={completedCourses}
               accent="text-emerald-600 dark:text-emerald-400"
               icon="✅"
               delay="stagger-2"
             />
             <StatCard
-              label="Toplam XP"
+              label={t.progress.totalXP}
               value={totalXp.toLocaleString('tr-TR')}
               accent="text-violet-600 dark:text-violet-400"
               icon="⚡"
               delay="stagger-3"
             />
             <StatCard
-              label="Aktif Seri"
-              value={currentStreak > 0 ? `${currentStreak} gün` : '--'}
+              label={t.progress.currentStreak}
+              value={currentStreak > 0 ? `${currentStreak}` : '--'}
               accent="text-amber-600 dark:text-amber-400"
               icon="🔥"
               delay="stagger-4"
@@ -608,7 +615,7 @@ export default function ProgressPage() {
             {/* Ring */}
             <div className="flex flex-col items-center">
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">
-                Genel Tamamlama
+                {t.tr("Genel Tamamlama")}
               </h2>
               <ProgressRing completed={completedCourses} total={totalCourses} />
             </div>
@@ -616,11 +623,11 @@ export default function ProgressPage() {
             {/* Heatmap */}
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">
-                Haftalık Aktivite
+                {t.tr("Haftalık Aktivite")}
               </h2>
               <WeeklyHeatmap enrollments={enrollments} />
               <p className="text-xs text-slate-400 mt-3">
-                Son 7 günlük aktivite gösterimi. Mavi kareler aktif günleri belirtir.
+                {t.tr("Son 7 günlük aktivite gösterimi. Mavi kareler aktif günleri belirtir.")}
               </p>
             </div>
           </div>
@@ -630,13 +637,13 @@ export default function ProgressPage() {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-              Kurs Detayları
+              {t.tr("Kurs Detayları")}
             </h2>
             <Link
               href="/courses"
               className="text-xs font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
             >
-              Tüm Kurslar →
+              {t.tr("Tüm Kurslar →")}
             </Link>
           </div>
 
@@ -648,12 +655,12 @@ export default function ProgressPage() {
             </div>
           ) : enrollments.length === 0 ? (
             <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-8 text-center">
-              <p className="text-slate-400">Henüz herhangi bir kursa kayıt yaptırmadınız.</p>
+              <p className="text-slate-400">{t.tr("Henüz herhangi bir kursa kayıt yaptırmadınız.")}</p>
               <Link
                 href="/courses"
                 className="inline-block mt-4 px-5 py-2 rounded-xl bg-indigo-500 text-white text-sm font-semibold hover:bg-indigo-600 transition-colors"
               >
-                Kursları Keşfet
+                {t.tr("Kursları Keşfet")}
               </Link>
             </div>
           ) : (
@@ -668,7 +675,7 @@ export default function ProgressPage() {
         {/* ── Badges ── */}
         <section className="glass rounded-3xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm animate-fade-slide-up stagger-3">
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">
-            Rozetler
+            {t.tr("Rozetler")}
           </h2>
           {loading ? (
             <div className="flex gap-4">
@@ -684,7 +691,7 @@ export default function ProgressPage() {
         {/* ── Gamification Card ── */}
         <section>
           <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">
-            Oyunlaştırma
+            {t.tr("Oyunlaştırma")}
           </h2>
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -699,7 +706,7 @@ export default function ProgressPage() {
 
         {/* ── Footer note ── */}
         <p className="text-[11px] text-center text-slate-300 dark:text-slate-600 pb-4">
-          Veriler canlı API'dan çekiliyor — bağlantı yoksa demo verisi gösterilir.
+          {t.tr("Veriler canlı API'dan çekiliyor — bağlantı yoksa demo verisi gösterilir.")}
         </p>
       </PanelShell>
     </div>

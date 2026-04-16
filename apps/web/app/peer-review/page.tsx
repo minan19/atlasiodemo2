@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useI18n } from '../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -96,6 +97,7 @@ function ReviewPanel({
   submission: Submission;
   onComplete: (id: string, score: number) => void;
 }) {
+  const t = useI18n();
   const [state, setState] = useState<ReviewState>(defaultReviewState);
 
   const criteriaBonus = state.criteria.filter(Boolean).length * 5;
@@ -152,7 +154,7 @@ function ReviewPanel({
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
-            Temel Puan
+            {t.tr("Temel Puan")}
           </span>
           <span
             className="text-lg font-extrabold tabular-nums"
@@ -173,7 +175,7 @@ function ReviewPanel({
           style={{ height: "6px" }}
         />
         <div className="text-xs" style={{ color: "var(--muted)" }}>
-          Kriter bonusu dahil toplam:{" "}
+          {t.tr("Kriter bonusu dahil toplam")}:{" "}
           <span className="font-bold" style={{ color: "var(--accent)" }}>
             {effectiveScore}/100
           </span>
@@ -183,12 +185,12 @@ function ReviewPanel({
       {/* Criteria checkboxes */}
       <div className="space-y-2">
         <div className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
-          Değerlendirme Kriterleri{" "}
+          {t.tr("Değerlendirme Kriterleri")}{" "}
           <span
             className="text-xs font-normal"
             style={{ color: "var(--muted)" }}
           >
-            (her biri +5 puan)
+            ({t.tr("her biri +5 puan")})
           </span>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
@@ -215,7 +217,7 @@ function ReviewPanel({
                 className="text-xs font-medium"
                 style={{ color: "var(--ink)" }}
               >
-                {label}
+                {t.tr(label)}
               </span>
             </label>
           ))}
@@ -229,13 +231,13 @@ function ReviewPanel({
             className="text-sm font-semibold"
             style={{ color: "var(--ink)" }}
           >
-            Değerlendirme Yorumu
+            {t.tr("Değerlendirme Yorumu")}
           </label>
           <span
             className="text-xs tabular-nums"
             style={{ color: charCount < 50 ? "#ef4444" : "var(--accent)" }}
           >
-            {charCount} / min 50 karakter
+            {charCount} / {t.tr("min 50 karakter")}
           </span>
         </div>
         <textarea
@@ -243,7 +245,7 @@ function ReviewPanel({
           onChange={(e) =>
             setState((prev) => ({ ...prev, feedback: e.target.value }))
           }
-          placeholder="Değerlendirme yorumunuz..."
+          placeholder={t.tr("Değerlendirme yorumunuz...")}
           rows={4}
           className="w-full rounded-xl px-4 py-3 text-sm resize-none"
           style={{
@@ -254,7 +256,7 @@ function ReviewPanel({
         />
         {charCount < 50 && charCount > 0 && (
           <p className="text-xs" style={{ color: "#ef4444" }}>
-            En az 50 karakter giriniz ({50 - charCount} karakter daha gerekli).
+            {t.tr("En az 50 karakter giriniz")} ({50 - charCount} {t.tr("karakter daha gerekli")}).
           </p>
         )}
       </div>
@@ -293,10 +295,10 @@ function ReviewPanel({
               className="inline-block w-4 h-4 rounded-full border-2 border-current border-t-transparent"
               style={{ animation: "spin 0.7s linear infinite" }}
             />
-            Gönderiliyor...
+            {t.tr("Gönderiliyor...")}
           </>
         ) : (
-          <>Değerlendirmeyi Gönder — {effectiveScore} puan</>
+          <>{t.tr("Değerlendirmeyi Gönder")} — {effectiveScore} {t.tr("puan")}</>
         )}
       </button>
     </div>
@@ -312,6 +314,7 @@ function SubmissionCard({
   submission: Submission;
   onComplete: (id: string, score: number) => void;
 }) {
+  const t = useI18n();
   const [open, setOpen] = useState(false);
   const isCompleted = submission.status === "completed";
 
@@ -354,12 +357,12 @@ function SubmissionCard({
               color: "var(--accent)",
             }}
           >
-            <span>✓ Değerlendirdiniz</span>
+            <span>✓ {t.tr("Değerlendirdiniz")}</span>
             <span
               className="ml-1 font-extrabold"
               style={{ color: "var(--ink)" }}
             >
-              — Verdiğiniz puan: {submission.myScore}
+              — {t.tr("Verdiğiniz puan")}: {submission.myScore}
             </span>
           </div>
         ) : (
@@ -374,7 +377,7 @@ function SubmissionCard({
               border: open ? "1px solid color-mix(in srgb, var(--accent) 30%, var(--line))" : "none",
             }}
           >
-            {open ? "Kapat" : "Değerlendir"}
+            {open ? t.tr("Kapat") : t.tr("Değerlendir")}
           </button>
         )}
       </div>
@@ -398,6 +401,7 @@ function SubmissionCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PeerReviewPage() {
+  const t = useI18n();
   const [submissions, setSubmissions] = useState<Submission[]>(INITIAL_REVIEWS);
 
   const handleComplete = useCallback((id: string, score: number) => {
@@ -432,15 +436,15 @@ export default function PeerReviewPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="back-btn">
-              ← Geri
+              ← {t.common.back}
             </Link>
             <div className="sep">/</div>
             <span className="text-sm font-semibold" style={{ color: "var(--ink)" }}>
-              Akran Değerlendirmesi
+              {t.tr("Akran Değerlendirmesi")}
             </span>
           </div>
           <Link href="/leaderboard" className="pill pill-sm">
-            🏠 Ana Sayfa
+            🏠 {t.tr("Ana Sayfa")}
           </Link>
         </div>
       </header>
@@ -459,19 +463,19 @@ export default function PeerReviewPage() {
               color: "var(--accent-2)",
             }}
           >
-            👥 Akran Değerlendirmesi
+            {t.tr("👥 Akran Değerlendirmesi")}
           </div>
           <h1
             className="text-3xl font-extrabold"
             style={{ color: "var(--ink)" }}
           >
-            Akran Değerlendirmesi
+            {t.peerReview.title}
           </h1>
           <p
             className="text-base max-w-xl leading-relaxed"
             style={{ color: "var(--ink-2)" }}
           >
-            Öğrenci ödevlerini değerlendirin ve puan kazanın
+            {t.peerReview.subtitle}
           </p>
         </div>
       </section>
@@ -479,7 +483,7 @@ export default function PeerReviewPage() {
       {/* Stats strip */}
       <div className="mt-4 grid grid-cols-3 gap-3 animate-fade-slide-up stagger-1">
         <div className="metric text-center">
-          <div className="label">Tamamlanan</div>
+          <div className="label">{t.tr("Tamamlanan")}</div>
           <div
             className="value"
             style={{ color: "var(--accent)" }}
@@ -488,7 +492,7 @@ export default function PeerReviewPage() {
           </div>
         </div>
         <div className="metric text-center">
-          <div className="label">Kazanılan XP</div>
+          <div className="label">{t.tr("Kazanılan XP")}</div>
           <div
             className="value"
             style={{
@@ -500,7 +504,7 @@ export default function PeerReviewPage() {
           </div>
         </div>
         <div className="metric text-center">
-          <div className="label">Ort. Verilen Puan</div>
+          <div className="label">{t.tr("Ort. Verilen Puan")}</div>
           <div
             className="value"
             style={{ color: "var(--accent-3)", fontSize: "22px" }}
@@ -516,7 +520,7 @@ export default function PeerReviewPage() {
           className="text-base font-bold mb-4"
           style={{ color: "var(--ink)" }}
         >
-          Nasıl Çalışır?
+          {t.tr("Nasıl Çalışır?")}
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
           {[
@@ -568,14 +572,14 @@ export default function PeerReviewPage() {
                   className="font-bold text-sm"
                   style={{ color: "var(--ink)" }}
                 >
-                  {item.title}
+                  {t.tr(item.title)}
                 </span>
               </div>
               <p
                 className="text-xs leading-relaxed pl-10"
                 style={{ color: "var(--ink-2)" }}
               >
-                {item.desc}
+                {t.tr(item.desc)}
               </p>
             </div>
           ))}
@@ -589,7 +593,7 @@ export default function PeerReviewPage() {
             className="text-lg font-bold"
             style={{ color: "var(--ink)" }}
           >
-            Bekleyen Değerlendirmeler
+            {t.tr("Bekleyen Değerlendirmeler")}
           </h2>
           <span
             className="pill pill-sm"
@@ -605,8 +609,8 @@ export default function PeerReviewPage() {
             }}
           >
             {completed.length === submissions.length
-              ? "✓ Tümü tamamlandı"
-              : `${submissions.length - completed.length} bekliyor`}
+              ? `✓ ${t.tr("Tümü tamamlandı")}`
+              : `${submissions.length - completed.length} ${t.tr("bekliyor")}`}
           </span>
         </div>
 

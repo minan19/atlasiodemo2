@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useI18n } from '../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -174,6 +175,7 @@ function FeedbackBadge({ label, value }: { label: string; value: string }) {
 // ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function LanguageLabPage() {
+  const t = useI18n();
   const [activeTab, setActiveTab] = useState<'pronunciation' | 'transcription' | 'history'>('pronunciation');
 
   return (
@@ -184,19 +186,19 @@ export default function LanguageLabPage() {
           <div className="space-y-2">
             <div className="pill w-fit">
               <span className="status-dot online" />
-              <span>Dil Laboratuvarı · AI Konuşma Koçu</span>
+              <span>{t.tr("Dil Laboratuvarı · AI Konuşma Koçu")}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Dil Laboratuvarı
+              {t.languageLab.title}
               <span
                 className="block text-transparent bg-clip-text"
                 style={{ backgroundImage: 'linear-gradient(120deg, #7c3aed, #4f46e5)' }}
               >
-                AI Konuşma Koçu
+                {t.tr("AI Konuşma Koçu")}
               </span>
             </h1>
             <p className="text-sm text-slate-500 max-w-md">
-              Telaffuzunu analiz et, canlı transkripsiyon yap ve geçmiş kayıtlarını incele — hepsi yapay zeka destekli.
+              {t.languageLab.subtitle}
             </p>
           </div>
 
@@ -206,7 +208,7 @@ export default function LanguageLabPage() {
               🎙 Ses Analizi
             </span>
             <span className="pill pill-sm" style={{ background: 'rgba(79,70,229,0.08)', borderColor: 'rgba(79,70,229,0.25)', color: '#4f46e5' }}>
-              🤖 AI Koçluk
+              {t.tr("🤖 AI Koçluk")}
             </span>
             <span className="pill pill-sm" style={{ background: 'rgba(16,169,123,0.08)', borderColor: 'rgba(16,169,123,0.25)', color: '#10a97b' }}>
               📊 Skor Takibi
@@ -221,10 +223,10 @@ export default function LanguageLabPage() {
           🎤 Telaffuz Analizi
         </TabBtn>
         <TabBtn active={activeTab === 'transcription'} onClick={() => setActiveTab('transcription')}>
-          🎙 Canlı Transkripsiyon
+          {t.tr("🎙 Canlı Transkripsiyon")}
         </TabBtn>
         <TabBtn active={activeTab === 'history'} onClick={() => setActiveTab('history')}>
-          📋 Geçmiş
+          {t.tr("📋 Geçmiş")}
         </TabBtn>
       </div>
 

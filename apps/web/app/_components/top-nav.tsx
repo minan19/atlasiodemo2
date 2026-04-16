@@ -126,11 +126,11 @@ export function TopNav() {
             onChange={(e) => setRole(e.target.value as UserRole)}
             className="nav-select"
           >
-            <option value="admin">Yönetici</option>
-            <option value="head-instructor">Baş Eğitmen</option>
-            <option value="instructor">Eğitmen</option>
-            <option value="student">Öğrenci</option>
-            <option value="guardian">Veli</option>
+            <option value="admin">{t.roles.admin}</option>
+            <option value="head-instructor">{t.roles.headInstructor}</option>
+            <option value="instructor">{t.roles.instructor}</option>
+            <option value="student">{t.roles.student}</option>
+            <option value="guardian">{t.roles.guardian}</option>
           </select>
           <select
             aria-label={t.nav.langLabel}
@@ -142,14 +142,15 @@ export function TopNav() {
             <option value="en">EN</option>
             <option value="de">DE</option>
             <option value="ar">AR</option>
+            <option value="ru">RU</option>
           </select>
 
           {/* Search / Command palette trigger */}
           <button
             onClick={() => setCmdOpen(true)}
             className="theme-toggle"
-            aria-label="Arama — Cmd+K"
-            title="Ara (⌘K / Ctrl+K)"
+            aria-label={t.nav.search}
+            data-tip={t.nav.search}
           >
             <svg
               className="w-4 h-4"
@@ -168,8 +169,8 @@ export function TopNav() {
           <button
             onClick={toggleTheme}
             className="theme-toggle"
-            aria-label={theme === 'dark' ? 'Açık moda geç' : 'Koyu moda geç'}
-            title={theme === 'dark' ? 'Açık mod' : 'Koyu mod'}
+            aria-label={theme === 'dark' ? t.nav.lightMode : t.nav.darkMode}
+            data-tip={theme === 'dark' ? t.nav.lightMode : t.nav.darkMode}
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -178,8 +179,8 @@ export function TopNav() {
           <Link
             href="/ai"
             className="theme-toggle"
-            aria-label="AI Mentor"
-            title="Ghost-Mentor AI"
+            aria-label={t.nav.aiMentor}
+            data-tip={t.nav.aiMentor}
           >
             🤖
           </Link>
@@ -193,9 +194,9 @@ export function TopNav() {
               {isAdmin && (
                 <Link
                   href="/admin/alarms"
-                  aria-label="Güvenlik alarmları"
+                  aria-label={t.nav.security}
                   className="relative theme-toggle"
-                  title="Güvenlik alarmları"
+                  data-tip={t.nav.security}
                 >
                   <span aria-hidden="true">🛡️</span>
                   {alarmCount > 0 && (
@@ -211,13 +212,13 @@ export function TopNav() {
                   Admin
                 </Link>
               )}
-              <Link href="/my-courses" className="btn-link text-xs hidden sm:inline-flex">Kayıtlarım</Link>
+              <Link href="/my-courses" className="btn-link text-xs hidden sm:inline-flex">{t.nav.myCourses}</Link>
               {/* User avatar + profile link */}
               <Link
                 href="/profile"
                 className="nav-user-avatar"
-                title={currentUser?.name ?? 'Profil'}
-                aria-label="Profil sayfasına git"
+                data-tip={currentUser?.name ?? t.nav.profile}
+                aria-label={t.nav.profile}
               >
                 {currentUser?.name?.[0]?.toUpperCase() ?? 'U'}
               </Link>
@@ -234,24 +235,24 @@ export function TopNav() {
           onClick={handleBack}
           disabled={!canGoBack && pathname === '/'}
           className="back-btn"
-          aria-label="Bir önceki sayfaya dön"
+          aria-label={t.nav.back}
         >
           <span aria-hidden="true">←</span>
-          <span>Geri</span>
+          <span>{t.nav.back}</span>
         </button>
         <button
           type="button"
           onClick={handleForward}
           className="back-btn"
-          aria-label="Bir sonraki sayfaya git"
+          aria-label={t.nav.forward}
         >
-          <span>İleri</span>
+          <span>{t.nav.forward}</span>
           <span aria-hidden="true">→</span>
         </button>
         {breadcrumbs.map((item, idx) => (
           <span key={item.href}>
             {idx > 0 ? <span className="sep">/</span> : null}
-            <Link href={item.href}>{item.label}</Link>
+            <Link href={item.href}>{idx === 0 ? t.nav.home : item.label}</Link>
           </span>
         ))}
       </div>

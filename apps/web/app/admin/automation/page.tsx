@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -166,6 +167,7 @@ function actionColor(action: string): string {
 // ---------------------------------------------------------------------------
 
 export default function AdminAutomationPage() {
+  const t = useI18n();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -241,10 +243,10 @@ export default function AdminAutomationPage() {
       {/* ------------------------------------------------------------------ */}
       <header className="glass p-6 rounded-2xl border border-slate-200 hero animate-fade-slide-up stagger-1">
         <div className="hero-content space-y-2">
-          <div className="pill w-fit">Otomasyon</div>
-          <h1 className="text-3xl font-semibold">⚙️ Otomasyon Merkezi</h1>
+          <div className="pill w-fit">{t.tr("Otomasyon")}</div>
+          <h1 className="text-3xl font-semibold">⚙️ {t.tr("Otomasyon Merkezi")}</h1>
           <p className="text-sm text-slate-600 max-w-2xl">
-            Zamanlanmış görevler ve sistem bakım süreçleri.
+            {t.tr("Zamanlanmış görevler ve sistem bakım süreçleri.")}
           </p>
         </div>
       </header>
@@ -255,13 +257,13 @@ export default function AdminAutomationPage() {
       <section className="space-y-3 animate-fade-slide-up stagger-2">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-indigo-500 inline-block" />
-          Zamanlanmış Görevler
+          {t.tr("Zamanlanmış Görevler")}
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {CRON_JOBS.map((job, i) => (
             <div
-              key={job.name}
+              key={t.tr(job.name)}
               className={`glass rounded-2xl border border-slate-200 p-5 space-y-3 shadow-sm hover:shadow-md transition-all animate-fade-slide-up stagger-${Math.min(i + 1, 4)}`}
             >
               {/* Header row */}
@@ -269,13 +271,13 @@ export default function AdminAutomationPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{job.icon}</span>
                   <span className="font-bold text-slate-800 text-sm leading-snug">
-                    {job.name}
+                    {t.tr(job.name)}
                   </span>
                 </div>
                 {/* ACTIVE badge */}
                 <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                  AKTİF
+                  {t.tr("AKTİF")}
                 </span>
               </div>
 
@@ -286,12 +288,12 @@ export default function AdminAutomationPage() {
 
               {/* Description */}
               <p className="text-xs text-slate-500 leading-relaxed">
-                {job.description}
+                {t.tr(job.description)}
               </p>
 
               {/* Last run row */}
               <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs text-slate-400">
-                <span className="font-medium text-slate-600">Son Çalışma</span>
+                <span className="font-medium text-slate-600">{t.tr("Son Çalışma")}</span>
                 {job.showLastRun ? (
                   tickLoading ? (
                     <span className="skeleton h-3 w-20 rounded" />
@@ -318,12 +320,12 @@ export default function AdminAutomationPage() {
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-slate-400 to-slate-600 inline-block" />
-            Son Otomasyon Logları
+            {t.tr("Son Otomasyon Logları")}
             <span className="pill">Son 20</span>
           </h2>
           {isDemo && (
             <span className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-1 text-xs text-amber-700">
-              Demo verisi gösteriliyor
+              {t.tr("Demo verisi gösteriliyor")}
             </span>
           )}
         </div>
@@ -391,16 +393,16 @@ export default function AdminAutomationPage() {
       <section className="space-y-3 animate-fade-slide-up stagger-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-sky-400 to-cyan-500 inline-block" />
-          Sistem Sağlığı
+          {t.tr("Sistem Sağlığı")}
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-3">
           {HEALTH_METRICS.map((m, i) => (
             <div
-              key={m.label}
+              key={t.tr(m.label)}
               className={`glass rounded-2xl border border-slate-200 p-5 shadow-sm animate-fade-slide-up stagger-${Math.min(i + 1, 4)}`}
             >
-              <p className="text-xs text-slate-500 mb-1">{m.label}</p>
+              <p className="text-xs text-slate-500 mb-1">{t.tr(m.label)}</p>
               <p className="metric text-slate-800">
                 {m.value}
                 {m.unit && (

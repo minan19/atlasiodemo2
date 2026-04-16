@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "../../_i18n/use-i18n";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -193,6 +194,7 @@ const GRADE_STYLES: Record<Grade, string> = {
 // ---------------------------------------------------------------------------
 
 function ScoreTrendChart({ results }: { results: ExamResult[] }) {
+  const t = useI18n();
   const data = useMemo(() => {
     return [...results]
       .sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime())
@@ -233,7 +235,7 @@ function ScoreTrendChart({ results }: { results: ExamResult[] }) {
   return (
     <div className="glass rounded-2xl p-6 animate-fade-slide-up stagger-3">
       <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest mb-4">
-        Puan Trendi (Son {data.length} Sınav)
+        {t.tr("Puan Trendi")} ({t.tr("Son")} {data.length} {t.tr("Sınav")})
       </h3>
       <div className="w-full overflow-x-auto">
         <svg
@@ -337,15 +339,15 @@ function ScoreTrendChart({ results }: { results: ExamResult[] }) {
       <div className="flex items-center gap-5 mt-3 text-xs text-white/40">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-          Geçti
+          {t.tr("Geçti")}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-          Kaldı
+          {t.tr("Kaldı")}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block opacity-60" />
-          Geçme sınırı (60)
+          {t.tr("Geçme sınırı (60)")}
         </span>
       </div>
     </div>
@@ -357,6 +359,7 @@ function ScoreTrendChart({ results }: { results: ExamResult[] }) {
 // ---------------------------------------------------------------------------
 
 function StatsStrip({ results }: { results: ExamResult[] }) {
+  const t = useI18n();
   const total = results.length;
   const avg =
     total > 0
@@ -368,31 +371,31 @@ function StatsStrip({ results }: { results: ExamResult[] }) {
 
   const stats = [
     {
-      label: "Toplam Sınav",
+      label: t.tr("Toplam Sınav"),
       value: String(total),
       icon: "📋",
-      sub: "tamamlanan",
+      sub: t.tr("tamamlanan"),
       color: "text-violet-400",
     },
     {
-      label: "Ortalama Puan",
+      label: t.tr("Ortalama Puan"),
       value: `%${avg}`,
       icon: "📊",
-      sub: "genel ortalama",
+      sub: t.tr("genel ortalama"),
       color: "text-blue-400",
     },
     {
-      label: "En Yüksek Puan",
+      label: t.tr("En Yüksek Puan"),
       value: `%${best}`,
       icon: "🏆",
-      sub: "en iyi sonuç",
+      sub: t.tr("en iyi sonuç"),
       color: "text-amber-400",
     },
     {
-      label: "Geçme Oranı",
+      label: t.tr("Geçme Oranı"),
       value: `%${passRate}`,
       icon: "✅",
-      sub: `${passedCount}/${total} sınav`,
+      sub: `${passedCount}/${total} ${t.tr("sınav")}`,
       color: passRate >= 70 ? "text-emerald-400" : "text-red-400",
     },
   ];
@@ -460,6 +463,7 @@ function GradeBadge({ grade }: { grade: Grade }) {
 // ---------------------------------------------------------------------------
 
 function ResultCard({ result }: { result: ExamResult }) {
+  const t = useI18n();
   const [showAbsolute, setShowAbsolute] = useState(false);
   const scoreColor =
     result.score >= 85
@@ -499,14 +503,14 @@ function ResultCard({ result }: { result: ExamResult }) {
               : "bg-red-500/20 text-red-400 border border-red-500/30"
           }`}
         >
-          {result.passed ? "GEÇTİ" : "KALDI"}
+          {result.passed ? t.tr("GEÇTİ") : t.tr("KALDI")}
         </span>
       </div>
 
       {/* Score */}
       <div>
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs text-white/40">Puan</span>
+          <span className="text-xs text-white/40">{t.tr("Puan")}</span>
           <span className={`text-lg font-bold ${scoreColor}`}>
             {result.score}/100
           </span>
@@ -517,13 +521,13 @@ function ResultCard({ result }: { result: ExamResult }) {
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-2 text-center">
         <div className="glass rounded-xl p-2">
-          <p className="text-xs text-white/40 mb-0.5">Doğru</p>
+          <p className="text-xs text-white/40 mb-0.5">{t.tr("Doğru")}</p>
           <p className="text-sm font-semibold text-white">
             {result.correctCount}/{result.totalCount}
           </p>
         </div>
         <div className="glass rounded-xl p-2">
-          <p className="text-xs text-white/40 mb-0.5">Süre</p>
+          <p className="text-xs text-white/40 mb-0.5">{t.tr("Süre")}</p>
           <p className="text-sm font-semibold text-white">
             {formatTime(result.timeSpent)}
           </p>
@@ -561,6 +565,7 @@ function ResultCard({ result }: { result: ExamResult }) {
 // ---------------------------------------------------------------------------
 
 function ResultTableRow({ result }: { result: ExamResult }) {
+  const t = useI18n();
   const [showAbsolute, setShowAbsolute] = useState(false);
   const scoreColor =
     result.score >= 85
@@ -603,7 +608,7 @@ function ResultTableRow({ result }: { result: ExamResult }) {
       </td>
       {/* Correct */}
       <td className="px-4 py-3 text-sm text-white/70 whitespace-nowrap">
-        {result.correctCount}/{result.totalCount} Doğru
+        {result.correctCount}/{result.totalCount} {t.tr("Doğru")}
       </td>
       {/* Time */}
       <td className="px-4 py-3 text-sm text-white/60 whitespace-nowrap">
@@ -633,7 +638,7 @@ function ResultTableRow({ result }: { result: ExamResult }) {
               : "bg-red-500/20 text-red-400 border border-red-500/30"
           }`}
         >
-          {result.passed ? "GEÇTİ" : "KALDI"}
+          {result.passed ? t.tr("GEÇTİ") : t.tr("KALDI")}
         </span>
       </td>
     </tr>
@@ -691,6 +696,7 @@ function ResultSkeleton({ view }: { view: "card" | "table" }) {
 // ---------------------------------------------------------------------------
 
 export default function ExamResultsPage() {
+  const t = useI18n();
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -786,15 +792,15 @@ export default function ExamResultsPage() {
         <div className="hero-content relative z-10 max-w-3xl mx-auto animate-fade-slide-up stagger-1">
           <div className="text-5xl mb-4">📋</div>
           <h1 className="text-4xl font-bold text-white mb-3">
-            Sınav Geçmişi
+            {t.exams.resultsTitle}
           </h1>
           <p className="text-white/50 text-lg">
-            Tüm sınav ve quiz sonuçlarınız
+            {t.exams.subtitle}
           </p>
           {isDemoMode && (
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-sm">
               <span>⚠️</span>
-              Demo modu — gerçek verinizi görmek için giriş yapın
+              {t.common.demoMode} — {t.common.loginRequired}
             </div>
           )}
         </div>
@@ -819,7 +825,7 @@ export default function ExamResultsPage() {
               </span>
               <input
                 type="text"
-                placeholder="Sınav veya kurs ara..."
+                placeholder={t.common.search}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-indigo-500/60 focus:bg-white/8 transition-all"
@@ -830,9 +836,9 @@ export default function ExamResultsPage() {
             <div className="flex rounded-xl overflow-hidden border border-white/10">
               {(
                 [
-                  { key: "all", label: "Tümü" },
-                  { key: "passed", label: "Geçti" },
-                  { key: "failed", label: "Kaldı" },
+                  { key: "all", label: t.common.all },
+                  { key: "passed", label: t.exams.status.passed },
+                  { key: "failed", label: t.exams.status.failed },
                 ] as { key: FilterStatus; label: string }[]
               ).map(({ key, label }) => (
                 <button
@@ -855,17 +861,17 @@ export default function ExamResultsPage() {
               onChange={(e) => setSortKey(e.target.value as SortKey)}
               className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/70 text-sm focus:outline-none focus:border-indigo-500/60 transition-all cursor-pointer"
             >
-              <option value="newest">En Yeni</option>
-              <option value="oldest">En Eski</option>
-              <option value="highest">En Yüksek Puan</option>
-              <option value="lowest">En Düşük Puan</option>
+              <option value="newest">{t.courses.sortNewest}</option>
+              <option value="oldest">{t.courses.sortOldest}</option>
+              <option value="highest">{t.courses.sortRating}</option>
+              <option value="lowest">{t.courses.sortPopular}</option>
             </select>
 
             {/* View toggle */}
             <div className="flex rounded-xl overflow-hidden border border-white/10 ml-auto">
               <button
                 onClick={() => setView("card")}
-                title="Kart görünümü"
+                title={t.tr("Kart görünümü")}
                 className={`px-3 py-2.5 text-sm transition-all ${
                   view === "card"
                     ? "bg-indigo-600 text-white"
@@ -876,7 +882,7 @@ export default function ExamResultsPage() {
               </button>
               <button
                 onClick={() => setView("table")}
-                title="Tablo görünümü"
+                title={t.tr("Tablo görünümü")}
                 className={`px-3 py-2.5 text-sm transition-all ${
                   view === "table"
                     ? "bg-indigo-600 text-white"
@@ -890,9 +896,9 @@ export default function ExamResultsPage() {
 
           {/* Result count */}
           <p className="text-xs text-white/30 mt-3 pl-1">
-            {filtered.length} sonuç gösteriliyor
+            {filtered.length} {t.tr("sonuç gösteriliyor")}
             {search || filterStatus !== "all"
-              ? ` (${results.length} toplam)`
+              ? ` (${results.length} ${t.tr("toplam")})`
               : ""}
           </p>
         </div>
@@ -913,10 +919,10 @@ export default function ExamResultsPage() {
           <div className="glass rounded-2xl p-12 text-center animate-fade-slide-up">
             <p className="text-5xl mb-4">🔍</p>
             <p className="text-white/60 text-lg font-medium">
-              Sonuç bulunamadı
+              {t.common.noResults}
             </p>
             <p className="text-white/30 text-sm mt-2">
-              Arama kriterlerini değiştirmeyi deneyin
+              {t.common.noData}
             </p>
             <button
               onClick={() => {
@@ -925,7 +931,7 @@ export default function ExamResultsPage() {
               }}
               className="mt-6 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all"
             >
-              Filtreleri Temizle
+              {t.common.reset}
             </button>
           </div>
         )}
@@ -947,28 +953,28 @@ export default function ExamResultsPage() {
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Not
+                      {t.leaderboard.rankLabel}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Sınav / Kurs
+                      {t.exams.title}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider min-w-[130px]">
-                      Puan
+                      {t.exams.yourScore}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Doğru
+                      {t.exams.correctAnswers}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Süre
+                      {t.exams.timeLeft}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Tarih
+                      {t.payments.date}
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
                       XP
                     </th>
                     <th className="px-4 py-3 text-xs font-semibold text-white/40 uppercase tracking-wider">
-                      Durum
+                      {t.exams.status.inProgress}
                     </th>
                   </tr>
                 </thead>
@@ -986,7 +992,7 @@ export default function ExamResultsPage() {
         {!loading && results.length > 0 && (
           <div className="glass rounded-2xl p-5 animate-fade-slide-up">
             <h3 className="text-sm font-semibold text-white/50 uppercase tracking-widest mb-4">
-              Not Dağılımı
+              {t.tr("Not Dağılımı")}
             </h3>
             <div className="flex flex-wrap gap-3">
               {(["A", "B", "C", "D", "F"] as Grade[]).map((g) => {
@@ -1007,7 +1013,7 @@ export default function ExamResultsPage() {
                     </span>
                     <div>
                       <p className="text-white font-semibold text-sm">
-                        {count} sınav
+                        {count} {t.tr("sınav")}
                       </p>
                       <p className="text-white/30 text-xs">%{pct}</p>
                     </div>

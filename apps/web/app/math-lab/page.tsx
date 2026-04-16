@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useI18n } from "../_i18n/use-i18n";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -95,15 +96,15 @@ const DEFAULT_MATRIX_B: number[][] = [
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function Spinner() {
+function Spinner({ dark = false }: { dark?: boolean }) {
   return (
     <div
       style={{
         width: 22,
         height: 22,
         borderRadius: "50%",
-        border: "2.5px solid rgba(255,255,255,0.25)",
-        borderTopColor: "#fff",
+        border: `2.5px solid ${dark ? "var(--line)" : "rgba(255,255,255,0.25)"}`,
+        borderTopColor: dark ? "var(--accent)" : "#fff",
         animation: "spin 0.7s linear infinite",
         display: "inline-block",
         flexShrink: 0,
@@ -378,22 +379,22 @@ function EquationSolverTab() {
               gap: 10,
               padding: "12px 28px",
               borderRadius: "var(--r-md)",
-              border: "none",
+              border: loading ? "1.5px solid var(--line)" : "none",
               background: loading
-                ? "color-mix(in srgb, var(--accent-2) 70%, transparent)"
+                ? "var(--panel)"
                 : "linear-gradient(135deg, var(--accent-2), var(--accent))",
-              color: "#fff",
+              color: loading ? "var(--ink-2)" : "#fff",
               fontSize: 15,
               fontWeight: 700,
               cursor: loading || !expression.trim() ? "not-allowed" : "pointer",
               opacity: !expression.trim() ? 0.55 : 1,
-              boxShadow: "var(--glow-blue)",
+              boxShadow: loading ? "none" : "var(--glow-blue)",
               transition: "all var(--t-mid)",
             }}
           >
             {loading ? (
               <>
-                <Spinner />
+                <Spinner dark />
                 <span>Hesaplanıyor…</span>
               </>
             ) : (
@@ -668,21 +669,21 @@ function MatrixOperationsTab() {
               gap: 10,
               padding: "12px 28px",
               borderRadius: "var(--r-md)",
-              border: "none",
+              border: loading ? "1.5px solid var(--line)" : "none",
               background: loading
-                ? "color-mix(in srgb, var(--accent) 70%, transparent)"
+                ? "var(--panel)"
                 : "linear-gradient(135deg, var(--accent), var(--accent-2))",
-              color: "#fff",
+              color: loading ? "var(--ink-2)" : "#fff",
               fontSize: 15,
               fontWeight: 700,
               cursor: loading ? "not-allowed" : "pointer",
-              boxShadow: "var(--glow)",
+              boxShadow: loading ? "none" : "var(--glow)",
               transition: "all var(--t-mid)",
             }}
           >
             {loading ? (
               <>
-                <Spinner />
+                <Spinner dark />
                 <span>Hesaplanıyor…</span>
               </>
             ) : (
@@ -792,6 +793,7 @@ function MatrixOperationsTab() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MathLabPage() {
+  const t = useI18n();
   const [activeTab, setActiveTab] = useState<Tab>("equation");
 
   return (
@@ -850,7 +852,7 @@ export default function MathLabPage() {
                       letterSpacing: "-0.03em",
                     }}
                   >
-                    Matematik Laboratuvarı
+                    {t.mathLab.title}
                   </h1>
                   <span
                     className="pill pill-sm"
@@ -861,12 +863,12 @@ export default function MathLabPage() {
                       fontWeight: 600,
                     }}
                   >
-                    AI Çözücü
+                    {t.tr("AI Çözücü")}
                   </span>
                 </div>
 
                 <p style={{ fontSize: 15, color: "var(--ink-2)", margin: 0, lineHeight: 1.6 }}>
-                  Denklemler, matrisler ve geometrik hesaplamalar — yapay zeka destekli
+                  {t.mathLab.subtitle}
                 </p>
 
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 14 }}>
@@ -897,8 +899,8 @@ export default function MathLabPage() {
         >
           {(
             [
-              { key: "equation", label: "Denklem Çözücü", icon: "ƒ(x)" },
-              { key: "matrix", label: "Matris İşlemleri", icon: "⊞" },
+              { key: "equation", label: t.mathLab.calculate, icon: "ƒ(x)" },
+              { key: "matrix", label: t.mathLab.matrix, icon: "⊞" },
             ] as { key: Tab; label: string; icon: string }[]
           ).map((tab) => (
             <button
@@ -924,7 +926,7 @@ export default function MathLabPage() {
               }}
             >
               <span style={{ fontFamily: "monospace", fontSize: 15 }}>{tab.icon}</span>
-              {tab.label}
+              {t.tr(tab.label)}
             </button>
           ))}
         </div>

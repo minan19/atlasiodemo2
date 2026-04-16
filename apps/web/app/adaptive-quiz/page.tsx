@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useI18n } from '../_i18n/use-i18n';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
@@ -205,8 +206,8 @@ function formatTime(seconds: number): string {
   return `${m}:${s}`;
 }
 
-function difficultyLabel(d: Difficulty): string {
-  return d === 'EASY' ? 'Kolay' : d === 'MEDIUM' ? 'Orta' : 'Zor';
+function difficultyLabel(d: Difficulty, tr: (s: string) => string): string {
+  return d === 'EASY' ? tr('Kolay') : d === 'MEDIUM' ? tr('Orta') : tr('Zor');
 }
 
 function difficultyStyle(d: Difficulty): React.CSSProperties {
@@ -284,6 +285,7 @@ interface SetupProps {
 }
 
 function SetupPhase({ onStart, loading }: SetupProps) {
+  const t = useI18n();
   const [difficulty, setDifficulty] = useState<Difficulty>('MEDIUM');
   const [courseId, setCourseId] = useState('');
   const [questionCount, setQuestionCount] = useState(10);
@@ -312,14 +314,14 @@ function SetupPhase({ onStart, loading }: SetupProps) {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}>
-            Adaptif Sınav Motoru
+            {t.adaptiveQuiz.title}
           </h1>
           <p style={{ color: 'var(--muted)', fontSize: 15, margin: 0 }}>
-            Sana göre zorlanan, sana göre öğreten
+            {t.adaptiveQuiz.subtitle}
           </p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-            <span className="pill pill-sm">🤖 Yapay Zeka Destekli</span>
-            <span className="pill pill-sm pill-dark">⚡ Anlık Adaptasyon</span>
+            <span className="pill pill-sm">{t.tr("🤖 Yapay Zeka Destekli")}</span>
+            <span className="pill pill-sm pill-dark">{t.tr("⚡ Anlık Adaptasyon")}</span>
           </div>
         </div>
       </div>
@@ -327,7 +329,7 @@ function SetupPhase({ onStart, loading }: SetupProps) {
       {/* Difficulty selector */}
       <div className="glass animate-fade-slide-up stagger-1" style={{ padding: 24, marginBottom: 16 }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Başlangıç Zorluğu
+          {t.adaptiveQuiz.selectDifficulty}
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
           {diffOptions.map(opt => (
@@ -346,9 +348,9 @@ function SetupPhase({ onStart, loading }: SetupProps) {
             >
               <div style={{ fontSize: 24, marginBottom: 6 }}>{opt.icon}</div>
               <div style={{ fontWeight: 700, fontSize: 14, color: difficulty === opt.key ? opt.text : 'var(--ink)' }}>
-                {opt.label}
+                {t.tr(opt.label)}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{opt.desc}</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{t.tr(opt.desc)}</div>
             </button>
           ))}
         </div>
@@ -357,13 +359,13 @@ function SetupPhase({ onStart, loading }: SetupProps) {
       {/* Course ID */}
       <div className="glass animate-fade-slide-up stagger-2" style={{ padding: 24, marginBottom: 16 }}>
         <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Kurs Bağlantısı
+          {t.tr("Kurs Bağlantısı")}
         </p>
         <input
           type="text"
           value={courseId}
           onChange={e => setCourseId(e.target.value)}
-          placeholder="Kurs ID (opsiyonel)"
+          placeholder={t.tr("Kurs ID (opsiyonel)")}
           style={{
             width: '100%',
             border: '1px solid var(--line)',
@@ -380,7 +382,7 @@ function SetupPhase({ onStart, loading }: SetupProps) {
       <div className="glass animate-fade-slide-up stagger-3" style={{ padding: 24, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Soru Sayısı
+            {t.adaptiveQuiz.questionsCount}
           </p>
           <span style={{
             background: 'var(--accent)',
@@ -402,8 +404,8 @@ function SetupPhase({ onStart, loading }: SetupProps) {
           style={{ width: '100%', accentColor: 'var(--accent)' }}
         />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
-          <span>5 (Hızlı)</span>
-          <span>20 (Kapsamlı)</span>
+          <span>{t.tr("5 (Hızlı)")}</span>
+          <span>{t.tr("20 (Kapsamlı)")}</span>
         </div>
       </div>
 
@@ -415,10 +417,10 @@ function SetupPhase({ onStart, loading }: SetupProps) {
           style={{
             width: '100%',
             padding: '16px',
-            background: loading ? 'var(--muted)' : 'linear-gradient(135deg, var(--accent), var(--accent-2))',
-            border: 'none',
+            background: loading ? 'var(--panel)' : 'linear-gradient(135deg, var(--accent), var(--accent-2))',
+            border: loading ? '1px solid var(--line)' : 'none',
             borderRadius: 'var(--r-lg)',
-            color: '#fff',
+            color: loading ? 'var(--ink-2)' : '#fff',
             fontSize: 16,
             fontWeight: 700,
             cursor: loading ? 'not-allowed' : 'pointer',
@@ -432,11 +434,11 @@ function SetupPhase({ onStart, loading }: SetupProps) {
         >
           {loading ? (
             <>
-              <div style={{ width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              Hazırlanıyor...
+              <div style={{ width: 18, height: 18, border: '2px solid var(--line-accent)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              {t.common.loading}
             </>
           ) : (
-            <>🚀 Sınava Başla</>
+            <>🚀 {t.adaptiveQuiz.startBtn}</>
           )}
         </button>
       </div>
@@ -474,6 +476,7 @@ function QuizPhase({
   onNext,
   loadingAnswer,
 }: QuizProps) {
+  const t = useI18n();
   const [selected, setSelected] = useState<string>('');
   const [shortAnswer, setShortAnswer] = useState('');
 
@@ -489,9 +492,10 @@ function QuizPhase({
     onAnswer(ans);
   };
 
+  // correctAnswer used only for highlight styling — derived from answerResult
   const correctAnswer = answerResult
     ? (question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE')
-      ? question.options.find(o => o === answerResult.correct ? selected : null) // just highlight from result
+      ? (answerResult.correct as unknown as string | null)
       : null
     : null;
   void correctAnswer;
@@ -507,7 +511,7 @@ function QuizPhase({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontWeight: 700, fontSize: 15 }}>
-              Soru {questionIndex + 1}<span style={{ color: 'var(--muted)', fontWeight: 400 }}>/{totalQuestions}</span>
+              {t.adaptiveQuiz.questionLabel} {questionIndex + 1}<span style={{ color: 'var(--muted)', fontWeight: 400 }}>/{totalQuestions}</span>
             </span>
             {difficultyChanged && (
               <span
@@ -519,7 +523,7 @@ function QuizPhase({
                   color: difficultyChanged === 'up' ? '#991b1b' : '#065f46',
                 }}
               >
-                {difficultyChanged === 'up' ? '↑ Zorluk arttı' : '↓ Zorluk azaldı'}
+                {difficultyChanged === 'up' ? t.tr('↑ Zorluk arttı') : t.tr('↓ Zorluk azaldı')}
               </span>
             )}
           </div>
@@ -528,7 +532,7 @@ function QuizPhase({
               className="pill pill-sm"
               style={difficultyStyle(difficulty)}
             >
-              {difficultyLabel(difficulty)}
+              {difficultyLabel(difficulty, t.tr)}
             </span>
             <span className="pill pill-sm pill-dark">⏱ {formatTime(elapsedSeconds)}</span>
             <span
@@ -543,18 +547,18 @@ function QuizPhase({
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, color: 'var(--muted)' }}>
-          <span>İlerleme</span>
-          <span>Puan: {score}</span>
+          <span>{t.tr("İlerleme")}</span>
+          <span>{t.tr("Puan")}: {score}</span>
         </div>
       </div>
 
       {/* Question card */}
       <div className="glass animate-fade-slide-up stagger-1" style={{ padding: 28, marginBottom: 16 }}>
         <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 }}>
-          {question.type === 'MULTIPLE_CHOICE' ? '📋 Çoktan Seçmeli' : question.type === 'TRUE_FALSE' ? '⚖️ Doğru / Yanlış' : '✍️ Kısa Yanıt'}
+          {question.type === 'MULTIPLE_CHOICE' ? t.tr('📋 Çoktan Seçmeli') : question.type === 'TRUE_FALSE' ? t.tr('⚖️ Doğru / Yanlış') : t.tr('✍️ Kısa Yanıt')}
         </p>
         <p style={{ fontSize: 19, fontWeight: 600, lineHeight: 1.5, margin: 0, color: 'var(--ink)' }}>
-          {question.text}
+          {t.tr(question.text)}
         </p>
       </div>
 
@@ -688,7 +692,7 @@ function QuizPhase({
             value={shortAnswer}
             onChange={e => setShortAnswer(e.target.value)}
             disabled={!!answerResult}
-            placeholder="Cevabınızı buraya yazın..."
+            placeholder={t.tr("Cevabınızı buraya yazın...")}
             onKeyDown={e => { if (e.key === 'Enter' && !answerResult) handleSubmit(); }}
             style={{
               width: '100%',
@@ -717,7 +721,7 @@ function QuizPhase({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, fontWeight: 700, color: answerResult.correct ? '#065f46' : '#991b1b' }}>
             <span style={{ fontSize: 20 }}>{answerResult.correct ? '🎉' : '❗'}</span>
-            {answerResult.correct ? 'Doğru Cevap!' : 'Yanlış Cevap'}
+            {answerResult.correct ? t.adaptiveQuiz.correctAnswer : t.adaptiveQuiz.wrongAnswer}
           </div>
           <p style={{ margin: 0, fontSize: 13, color: answerResult.correct ? '#065f46' : '#991b1b', lineHeight: 1.6 }}>
             {answerResult.explanation}
@@ -752,9 +756,9 @@ function QuizPhase({
           {loadingAnswer ? (
             <>
               <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              Kontrol ediliyor...
+              {t.common.loading}
             </>
-          ) : '✔ Cevapla'}
+          ) : `✔ ${t.adaptiveQuiz.submitAnswer}`}
         </button>
       ) : (
         <button
@@ -773,7 +777,7 @@ function QuizPhase({
             boxShadow: 'var(--glow-blue)',
           }}
         >
-          Sonraki Soru →
+          {t.adaptiveQuiz.nextBtn} →
         </button>
       )}
     </div>
@@ -787,6 +791,7 @@ interface ResultsProps {
 }
 
 function ResultsPhase({ result, onRetry }: ResultsProps) {
+  const t = useI18n();
   const [animXp, setAnimXp] = useState(0);
   const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
 
@@ -803,8 +808,8 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
     // Confetti for A grade
     if (result.grade === 'A') {
       setConfetti(generateConfetti());
-      const t = setTimeout(() => setConfetti([]), 4500);
-      return () => { clearInterval(interval); clearTimeout(t); };
+      const confettiTimer = setTimeout(() => setConfetti([]), 4500);
+      return () => { clearInterval(interval); clearTimeout(confettiTimer); };
     }
 
     return () => clearInterval(interval);
@@ -815,10 +820,10 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
   const color = gradeColor(result.grade);
 
   const metrics = [
-    { label: 'Doğru', value: result.correctCount, icon: '✅', color: '#10b981' },
-    { label: 'Yanlış', value: wrongCount, icon: '❌', color: '#ef4444' },
-    { label: 'Süre', value: formatTime(result.timeSpent), icon: '⏱', color: 'var(--accent-2)' },
-    { label: 'XP Kazanılan', value: `+${animXp}`, icon: '⚡', color: '#f59e0b' },
+    { label: t.adaptiveQuiz.correctAnswer, value: result.correctCount, icon: '✅', color: '#10b981' },
+    { label: t.adaptiveQuiz.wrongAnswer, value: wrongCount, icon: '❌', color: '#ef4444' },
+    { label: t.tr('Süre'), value: formatTime(result.timeSpent), icon: '⏱', color: 'var(--accent-2)' },
+    { label: t.tr('XP Kazanılan'), value: `+${animXp}`, icon: '⚡', color: '#f59e0b' },
   ];
 
   return (
@@ -859,10 +864,10 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
             <span style={{ fontSize: 52, fontWeight: 900, color, lineHeight: 1 }}>{result.grade}</span>
           </div>
           <h2 style={{ margin: '0 0 8px', fontSize: 24 }}>
-            {result.grade === 'A' ? '🏆 Mükemmel!' : result.grade === 'B' ? '🎯 Çok İyi!' : result.grade === 'C' ? '👍 İyi!' : result.grade === 'D' ? '💪 Gelişiyor!' : '📚 Tekrar Dene!'}
+            {result.grade === 'A' ? t.tr('🏆 Mükemmel!') : result.grade === 'B' ? t.tr('🎯 Çok İyi!') : result.grade === 'C' ? t.tr('👍 İyi!') : result.grade === 'D' ? t.tr('💪 Gelişiyor!') : t.tr('📚 Tekrar Dene!')}
           </h2>
           <p style={{ color: 'var(--muted)', margin: 0, fontSize: 15 }}>
-            {result.correctCount}/{result.totalCount} soruyu doğru cevapladın
+            {result.correctCount}/{result.totalCount} {t.tr("soruyu doğru cevapladın")}
           </p>
           <div style={{ marginTop: 16 }}>
             <div className="progress-track" style={{ height: 10 }}>
@@ -874,7 +879,7 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
                 }}
               />
             </div>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--muted)' }}>{correctPct}% başarı oranı</p>
+            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--muted)' }}>{correctPct}% {t.tr("başarı oranı")}</p>
           </div>
         </div>
       </div>
@@ -883,10 +888,10 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginBottom: 20 }}>
         {metrics.map((m, i) => (
           <div
-            key={m.label}
+            key={t.tr(m.label)}
             className={`metric animate-fade-slide-up stagger-${Math.min(i + 1, 4) as 1 | 2 | 3 | 4}`}
           >
-            <div className="label">{m.icon} {m.label}</div>
+            <div className="label">{m.icon} {t.tr(m.label)}</div>
             <div className="value" style={{ color: m.color }}>{m.value}</div>
           </div>
         ))}
@@ -908,7 +913,7 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
             boxShadow: 'var(--glow)',
           }}
         >
-          🔄 Tekrar Dene
+          🔄 {t.adaptiveQuiz.retryBtn}
         </button>
         <Link
           href="/courses"
@@ -927,7 +932,7 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
             textDecoration: 'none',
           }}
         >
-          📚 Kursa Dön
+          {t.tr("📚 Kursa Dön")}
         </Link>
       </div>
     </div>
@@ -936,6 +941,7 @@ function ResultsPhase({ result, onRetry }: ResultsProps) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function AdaptiveQuizPage() {
+  const t = useI18n();
   const [phase, setPhase] = useState<Phase>('SETUP');
   const [sessionId, setSessionId] = useState<string>('');
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
@@ -1109,17 +1115,17 @@ export default function AdaptiveQuizPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
           <Link href="/dashboard" className="back-btn">← Dashboard</Link>
           <span className="sep">›</span>
-          <span className="pill pill-sm">🧠 Adaptif Sınav</span>
+          <span className="pill pill-sm">{t.tr("🧠 Adaptif Sınav")}</span>
           {phase === 'QUIZ' && (
             <>
               <span className="sep">›</span>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Aktif Oturum</span>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t.tr("Aktif Oturum")}</span>
             </>
           )}
           {phase === 'RESULTS' && (
             <>
               <span className="sep">›</span>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Sonuçlar</span>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t.tr("Sonuçlar")}</span>
             </>
           )}
         </div>

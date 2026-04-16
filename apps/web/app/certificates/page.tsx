@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { api } from "../api/client";
+import { useI18n } from "../_i18n/use-i18n";
 
 type Certificate = {
   id: string;
@@ -104,10 +105,12 @@ function getLevelLabel(level?: Level | null): string {
     default:       return "Standart";
   }
 }
+// getLevelLabel returns Turkish keys; wrap with t.tr() at render sites
 
 // ─── Status badge ────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useI18n();
   if (status === "active") {
     return (
       <span
@@ -134,7 +137,7 @@ function StatusBadge({ status }: { status: string }) {
             animation: "statusPulse 2s ease-in-out infinite",
           }}
         />
-        Aktif
+        {t.tr("Aktif")}
       </span>
     );
   }
@@ -162,7 +165,7 @@ function StatusBadge({ status }: { status: string }) {
             background: "#64748b",
           }}
         />
-        Süresi Dolmuş
+        {t.tr("Süresi Dolmuş")}
       </span>
     );
   }
@@ -189,7 +192,7 @@ function StatusBadge({ status }: { status: string }) {
           background: "#f59e0b",
         }}
       />
-      Beklemede
+      {t.tr("Beklemede")}
     </span>
   );
 }
@@ -300,6 +303,7 @@ function CertSkeleton() {
 // ─── Certificate card with flip ──────────────────────────────────────────────
 
 function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) => void }) {
+  const t = useI18n();
   const [flipped, setFlipped] = useState(false);
 
   const verifyUrl =
@@ -323,7 +327,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
         animation: "fadeSlideUp var(--t-slow) both",
       }}
       onClick={() => setFlipped((f) => !f)}
-      title="Çevirmek için tıkla"
+      title={t.tr("Çevirmek için tıkla")}
     >
       <div
         style={{
@@ -412,7 +416,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                     opacity: 0.75,
                   }}
                 >
-                  ATLASIO &nbsp;·&nbsp; Sertifika
+                  ATLASIO &nbsp;·&nbsp; {t.tr("Sertifika")}
                 </span>
                 <span
                   style={{
@@ -423,7 +427,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                     textTransform: "uppercase",
                   }}
                 >
-                  {getLevelLabel(cert.level)} Seviye
+                  {t.tr(getLevelLabel(cert.level))} {t.tr("Seviye")}
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -479,7 +483,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                 textShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
             >
-              {cert.Course?.title ?? "Kurs"}
+              {t.tr(cert.Course?.title ?? "Kurs")}
             </div>
 
             {/* Student name */}
@@ -492,7 +496,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                 marginBottom: 8,
               }}
             >
-              {cert.User?.name ?? cert.User?.email ?? "Öğrenci"}
+              {cert.User?.name ?? cert.User?.email ?? t.tr("Öğrenci")}
             </div>
 
             {/* Bottom row */}
@@ -507,7 +511,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
               }}
             >
               <div style={{ fontSize: 10, opacity: 0.75 }}>
-                <span style={{ fontWeight: 600 }}>Veriliş: </span>
+                <span style={{ fontWeight: 600 }}>{t.tr("Veriliş")}: </span>
                 {new Date(cert.issuedAt).toLocaleDateString("tr-TR", {
                   day: "numeric",
                   month: "long",
@@ -516,7 +520,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
               </div>
               {cert.expiresAt && (
                 <div style={{ fontSize: 10, opacity: 0.75 }}>
-                  <span style={{ fontWeight: 600 }}>Son: </span>
+                  <span style={{ fontWeight: 600 }}>{t.tr("Son")}: </span>
                   {new Date(cert.expiresAt).toLocaleDateString("tr-TR", {
                     day: "numeric",
                     month: "short",
@@ -584,7 +588,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                   letterSpacing: "-0.01em",
                 }}
               >
-                Sertifika Doğrulama
+                {t.tr("Sertifika Doğrulama")}
               </span>
               <button
                 onClick={() => setFlipped(false)}
@@ -598,7 +602,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                   cursor: "pointer",
                 }}
               >
-                Geri çevir
+                {t.tr("Geri çevir")}
               </button>
             </div>
 
@@ -641,7 +645,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 3, fontWeight: 500 }}>
-                  Doğrulama Anahtarı
+                  {t.tr("Doğrulama Anahtarı")}
                 </div>
                 <div
                   style={{
@@ -664,7 +668,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
             {/* Verify URL */}
             <div>
               <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4, fontWeight: 500 }}>
-                Doğrulama Linki
+                {t.tr("Doğrulama Linki")}
               </div>
               <div
                 style={{
@@ -694,7 +698,7 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
                   <rect x="4" y="4" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
                   <path d="M10 4V2.5A1.5 1.5 0 0 0 8.5 1h-6A1.5 1.5 0 0 0 1 2.5v6A1.5 1.5 0 0 0 2.5 10H4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
-                Link Kopyala
+                {t.tr("Link Kopyala")}
               </button>
               <a
                 href={linkedInUrl}
@@ -738,16 +742,17 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
 // ─── Stats bar ───────────────────────────────────────────────────────────────
 
 function StatsBar({ certs, isDemo }: { certs: Certificate[]; isDemo: boolean }) {
+  const t = useI18n();
   const total = certs.length;
   const active = certs.filter((c) => c.status === "active").length;
   const expired = certs.filter((c) => c.status === "expired").length;
   const pending = certs.filter((c) => c.status === "pending").length;
 
   const stats = [
-    { label: "Toplam Sertifika", value: total, color: "var(--accent-2)" },
-    { label: "Aktif", value: active, color: "#10b981" },
-    { label: "Süresi Dolmuş", value: expired, color: "var(--muted)" },
-    { label: "Beklemede", value: pending, color: "var(--accent-3)" },
+    { label: t.tr("Toplam Sertifika"), value: total, color: "var(--accent-2)" },
+    { label: t.tr("Aktif"), value: active, color: "#10b981" },
+    { label: t.tr("Süresi Dolmuş"), value: expired, color: "var(--muted)" },
+    { label: t.tr("Beklemede"), value: pending, color: "var(--accent-3)" },
   ];
 
   return (
@@ -790,6 +795,7 @@ function StatsBar({ certs, isDemo }: { certs: Certificate[]; isDemo: boolean }) 
 // ─── Empty state ─────────────────────────────────────────────────────────────
 
 function EmptyState() {
+  const t = useI18n();
   return (
     <div
       className="animate-scale-in"
@@ -833,7 +839,7 @@ function EmptyState() {
             marginBottom: 6,
           }}
         >
-          Henüz sertifikan yok
+          {t.tr("Henüz sertifikan yok")}
         </div>
         <div
           style={{
@@ -843,7 +849,7 @@ function EmptyState() {
             maxWidth: 320,
           }}
         >
-          Bir kursu tamamladığında sertifikan burada belirecek. Çevrimiçi eğitim ile kariyerini ilerlet.
+          {t.tr("Bir kursu tamamladığında sertifikan burada belirecek. Çevrimiçi eğitim ile kariyerini ilerlet.")}
         </div>
       </div>
       <Link
@@ -855,7 +861,7 @@ function EmptyState() {
           <circle cx="7.5" cy="7.5" r="6.5" stroke="currentColor" strokeWidth="1.4"/>
           <path d="M6 7.5h3M7.5 6l1.5 1.5-1.5 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
-        Kurslara Göz At
+        {t.tr("Kurslara Göz At")}
       </Link>
     </div>
   );
@@ -864,6 +870,7 @@ function EmptyState() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CertificatesPage() {
+  const t = useI18n();
   const { data: apiCerts, error, isLoading } = useSWR<Certificate[]>(
     "/certifications/me",
     api,
@@ -883,8 +890,8 @@ export default function CertificatesPage() {
     (url: string) => {
       navigator.clipboard
         .writeText(url)
-        .then(() => showToast("Doğrulama linki kopyalandı!"))
-        .catch(() => showToast("Kopyalama başarısız."));
+        .then(() => showToast(t.tr("Doğrulama linki kopyalandı!")))
+        .catch(() => showToast(t.tr("Kopyalama başarısız.")));
     },
     [showToast]
   );
@@ -906,7 +913,7 @@ export default function CertificatesPage() {
                   <rect x="1" y="2" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
                   <path d="M3.5 5.5h5M3.5 7.5h3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                 </svg>
-                Sertifikalarım
+                {t.certificates.title}
               </div>
               <h1
                 style={{
@@ -917,10 +924,10 @@ export default function CertificatesPage() {
                   lineHeight: 1.1,
                 }}
               >
-                Başarı Sertifikaların
+                {t.certificates.title}
               </h1>
               <p style={{ fontSize: 13, color: "var(--muted)", maxWidth: 500, margin: 0, lineHeight: 1.6 }}>
-                LinkedIn paylaşım kartı, PDF indirme ve QR/anahtar kod ile anlık doğrulama. Kartı çevirmek için üzerine tıkla.
+                {t.certificates.subtitle}
               </p>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -929,7 +936,7 @@ export default function CertificatesPage() {
                   <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.4"/>
                   <path d="M5 7l1.5 1.5 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Doğrulama Ekranı
+                {t.tr("Doğrulama Ekranı")}
               </Link>
             </div>
           </div>
@@ -957,7 +964,7 @@ export default function CertificatesPage() {
             <path d="M7.5 4.5v3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
             <circle cx="7.5" cy="10" r="0.8" fill="currentColor"/>
           </svg>
-          Sertifikalar yüklenemedi — demo veriler gösteriliyor. ({error?.message ?? "Bağlantı hatası"})
+          {t.tr("Sertifikalar yüklenemedi — demo veriler gösteriliyor.")} ({error?.message ?? t.tr("Bağlantı hatası")})
         </div>
       )}
 
@@ -980,7 +987,7 @@ export default function CertificatesPage() {
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1l1.8 3.6 4 .6-2.9 2.8.7 4L7 10 3.4 12l.7-4L1.2 5.2l4-.6z" stroke="currentColor" strokeWidth="1.3" fill="none"/>
           </svg>
-          Henüz sertifikan yok — örnek görünüm için demo kartlar gösteriliyor.
+          {t.tr("Henüz sertifikan yok — örnek görünüm için demo kartlar gösteriliyor.")}
         </div>
       )}
 
@@ -1019,17 +1026,17 @@ export default function CertificatesPage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              {isDemo ? "Örnek Sertifikalar" : "Sertifikalarım"}
+              {isDemo ? t.tr("Örnek Sertifikalar") : t.tr("Sertifikalarım")}
             </div>
             {!isLoading && (
               <span className="pill pill-sm pill-dark">
-                {certs.length} adet
+                {certs.length} {t.tr("adet")}
               </span>
             )}
           </div>
           {!isDemo && certs.length > 0 && (
             <div style={{ fontSize: 11, color: "var(--muted)" }}>
-              Çevirmek için kartlara tıkla
+              {t.tr("Çevirmek için kartlara tıkla")}
             </div>
           )}
         </div>

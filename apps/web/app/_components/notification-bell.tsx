@@ -186,7 +186,7 @@ export function NotificationBell() {
           onClick={openPanel}
           className={`theme-toggle relative ${unread > 0 ? 'animate-pulse' : ''}`}
           aria-label="Bildirimler"
-          title="Bildirimler"
+          data-tip="Bildirimler"
         >
           🔔
           {badgeLabel && (

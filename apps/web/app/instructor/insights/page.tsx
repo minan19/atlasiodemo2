@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { api } from "../../api/client";
 import { PanelShell } from "../../_components/panel-shell";
+import { useI18n } from "../../_i18n/use-i18n";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -149,6 +150,7 @@ function SectionHeading({ title }: { title: string }) {
 type TooltipState = { day: number; hour: number; count: number; x: number; y: number } | null;
 
 function EngagementHeatmap() {
+  const t = useI18n();
   const [tooltip, setTooltip] = useState<TooltipState>(null);
 
   const intensityColor = (count: number): string => {
@@ -166,10 +168,10 @@ function EngagementHeatmap() {
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-slide-up stagger-1">
       <div className="flex items-center justify-between">
-        <SectionHeading title="Öğrenci Aktivite Haritası" />
-        <span className="pill text-xs">7 gün × 24 saat</span>
+        <SectionHeading title={t.tr("Öğrenci Aktivite Haritası")} />
+        <span className="pill text-xs">{t.tr("7 gün × 24 saat")}</span>
       </div>
-      <p className="text-xs text-slate-500">Öğrencilerin en aktif olduğu saat dilimlerini keşfet.</p>
+      <p className="text-xs text-slate-500">{t.tr("Öğrencilerin en aktif olduğu saat dilimlerini keşfet.")}</p>
 
       <div className="relative overflow-x-auto pb-1">
         {/* Tooltip */}
@@ -180,7 +182,7 @@ function EngagementHeatmap() {
           >
             <span className="font-semibold text-slate-700">{DAYS[tooltip.day]}</span>
             <span className="text-slate-500"> {String(tooltip.hour).padStart(2, "0")}:00 — </span>
-            <span className="font-bold text-blue-700">{tooltip.count} aktif</span>
+            <span className="font-bold text-blue-700">{tooltip.count} {t.tr("aktif")}</span>
           </div>
         )}
 
@@ -223,11 +225,11 @@ function EngagementHeatmap() {
 
         {/* Legend */}
         <div className="flex items-center gap-2 mt-3 text-[10px] text-slate-500">
-          <span>Az</span>
+          <span>{t.tr("Az")}</span>
           {["#dbeafe", "#93c5fd", "#3b82f6", "#1d4ed8", "#1e3a8a"].map((c) => (
             <div key={c} className="w-4 h-4 rounded-sm" style={{ backgroundColor: c }} />
           ))}
-          <span>Çok</span>
+          <span>{t.tr("Çok")}</span>
         </div>
       </div>
     </div>
@@ -235,6 +237,7 @@ function EngagementHeatmap() {
 }
 
 function CompletionFunnel() {
+  const t = useI18n();
   const totalWidth = 480;
   const stageH = 58;
   const gap = 10;
@@ -244,10 +247,10 @@ function CompletionFunnel() {
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-slide-up stagger-2">
       <div className="flex items-center justify-between">
-        <SectionHeading title="Kurs Tamamlama Hunisi" />
-        <span className="pill text-xs">4 aşama</span>
+        <SectionHeading title={t.tr("Kurs Tamamlama Hunisi")} />
+        <span className="pill text-xs">{t.tr("4 aşama")}</span>
       </div>
-      <p className="text-xs text-slate-500">Kayıttan tamamlamaya dönüşüm oranları.</p>
+      <p className="text-xs text-slate-500">{t.tr("Kayıttan tamamlamaya dönüşüm oranları.")}</p>
 
       <div className="overflow-x-auto">
         <svg
@@ -291,7 +294,7 @@ function CompletionFunnel() {
                   fontSize={13}
                   fontWeight="700"
                 >
-                  {stage.label}
+                  {t.tr(stage.label)}
                 </text>
                 {/* Count */}
                 <text
@@ -302,7 +305,7 @@ function CompletionFunnel() {
                   fontSize={11}
                   opacity={0.9}
                 >
-                  {stage.count.toLocaleString("tr-TR")} öğrenci
+                  {stage.count.toLocaleString("tr-TR")} {t.tr("öğrenci")}
                 </text>
                 {/* Conversion rate badge between stages */}
                 {i > 0 && (
@@ -328,7 +331,7 @@ function CompletionFunnel() {
         {funnelStages.map((s) => (
           <div key={s.label} className="flex items-center gap-1.5 text-xs text-slate-600">
             <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: s.color }} />
-            <span>{s.label}: <strong>{s.count.toLocaleString("tr-TR")}</strong></span>
+            <span>{t.tr(s.label)}: <strong>{s.count.toLocaleString("tr-TR")}</strong></span>
           </div>
         ))}
       </div>
@@ -337,6 +340,7 @@ function CompletionFunnel() {
 }
 
 function StudentRiskDetector() {
+  const t = useI18n();
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState<string | null>(null);
 
@@ -362,13 +366,13 @@ function StudentRiskDetector() {
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-slide-up stagger-3">
       <div className="flex items-center justify-between">
-        <SectionHeading title="Risk Altındaki Öğrenciler" />
+        <SectionHeading title={t.tr("Risk Altındaki Öğrenciler")} />
         <span className="pill text-xs bg-rose-50 border-rose-200 text-rose-700">
-          7+ gün aktif değil
+          {t.tr("7+ gün aktif değil")}
         </span>
       </div>
       <p className="text-xs text-slate-500">
-        7 günden uzun süredir hiç giriş yapmayan öğrenciler. Hatırlatma göndererek onları geri kazan.
+        {t.tr("7 günden uzun süredir hiç giriş yapmayan öğrenciler. Hatırlatma göndererek onları geri kazan.")}
       </p>
 
       <div className="space-y-2">
@@ -386,7 +390,7 @@ function StudentRiskDetector() {
                 </div>
                 <div className="min-w-0">
                   <div className="font-semibold text-sm truncate">{s.name}</div>
-                  <div className="text-xs text-slate-500 truncate">{s.course} · Son giriş: {s.lastActive}</div>
+                  <div className="text-xs text-slate-500 truncate">{t.tr(s.course)} · {t.tr("Son giriş:")} {s.lastActive}</div>
                 </div>
               </div>
               <button
@@ -398,7 +402,7 @@ function StudentRiskDetector() {
                     : "bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100"
                 } disabled:cursor-not-allowed`}
               >
-                {isSending ? "Gönderiliyor…" : isSent ? "✓ Gönderildi" : "Hatırlatma Gönder"}
+                {isSending ? t.tr("Gönderiliyor…") : isSent ? t.tr("✓ Gönderildi") : t.tr("Hatırlatma Gönder")}
               </button>
             </div>
           );
@@ -406,13 +410,14 @@ function StudentRiskDetector() {
       </div>
 
       <div className="text-xs text-slate-400 text-right">
-        Toplam {riskStudents.length} öğrenci risk altında
+        {t.tr("Toplam")} {riskStudents.length} {t.tr("öğrenci risk altında")}
       </div>
     </div>
   );
 }
 
 function RevenueBreakdown() {
+  const t = useI18n();
   const svgW = 560;
   const svgH = 220;
   const padL = 48;
@@ -436,10 +441,10 @@ function RevenueBreakdown() {
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-slide-up stagger-4">
       <div className="flex items-center justify-between">
-        <SectionHeading title="Kursa Göre Aylık Gelir" />
-        <span className="pill text-xs">Son 6 ay</span>
+        <SectionHeading title={t.tr("Kursa Göre Aylık Gelir")} />
+        <span className="pill text-xs">{t.tr("Son 6 ay")}</span>
       </div>
-      <p className="text-xs text-slate-500">Her kursun aylık gelir dağılımı (₺).</p>
+      <p className="text-xs text-slate-500">{t.tr("Her kursun aylık gelir dağılımı (₺).")}</p>
 
       <div className="overflow-x-auto">
         <svg
@@ -493,7 +498,7 @@ function RevenueBreakdown() {
                 fontSize={10}
                 fill="#64748b"
               >
-                {month}
+                {t.tr(month)}
               </text>
             </g>
           ))}
@@ -521,24 +526,25 @@ function RevenueBreakdown() {
 }
 
 function TopStudentsTable() {
+  const t = useI18n();
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3 animate-fade-slide-up stagger-1">
       <div className="flex items-center justify-between">
-        <SectionHeading title="En Başarılı Öğrenciler" />
-        <span className="pill text-xs">XP sıralaması</span>
+        <SectionHeading title={t.tr("En Başarılı Öğrenciler")} />
+        <span className="pill text-xs">{t.tr("XP sıralaması")}</span>
       </div>
-      <p className="text-xs text-slate-500">Bu haftanın en aktif ve en yüksek tamamlama oranlı öğrencileri.</p>
+      <p className="text-xs text-slate-500">{t.tr("Bu haftanın en aktif ve en yüksek tamamlama oranlı öğrencileri.")}</p>
 
       <div className="overflow-x-auto rounded-xl border border-slate-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/80">
               <th className="text-left px-3 py-2 text-xs font-semibold text-slate-500 w-10">#</th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-slate-500">Öğrenci</th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-slate-500">{t.tr("Öğrenci")}</th>
               <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500">XP</th>
-              <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500">Tamamlama</th>
+              <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500">{t.tr("Tamamlama")}</th>
               <th className="text-right px-3 py-2 text-xs font-semibold text-slate-500 hidden sm:table-cell">
-                Son Aktivite
+                {t.tr("Son Aktivite")}
               </th>
             </tr>
           </thead>
@@ -590,7 +596,7 @@ function TopStudentsTable() {
                     </div>
                   </td>
                   <td className="px-3 py-2.5 text-right text-xs text-slate-500 hidden sm:table-cell">
-                    {s.lastActive}
+                    {t.tr(s.lastActive)}
                   </td>
                 </tr>
               );
@@ -605,6 +611,7 @@ function TopStudentsTable() {
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function HeadInstructorPage() {
+  const t = useI18n();
   const { data: users, isLoading: usersLoading } = useSWR<UserRecord[]>("/users", api, {
     revalidateOnFocus: false,
   });
@@ -660,23 +667,23 @@ export default function HeadInstructorPage() {
 
   return (
     <PanelShell
-      roleLabel="Baş Eğitmen Paneli"
-      userName="Akademik Yönetim"
-      userSub="Kalite ve içerik kontrol"
+      roleLabel={t.tr("Baş Eğitmen Paneli")}
+      userName={t.tr("Akademik Yönetim")}
+      userSub={t.tr("Kalite ve içerik kontrol")}
       navSections={navSections}
     >
       <div className="space-y-6">
         <header className="glass p-6 rounded-2xl border border-slate-200 hero">
           <div className="hero-content space-y-2">
-            <div className="pill w-fit">Baş Eğitmen</div>
-            <h1 className="text-3xl font-semibold">Sınıfları yönet, kaliteyi yükselt</h1>
+            <div className="pill w-fit">{t.roles.instructor}</div>
+            <h1 className="text-3xl font-semibold">{t.instructor.insights}</h1>
             <p className="text-sm text-slate-600 max-w-3xl">
-              Eğitmen dağılımı, içerik onayı ve kazanım takibi tek panelde. Zayıf konuları hızlıca toparla.
+              {t.tr("Eğitmen dağılımı, içerik onayı ve kazanım takibi tek panelde. Zayıf konuları hızlıca toparla.")}
             </p>
             <div className="flex gap-2 flex-wrap">
-              <Link href="/whiteboard" className="btn-link text-sm">Canlı sınıf aç</Link>
-              <Link href="/report-cards" className="btn-link text-sm">Karne akışı</Link>
-              <Link href="/courses" className="btn-link text-sm">Kurs kataloğu</Link>
+              <Link href="/whiteboard" className="btn-link text-sm">{t.tr("Canlı sınıf aç")}</Link>
+              <Link href="/report-cards" className="btn-link text-sm">{t.tr("Karne akışı")}</Link>
+              <Link href="/courses" className="btn-link text-sm">{t.tr("Kurs kataloğu")}</Link>
             </div>
           </div>
         </header>
@@ -694,10 +701,10 @@ export default function HeadInstructorPage() {
                 ] as const;
                 const g = gradients[i] ?? { bg: "glass border-slate-200", num: "text-slate-700", icon: "📊" };
                 return (
-                  <div key={s.name} className={`rounded-2xl border p-4 shadow-sm bg-gradient-to-br ${g.bg}`}>
+                  <div key={t.tr(s.name)} className={`rounded-2xl border p-4 shadow-sm bg-gradient-to-br ${g.bg}`}>
                     <div className="flex items-center gap-2 text-sm text-slate-600">
                       <span>{g.icon}</span>
-                      <span>{s.name}</span>
+                      <span>{t.tr(s.name)}</span>
                     </div>
                     <div className={`text-3xl font-bold mt-2 ${g.num}`}>{s.value ?? "—"}</div>
                   </div>
@@ -709,9 +716,9 @@ export default function HeadInstructorPage() {
           {/* Instructor roster */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="Eğitmen kadrosu" />
+              <SectionHeading title={t.tr("Eğitmen kadrosu")} />
               <span className="pill text-xs">
-                {usersLoading ? "Yükleniyor..." : `${instructors.length} eğitmen`}
+                {usersLoading ? t.tr("Yükleniyor...") : `${instructors.length} ${t.tr("eğitmen")}`}
               </span>
             </div>
             <div className="space-y-2">
@@ -719,7 +726,7 @@ export default function HeadInstructorPage() {
                 ? Array.from({ length: 3 }).map((_, i) => <RowSkeleton key={i} />)
                 : instructorRoster.length === 0
                 ? (
-                    <div className="text-sm text-slate-500 py-4 text-center">Kayıtlı eğitmen bulunamadı.</div>
+                    <div className="text-sm text-slate-500 py-4 text-center">{t.tr("Kayıtlı eğitmen bulunamadı.")}</div>
                   )
                 : instructorRoster.map((i) => (
                     <div
@@ -731,7 +738,7 @@ export default function HeadInstructorPage() {
                           {i.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-sm">{i.name}</div>
+                          <div className="font-semibold text-sm">{t.tr(i.name)}</div>
                           <div className="text-xs text-slate-500">{i.field} · {i.load}</div>
                         </div>
                       </div>
@@ -744,9 +751,9 @@ export default function HeadInstructorPage() {
                               : "bg-emerald-50 border-emerald-200 text-emerald-700"
                           }`}
                         >
-                          {i.status}
+                          {t.tr(i.status)}
                         </span>
-                        <button className="btn-link">Sınıf ata</button>
+                        <button className="btn-link">{t.tr("Sınıf ata")}</button>
                       </div>
                     </div>
                   ))}
@@ -756,9 +763,9 @@ export default function HeadInstructorPage() {
           {/* Content review */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="İçerik onayı" />
+              <SectionHeading title={t.tr("İçerik onayı")} />
               <span className="pill text-xs">
-                {vcLoading ? "Yükleniyor..." : `${reviewQueue.length} görev`}
+                {vcLoading ? t.tr("Yükleniyor...") : `${reviewQueue.length} ${t.tr("görev")}`}
               </span>
             </div>
             <div className="space-y-2">
@@ -766,18 +773,18 @@ export default function HeadInstructorPage() {
                 ? Array.from({ length: 3 }).map((_, i) => <RowSkeleton key={i} />)
                 : reviewQueue.length === 0
                 ? (
-                    <div className="text-sm text-slate-500 py-4 text-center">Bekleyen onay yok.</div>
+                    <div className="text-sm text-slate-500 py-4 text-center">{t.tr("Bekleyen onay yok.")}</div>
                   )
                 : reviewQueue.map((q) => (
                     <div key={q.id} className="rounded-xl border border-slate-200 bg-white/80 p-3 hover:border-amber-200 transition-colors">
                       <div className="flex items-start justify-between gap-2">
-                        <div className="font-semibold text-sm leading-tight">{q.title}</div>
+                        <div className="font-semibold text-sm leading-tight">{t.tr(q.title)}</div>
                         <span className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700 flex-shrink-0">{q.type}</span>
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5">{q.owner}</div>
                       <div className="flex gap-2 mt-2 text-xs">
-                        <button className="btn-link bg-emerald-50 border-emerald-300 text-emerald-700">✓ Onayla</button>
-                        <button className="btn-link text-rose-700 border-rose-200">↩ Geri gönder</button>
+                        <button className="btn-link bg-emerald-50 border-emerald-300 text-emerald-700">{t.tr("✓ Onayla")}</button>
+                        <button className="btn-link text-rose-700 border-rose-200">{t.tr("↩ Geri gönder")}</button>
                       </div>
                     </div>
                   ))}
@@ -789,18 +796,18 @@ export default function HeadInstructorPage() {
           {/* Curriculum management */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="Müfredat & Branş Yönetimi" />
+              <SectionHeading title={t.tr("Müfredat & Branş Yönetimi")} />
               <span className="pill text-xs">Drag & Drop</span>
             </div>
             <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-4 text-sm text-slate-500">
-              PDF, ses ve video dosyalarını sürükleyip bırak. Seviye ve dil etiketi otomatik atanır.
+              {t.tr("PDF, ses ve video dosyalarını sürükleyip bırak. Seviye ve dil etiketi otomatik atanır.")}
             </div>
             <div className="space-y-2">
               {coursesLoading
                 ? Array.from({ length: 3 }).map((_, i) => <RowSkeleton key={i} />)
                 : programs.length === 0
                 ? (
-                    <div className="text-sm text-slate-500 py-2 text-center">Kurs bulunamadı.</div>
+                    <div className="text-sm text-slate-500 py-2 text-center">{t.tr("Kurs bulunamadı.")}</div>
                   )
                 : programs.map((p) => (
                     <div
@@ -808,12 +815,12 @@ export default function HeadInstructorPage() {
                       className="rounded-xl border border-slate-200 bg-white/90 p-3 flex items-center justify-between"
                     >
                       <div>
-                        <div className="font-semibold">{p.title}</div>
-                        <div className="text-xs text-slate-500">{p.level} · {p.assets}</div>
+                        <div className="font-semibold">{t.tr(p.title)}</div>
+                        <div className="text-xs text-slate-500">{t.tr(p.level)} · {t.tr(p.assets)}</div>
                       </div>
                       <div className="flex gap-2 text-xs">
-                        <Link href={`/courses/${p.id}`} className="btn-link">Düzenle</Link>
-                        <button className="btn-link">İçerik ekle</button>
+                        <Link href={`/courses/${p.id}`} className="btn-link">{t.tr("Düzenle")}</Link>
+                        <button className="btn-link">{t.tr("İçerik ekle")}</button>
                       </div>
                     </div>
                   ))}
@@ -823,7 +830,7 @@ export default function HeadInstructorPage() {
           {/* Smart scheduler */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="Akıllı Ders Programı" />
+              <SectionHeading title={t.tr("Akıllı Ders Programı")} />
               <span className="pill text-xs">Scheduler</span>
             </div>
             <div className="space-y-2">
@@ -833,7 +840,7 @@ export default function HeadInstructorPage() {
                   className="rounded-xl border border-slate-200 bg-white/90 p-3 flex items-center justify-between"
                 >
                   <div>
-                    <div className="font-semibold">{s.day}</div>
+                    <div className="font-semibold">{t.tr(s.day)}</div>
                     <div className="text-xs text-slate-500">{s.time}</div>
                   </div>
                   <span
@@ -843,14 +850,14 @@ export default function HeadInstructorPage() {
                         : "bg-emerald-50 border-emerald-200 text-emerald-700"
                     }`}
                   >
-                    {s.status}
+                    {t.tr(s.status)}
                   </span>
                 </div>
               ))}
             </div>
             <div className="flex gap-2 text-xs">
-              <button className="btn-link flex-1">Otomatik atama</button>
-              <button className="btn-link flex-1">Takvim aç</button>
+              <button className="btn-link flex-1">{t.tr("Otomatik atama")}</button>
+              <button className="btn-link flex-1">{t.tr("Takvim aç")}</button>
             </div>
           </div>
         </section>
@@ -859,49 +866,49 @@ export default function HeadInstructorPage() {
           {/* Exam management */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="Sınav Yönetimi" />
+              <SectionHeading title={t.tr("Sınav Yönetimi")} />
               <span className="pill text-xs">Exam Builder</span>
             </div>
             <div className="space-y-2">
               {examTemplates.map((e) => (
                 <div
-                  key={e.name}
+                  key={t.tr(e.name)}
                   className="rounded-xl border border-slate-200 bg-white/90 p-3 flex items-center justify-between"
                 >
                   <div>
-                    <div className="font-semibold">{e.name}</div>
-                    <div className="text-xs text-slate-500">{e.type}</div>
+                    <div className="font-semibold">{t.tr(e.name)}</div>
+                    <div className="text-xs text-slate-500">{t.tr(e.type)}</div>
                   </div>
-                  <button className="btn-link text-xs">Şablonu aç</button>
+                  <button className="btn-link text-xs">{t.tr("Şablonu aç")}</button>
                 </div>
               ))}
             </div>
             <div className="flex gap-2 text-xs">
-              <button className="btn-link flex-1">Yeni sınav</button>
-              <button className="btn-link flex-1">Analiz raporu</button>
+              <button className="btn-link flex-1">{t.tr("Yeni sınav")}</button>
+              <button className="btn-link flex-1">{t.tr("Analiz raporu")}</button>
             </div>
           </div>
 
           {/* Academic reporting */}
           <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <SectionHeading title="Akademik Raporlama" />
-              <span className="pill text-xs">Haftalık</span>
+              <SectionHeading title={t.tr("Akademik Raporlama")} />
+              <span className="pill text-xs">{t.tr("Haftalık")}</span>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white/90 p-3 space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span>Seviye ilerleme</span>
+                <span>{t.tr("Seviye ilerleme")}</span>
                 <span className="pill text-[11px]">+8%</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Ödev tamamlama</span>
+                <span>{t.tr("Ödev tamamlama")}</span>
                 <span className="pill text-[11px]">72%</span>
               </div>
               <div className="flex items-center justify-between">
-                <span>Kalite anketi</span>
+                <span>{t.tr("Kalite anketi")}</span>
                 <span className="pill text-[11px]">4.7/5</span>
               </div>
-              <button className="btn-link w-full justify-center text-xs">PDF rapor indir</button>
+              <button className="btn-link w-full justify-center text-xs">{t.tr("PDF rapor indir")}</button>
             </div>
           </div>
         </section>
@@ -909,42 +916,42 @@ export default function HeadInstructorPage() {
         {/* Learning outcome insights */}
         <section className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
           <div className="flex items-center justify-between">
-            <SectionHeading title="Kazanım içgörüleri" />
-            <span className="pill text-xs">Son 7 gün</span>
+            <SectionHeading title={t.tr("Kazanım içgörüleri")} />
+            <span className="pill text-xs">{t.tr("Son 7 gün")}</span>
           </div>
           <div className="grid gap-3 md:grid-cols-3">
-            {weakTopics.map((t) => (
-              <div key={t.topic} className="glass rounded-xl border border-slate-200 p-3 space-y-2">
+            {weakTopics.map((topic) => (
+              <div key={topic.topic} className="glass rounded-xl border border-slate-200 p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="font-semibold text-sm">{t.topic}</div>
+                  <div className="font-semibold text-sm">{t.tr(topic.topic)}</div>
                   <span
                     className={`text-xs font-bold ${
-                      t.accuracy < 65
+                      topic.accuracy < 65
                         ? "text-rose-600"
-                        : t.accuracy < 75
+                        : topic.accuracy < 75
                         ? "text-amber-600"
                         : "text-emerald-600"
                     }`}
                   >
-                    {t.accuracy}%
+                    {topic.accuracy}%
                   </span>
                 </div>
                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      t.accuracy < 65
+                      topic.accuracy < 65
                         ? "bg-rose-400"
-                        : t.accuracy < 75
+                        : topic.accuracy < 75
                         ? "bg-amber-400"
                         : "bg-emerald-400"
                     }`}
-                    style={{ width: `${t.accuracy}%` }}
+                    style={{ width: `${topic.accuracy}%` }}
                   />
                 </div>
-                <div className="text-xs text-slate-500">💡 {t.action}</div>
+                <div className="text-xs text-slate-500">💡 {t.tr(topic.action)}</div>
                 <div className="flex gap-2 mt-1 text-xs">
-                  <button className="btn-link">Görev ata</button>
-                  <button className="btn-link">Quiz gönder</button>
+                  <button className="btn-link">{t.tr("Görev ata")}</button>
+                  <button className="btn-link">{t.tr("Quiz gönder")}</button>
                 </div>
               </div>
             ))}

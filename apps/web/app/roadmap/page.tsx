@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '../_i18n/use-i18n';
 
 /* ─── Config ─────────────────────────────────────────────────────────────── */
 
@@ -293,6 +294,7 @@ function NodeDetailPanel({
   onStart: (node: RoadmapNode) => void;
 }) {
   const router = useRouter();
+  const t = useI18n();
   const nodeMap = useMemo(() => new Map(allNodes.map((n) => [n.id, n])), [allNodes]);
 
   const canInteract = node.status === 'AVAILABLE' || node.status === 'IN_PROGRESS';
@@ -315,26 +317,26 @@ function NodeDetailPanel({
             <span
               className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${TYPE_COLOR[node.type]}`}
             >
-              {TYPE_BADGE[node.type]}
+              {t.tr(TYPE_BADGE[node.type])}
             </span>
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[node.status]}`}
             >
               <span>{STATUS_ICON[node.status]}</span>
               {node.status === 'LOCKED'
-                ? 'Kilitli'
+                ? t.tr('Kilitli')
                 : node.status === 'AVAILABLE'
-                  ? 'Hazır'
+                  ? t.tr('Hazır')
                   : node.status === 'IN_PROGRESS'
-                    ? 'Devam Ediyor'
-                    : 'Tamamlandı'}
+                    ? t.tr('Devam Ediyor')
+                    : t.tr('Tamamlandı')}
             </span>
           </div>
           <h2 className="text-lg font-bold text-slate-800 leading-snug truncate">{node.title}</h2>
         </div>
         <button
           onClick={onClose}
-          aria-label="Paneli kapat"
+          aria-label={t.tr("Paneli kapat")}
           className="shrink-0 mt-1 rounded-xl w-8 h-8 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
         >
           ✕
@@ -353,7 +355,7 @@ function NodeDetailPanel({
           <span className="text-2xl">⭐</span>
           <div>
             <p className="text-xs text-amber-600 font-semibold uppercase tracking-wide">
-              XP Ödülü
+              {t.tr("XP Ödülü")}
             </p>
             <p className="text-xl font-bold text-amber-700">+{node.xpReward} XP</p>
           </div>
@@ -363,7 +365,7 @@ function NodeDetailPanel({
         {node.status === 'IN_PROGRESS' && typeof node.progress === 'number' && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-              <span>İlerleme</span>
+              <span>{t.tr("İlerleme")}</span>
               <span>{node.progress}%</span>
             </div>
             <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
@@ -379,7 +381,7 @@ function NodeDetailPanel({
         {node.prerequisites.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Ön Koşullar
+              {t.tr("Ön Koşullar")}
             </p>
             <ul className="space-y-1.5">
               {node.prerequisites.map((preId) => {
@@ -412,10 +414,10 @@ function NodeDetailPanel({
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 space-y-2">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
               <span className="text-lg">🔒</span>
-              <span>Bu düğüm kilitli</span>
+              <span>{t.tr("Bu düğüm kilitli")}</span>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Bu içeriğe erişmek için önce aşağıdaki konuları tamamlamanız gerekiyor:
+              {t.tr("Bu içeriğe erişmek için önce aşağıdaki konuları tamamlamanız gerekiyor:")}
             </p>
             <ul className="space-y-1 mt-2">
               {node.prerequisites
@@ -437,8 +439,8 @@ function NodeDetailPanel({
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 flex items-center gap-3">
             <span className="text-2xl">🏆</span>
             <div>
-              <p className="text-sm font-bold text-emerald-700">Tamamlandı!</p>
-              <p className="text-xs text-emerald-600">Bu konuyu başarıyla bitirdiniz.</p>
+              <p className="text-sm font-bold text-emerald-700">{t.tr("Tamamlandı!")}</p>
+              <p className="text-xs text-emerald-600">{t.tr("Bu konuyu başarıyla bitirdiniz.")}</p>
             </div>
           </div>
         )}
@@ -451,7 +453,7 @@ function NodeDetailPanel({
             onClick={handleAction}
             className="w-full rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200"
           >
-            ▶ Başla
+            ▶ {t.tr("Başla")}
           </button>
         )}
         {node.status === 'IN_PROGRESS' && (
@@ -459,7 +461,7 @@ function NodeDetailPanel({
             onClick={handleAction}
             className="w-full rounded-2xl bg-amber-500 px-4 py-3 text-sm font-bold text-white hover:bg-amber-600 active:scale-95 transition-all shadow-lg shadow-amber-200"
           >
-            ⏳ Devam Et
+            ⏳ {t.tr("Devam Et")}
           </button>
         )}
         {node.status === 'LOCKED' && (
@@ -467,7 +469,7 @@ function NodeDetailPanel({
             disabled
             className="w-full rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed"
           >
-            🔒 Kilitli
+            🔒 {t.tr("Kilitli")}
           </button>
         )}
         {node.status === 'COMPLETED' && (
@@ -475,7 +477,7 @@ function NodeDetailPanel({
             onClick={() => router.push('/courses')}
             className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all"
           >
-            ✓ Kurslara Git
+            ✓ {t.tr("Kurslara Git")}
           </button>
         )}
       </div>
@@ -496,6 +498,7 @@ function SkillTreeCanvas({
   filteredIds: Set<string>;
   onNodeClick: (node: RoadmapNode) => void;
 }) {
+  const t = useI18n();
   const { width, height } = svgDimensions(nodes);
   const nodeMap = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
 
@@ -512,7 +515,7 @@ function SkillTreeCanvas({
             className="flex items-center justify-center text-xs font-bold uppercase tracking-widest text-slate-400"
             style={{ width: NODE_W, paddingTop: 6 }}
           >
-            {label}
+            {t.tr(label)}
           </div>
         ))}
       </div>
@@ -621,7 +624,7 @@ function SkillTreeCanvas({
               </div>
 
               {/* Title */}
-              <p className="text-xs font-bold leading-snug line-clamp-2 flex-1">{node.title}</p>
+              <p className="text-xs font-bold leading-snug line-clamp-2 flex-1">{t.tr(node.title)}</p>
 
               {/* Progress mini-bar (IN_PROGRESS) */}
               {node.status === 'IN_PROGRESS' && typeof node.progress === 'number' && (
@@ -668,6 +671,7 @@ function XpCelebration({ popups }: { popups: XpPopup[] }) {
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 
 export default function RoadmapPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [nodes, setNodes] = useState<RoadmapNode[]>([]);
   const [edges, setEdges] = useState<RoadmapEdge[]>([]);
@@ -686,8 +690,8 @@ export default function RoadmapPage() {
     }
   }, []);
 
-  const authHeaders = useMemo<Record<string, string>>(
-    () => (token ? { Authorization: `Bearer ${token}` } : {}),
+  const authHeaders = useMemo(
+    () => (token ? { Authorization: `Bearer ${token}` } : {}) as Record<string, string>,
     [token]
   );
 
@@ -778,7 +782,7 @@ export default function RoadmapPage() {
   const STATS = [
     {
       icon: '✅',
-      label: 'Tamamlanan Düğüm',
+      label: t.tr('Tamamlanan Düğüm'),
       value: completedCount,
       bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200',
       valClass: 'text-emerald-700',
@@ -786,7 +790,7 @@ export default function RoadmapPage() {
     },
     {
       icon: '⭐',
-      label: 'Toplam XP',
+      label: t.tr('Toplam XP'),
       value: totalXp,
       bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200',
       valClass: 'text-amber-700',
@@ -794,7 +798,7 @@ export default function RoadmapPage() {
     },
     {
       icon: '⏳',
-      label: 'Aktif Görev',
+      label: t.tr('Aktif Görev'),
       value: activeCount,
       bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200',
       valClass: 'text-blue-700',
@@ -802,7 +806,7 @@ export default function RoadmapPage() {
     },
     {
       icon: '📊',
-      label: 'Tamamlanma %',
+      label: t.tr('Tamamlanma %'),
       value: `${completionPct}%`,
       bg: 'bg-gradient-to-br from-violet-50 to-violet-100/50 border-violet-200',
       valClass: 'text-violet-700',
@@ -830,10 +834,10 @@ export default function RoadmapPage() {
         {/* ── Hero ── */}
         <header className="glass p-6 rounded-2xl border border-slate-200 hero">
           <div className="hero-content space-y-2">
-            <div className="pill w-fit">Yol Haritası</div>
-            <h1 className="text-3xl font-semibold">🗺️ Öğrenme Yol Haritası</h1>
+            <div className="pill w-fit">{t.roadmap.title}</div>
+            <h1 className="text-3xl font-semibold">🗺️ {t.roadmap.title}</h1>
             <p className="text-sm text-slate-600 max-w-2xl">
-              Beceri ağacında ilerle, rozetler kazan
+              {t.tr("Beceri ağacında ilerle, rozetler kazan")}
             </p>
           </div>
         </header>
@@ -849,7 +853,7 @@ export default function RoadmapPage() {
         {isDemo && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700 flex items-center gap-2">
             <span>⚠</span>
-            <span>Demo verisi gösteriliyor. Gerçek yol haritası için API bağlantısını kontrol edin.</span>
+            <span>{t.tr("Demo verisi gösteriliyor. Gerçek yol haritası için API bağlantısını kontrol edin.")}</span>
           </div>
         )}
 
@@ -866,7 +870,7 @@ export default function RoadmapPage() {
                   : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-700',
               ].join(' ')}
             >
-              {tab.label}
+              {t.tr(tab.label)}
               {tab.key !== 'ALL' && (
                 <span className="ml-1.5 text-[10px] font-bold opacity-70">
                   {tab.key === 'COMPLETED'
@@ -885,7 +889,7 @@ export default function RoadmapPage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-400 to-violet-500 inline-block" />
-              Beceri Ağacı
+              {t.tr("Beceri Ağacı")}
             </h2>
             <div className="flex flex-wrap gap-3 text-xs">
               {(
@@ -900,7 +904,7 @@ export default function RoadmapPage() {
                   <span
                     className={`w-2.5 h-2.5 rounded-full ${STATUS_ACCENT[status]}`}
                   />
-                  {label}
+                  {t.tr(label)}
                 </span>
               ))}
             </div>
@@ -927,7 +931,7 @@ export default function RoadmapPage() {
         {/* ── Legend / guide ── */}
         <section className="glass rounded-2xl border border-slate-200 p-5 animate-fade-slide-up stagger-3">
           <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-            <span>💡</span> Nasıl İlerlenir?
+            <span>💡</span> {t.tr("Nasıl İlerlenir?")}
           </h3>
           <ol className="space-y-2 text-sm text-slate-600">
             <li className="flex items-start gap-2">
@@ -935,7 +939,7 @@ export default function RoadmapPage() {
                 1
               </span>
               <span>
-                <strong>Mavi düğümlere</strong> (Hazır) tıklayarak öğrenmeye başla.
+                <strong>{t.tr("Mavi düğümlere")}</strong> {t.tr("(Hazır) tıklayarak öğrenmeye başla.")}
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -943,8 +947,7 @@ export default function RoadmapPage() {
                 2
               </span>
               <span>
-                <strong>Turuncu düğümler</strong> başladığın ama bitirmediğin konuları gösterir —{' '}
-                devam et!
+                <strong>{t.tr("Turuncu düğümler")}</strong> {t.tr("başladığın ama bitirmediğin konuları gösterir — devam et!")}
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -952,7 +955,7 @@ export default function RoadmapPage() {
                 3
               </span>
               <span>
-                <strong>Yeşil düğümler</strong> tamamladığın konular — XP kazandın!
+                <strong>{t.tr("Yeşil düğümler")}</strong> {t.tr("tamamladığın konular — XP kazandın!")}
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -960,7 +963,7 @@ export default function RoadmapPage() {
                 4
               </span>
               <span>
-                <strong>Gri/kilitli düğümler</strong> ön koşullar tamamlandıktan sonra açılır.
+                <strong>{t.tr("Gri/kilitli düğümler")}</strong> {t.tr("ön koşullar tamamlandıktan sonra açılır.")}
               </span>
             </li>
           </ol>
@@ -971,10 +974,10 @@ export default function RoadmapPage() {
           <section className="space-y-3 animate-fade-slide-up stagger-4">
             <h3 className="text-sm font-bold text-slate-700">
               {filter === 'COMPLETED'
-                ? '✅ Tamamlanan Konular'
+                ? `✅ ${t.tr('Tamamlanan Konular')}`
                 : filter === 'ACTIVE'
-                  ? '⏳ Aktif Konular'
-                  : '🔒 Kilitli Konular'}
+                  ? `⏳ ${t.tr('Aktif Konular')}`
+                  : `🔒 ${t.tr('Kilitli Konular')}`}
             </h3>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {nodes
@@ -1001,11 +1004,11 @@ export default function RoadmapPage() {
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-bold ${TYPE_COLOR[node.type]}`}
                       >
-                        {TYPE_BADGE[node.type]}
+                        {t.tr(TYPE_BADGE[node.type])}
                       </span>
                     </div>
-                    <p className="text-sm font-bold leading-snug mb-1">{node.title}</p>
-                    <p className="text-xs opacity-70 line-clamp-2">{node.description}</p>
+                    <p className="text-sm font-bold leading-snug mb-1">{t.tr(node.title)}</p>
+                    <p className="text-xs opacity-70 line-clamp-2">{t.tr(node.description ?? "")}</p>
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-xs font-semibold text-amber-600">
                         +{node.xpReward} XP

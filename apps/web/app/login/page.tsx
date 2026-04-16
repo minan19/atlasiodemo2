@@ -51,7 +51,7 @@ function LoginForm() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.message || "Giriş başarısız");
+      if (!res.ok) throw new Error(data?.message || t.common.error);
 
       // Token'ları sakla
       localStorage.setItem("accessToken", data.accessToken);
@@ -66,7 +66,7 @@ function LoginForm() {
       setRole(role);
       router.push(redirectTo ?? redirectForRole(role));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : t.common.error);
     } finally {
       setLoading(false);
     }
@@ -91,8 +91,8 @@ function LoginForm() {
           </p>
           <div className="grid grid-cols-3 gap-3 max-w-xl">
             <Stat label="Aktif oturum" value="1.2K" accent />
-            <Stat label="Başarısız deneme" value="0.3%" />
-            <Stat label="Ortalama oturum süresi" value="42dk" />
+            <Stat label={t.tr("Başarısız deneme")} value="0.3%" />
+            <Stat label={t.tr("Ortalama oturum süresi")} value="42dk" />
           </div>
         </div>
       </div>
@@ -110,6 +110,8 @@ function LoginForm() {
           <label className="space-y-2 text-sm">
             <span className="text-slate-600">{t.login.email}</span>
             <input
+              type="email"
+              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t.login.emailPh}
@@ -130,9 +132,24 @@ function LoginForm() {
 
           <button
             disabled={loading}
-            className="btn-link justify-center text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-xl"
+            className="btn-link justify-center text-sm font-semibold disabled:opacity-60"
+            style={{
+              background: loading ? 'var(--panel)' : 'linear-gradient(to right, #10b981, #06b6d4)',
+              color: loading ? 'var(--ink-2)' : '#fff',
+              borderColor: loading ? 'var(--line)' : '#10b981',
+              gap: 8,
+            }}
             type="submit"
           >
+            {loading && (
+              <span style={{
+                width: 14, height: 14, borderRadius: '50%',
+                border: '2px solid var(--line-accent)',
+                borderTopColor: 'var(--accent)',
+                animation: 'loginSpin 0.7s linear infinite',
+                display: 'inline-block', flexShrink: 0,
+              }} />
+            )}
             {loading ? t.login.loading : t.login.submit}
           </button>
 
@@ -140,19 +157,20 @@ function LoginForm() {
 
           <div className="flex items-center justify-between text-sm text-slate-500">
             <p>
-              Hesabınız yok mu?{" "}
+              {t.login.noAccount}{" "}
               <Link href="/register" className="text-emerald-600 hover:underline font-medium">
-                Kayıt ol
+                {t.login.register}
               </Link>
             </p>
             <Link href="/forgot-password" className="text-slate-500 hover:text-emerald-600 hover:underline">
-              Şifremi unuttum
+              {t.login.forgotPassword}
             </Link>
           </div>
         </form>
       </div>
 
       <style jsx global>{`
+        @keyframes loginSpin { to { transform: rotate(360deg); } }
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,

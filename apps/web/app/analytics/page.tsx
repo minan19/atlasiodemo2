@@ -14,6 +14,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { useI18n } from '../_i18n/use-i18n';
 
 /* ─────────────────────────────────────────────
    Types
@@ -278,6 +279,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 function RevenueTooltip({ active, payload, label }: CustomTooltipProps) {
+  const t = useI18n();
   if (!active || !payload?.length) return null;
   return (
     <div
@@ -292,7 +294,7 @@ function RevenueTooltip({ active, payload, label }: CustomTooltipProps) {
           key={entry.name}
           style={{ display: 'flex', justifyContent: 'space-between', gap: 12, color: 'var(--accent-2)', fontWeight: 700 }}
         >
-          <span>Gelir</span>
+          <span>{t.tr("Gelir")}</span>
           <span>
             {entry.value.toLocaleString('tr-TR', {
               style: 'currency',
@@ -313,6 +315,7 @@ function RevenueTooltip({ active, payload, label }: CustomTooltipProps) {
 const CATEGORY_COLORS = ['#10a97b', '#2d7df6', '#f59e0b', '#8b5cf6'];
 
 function DonutChart({ data }: { data: CategoryBreakdown[] }) {
+  const t = useI18n();
   const cx = 80;
   const cy = 80;
   const r = 60;
@@ -373,7 +376,7 @@ function DonutChart({ data }: { data: CategoryBreakdown[] }) {
           fill="var(--muted)"
           fontSize={10}
         >
-          toplam
+          {t.tr("toplam")}
         </text>
       </svg>
 
@@ -449,6 +452,7 @@ function retentionColor(pct: number): string {
 }
 
 function RetentionHeatmap() {
+  const t = useI18n();
   return (
     <div style={{ overflowX: 'auto' }}>
       <table
@@ -475,7 +479,7 @@ function RetentionHeatmap() {
                 letterSpacing: '0.04em',
               }}
             >
-              Kohort
+              {t.analytics.cohortLabel}
             </th>
             {WEEK_LABELS.map((w) => (
               <th
@@ -572,7 +576,7 @@ function RetentionHeatmap() {
           { color: 'rgba(245,158,11,0.55)', label: '40–54% (Zayıf)' },
           { color: 'rgba(239,68,68,0.45)', label: '<40% (Kritik)' },
         ].map((l) => (
-          <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <div key={t.tr(l.label)} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div
               style={{
                 width: 12,
@@ -582,7 +586,7 @@ function RetentionHeatmap() {
                 flexShrink: 0,
               }}
             />
-            {l.label}
+            {t.tr(l.label)}
           </div>
         ))}
       </div>
@@ -595,16 +599,17 @@ function RetentionHeatmap() {
 ───────────────────────────────────────────── */
 
 function TopCoursesTable({ courses }: { courses: TopCourse[] }) {
+  const t = useI18n();
   return (
     <div style={{ overflowX: 'auto' }}>
       <table style={{ width: '100%', fontSize: 13 }}>
         <thead>
           <tr>
             <th style={{ textAlign: 'center', width: 36 }}>#</th>
-            <th style={{ textAlign: 'left' }}>Kurs Adı</th>
-            <th style={{ textAlign: 'right' }}>Kayıt</th>
-            <th style={{ textAlign: 'left', minWidth: 120 }}>Tamamlanma</th>
-            <th style={{ textAlign: 'right' }}>Gelir</th>
+            <th style={{ textAlign: 'left' }}>{t.analytics.courseTitle}</th>
+            <th style={{ textAlign: 'right' }}>{t.analytics.enrollments}</th>
+            <th style={{ textAlign: 'left', minWidth: 120 }}>{t.analytics.completions}</th>
+            <th style={{ textAlign: 'right' }}>{t.analytics.revenue}</th>
           </tr>
         </thead>
         <tbody>
@@ -649,7 +654,7 @@ function TopCoursesTable({ courses }: { courses: TopCourse[] }) {
                 </span>
               </td>
               <td style={{ padding: '10px 12px', fontWeight: 600, color: 'var(--ink)' }}>
-                {c.title}
+                {t.tr(c.title)}
               </td>
               <td
                 style={{
@@ -760,10 +765,10 @@ function SectionHeader({
    Period selector
 ───────────────────────────────────────────── */
 
-const PERIOD_OPTIONS: { label: string; value: Period }[] = [
-  { label: '7 Gün', value: '7d' },
-  { label: '30 Gün', value: '30d' },
-  { label: '90 Gün', value: '90d' },
+const PERIOD_OPTIONS: { value: Period }[] = [
+  { value: '7d' },
+  { value: '30d' },
+  { value: '90d' },
 ];
 
 function PeriodSelector({
@@ -773,6 +778,12 @@ function PeriodSelector({
   value: Period;
   onChange: (p: Period) => void;
 }) {
+  const t = useI18n();
+  const periodLabel: Record<Period, string> = {
+    '7d': t.analytics.day7,
+    '30d': t.analytics.day30,
+    '90d': t.analytics.day90,
+  };
   return (
     <div
       style={{
@@ -810,7 +821,7 @@ function PeriodSelector({
                 : 'none',
           }}
         >
-          {opt.label}
+          {periodLabel[opt.value]}
         </button>
       ))}
     </div>
@@ -822,6 +833,7 @@ function PeriodSelector({
 ───────────────────────────────────────────── */
 
 export default function AnalyticsPage() {
+  const t = useI18n();
   const [period, setPeriod] = useState<Period>('30d');
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -992,7 +1004,7 @@ export default function AnalyticsPage() {
                       backgroundClip: 'text',
                     }}
                   >
-                    Analitik Merkezi
+                    {t.analytics.title}
                   </h1>
                   <p
                     style={{
@@ -1002,7 +1014,7 @@ export default function AnalyticsPage() {
                       marginTop: 2,
                     }}
                   >
-                    Platform performansını gerçek zamanlı izle
+                    {t.analytics.subtitle}
                   </p>
                 </div>
               </div>
@@ -1011,11 +1023,11 @@ export default function AnalyticsPage() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
                 <span className="pill pill-sm">
                   <span className="status-dot online" />
-                  Canlı Veri
+                  {t.analytics.liveData}
                 </span>
                 {lastUpdated && (
                   <span className="pill pill-sm pill-dark">
-                    🕐 Son güncelleme:{' '}
+                    🕐 {t.analytics.lastUpdated}:{' '}
                     {lastUpdated.toLocaleTimeString('tr-TR', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -1023,7 +1035,7 @@ export default function AnalyticsPage() {
                   </span>
                 )}
                 <span className="pill pill-sm pill-dark">
-                  📅 {PERIOD_OPTIONS.find((o) => o.value === period)?.label}
+                  📅 {{ '7d': t.analytics.day7, '30d': t.analytics.day30, '90d': t.analytics.day90 }[period]}
                 </span>
               </div>
             </div>
@@ -1044,7 +1056,7 @@ export default function AnalyticsPage() {
                 className="btn-link"
                 style={{ fontSize: 12, padding: '6px 14px' }}
               >
-                {loading ? '⏳ Yükleniyor…' : '🔄 Yenile'}
+                {loading ? `⏳ ${t.tr("Yükleniyor…")}` : `🔄 ${t.tr("Yenile")}`}
               </button>
             </div>
           </div>
@@ -1068,7 +1080,7 @@ export default function AnalyticsPage() {
             alignItems: 'center',
           }}
         >
-          ⚠️ {error} — Demo verisi gösteriliyor.
+          ⚠️ {error} — {t.analytics.demoData}.
         </div>
       )}
 
@@ -1088,17 +1100,17 @@ export default function AnalyticsPage() {
           ) : (
             <>
               <KpiCard
-                label="Toplam Kayıt"
+                label={t.analytics.totalEnrollments}
                 value={kpi?.totalEnrollments.toLocaleString('tr-TR') ?? '—'}
                 icon="🎓"
                 trend={
-                  kpi ? { value: kpi.enrollmentTrend, label: 'önceki dönem' } : null
+                  kpi ? { value: kpi.enrollmentTrend, label: t.analytics.previousPeriod } : null
                 }
                 accent="blue"
                 className="animate-fade-slide-up stagger-1"
               />
               <KpiCard
-                label="Tamamlanma Oranı"
+                label={t.analytics.completionRate}
                 value={`%${kpi?.completionRate ?? 0}`}
                 icon="✅"
                 accent={
@@ -1111,7 +1123,7 @@ export default function AnalyticsPage() {
                 className="animate-fade-slide-up stagger-2"
               />
               <KpiCard
-                label="Toplam Gelir"
+                label={t.analytics.totalRevenue}
                 value={
                   kpi
                     ? kpi.totalRevenue.toLocaleString('tr-TR', {
@@ -1123,28 +1135,28 @@ export default function AnalyticsPage() {
                 }
                 icon="💰"
                 trend={
-                  kpi ? { value: kpi.revenueTrend, label: 'önceki dönem' } : null
+                  kpi ? { value: kpi.revenueTrend, label: t.analytics.previousPeriod } : null
                 }
                 accent="green"
                 className="animate-fade-slide-up stagger-3"
               />
               <KpiCard
-                label="Aktif Kullanıcı"
+                label={t.analytics.activeUsers}
                 value={kpi?.avgActiveUsers.toLocaleString('tr-TR') ?? '—'}
                 icon="👥"
                 accent="blue"
                 className="animate-fade-slide-up stagger-4"
               />
               <KpiCard
-                label="NPS Skoru"
+                label={t.analytics.npsScore}
                 value={data ? String(data.nps) : '—'}
                 icon="⭐"
                 accent={npsAccent}
                 className="animate-fade-slide-up stagger-1"
               />
               <KpiCard
-                label="Ort. Seans Süresi"
-                value={data ? `${data.avgSessionDuration} dk` : '—'}
+                label={t.analytics.avgSession}
+                value={data ? `${data.avgSessionDuration} ${t.analytics.minutesSuffix}` : '—'}
                 icon="⏱️"
                 accent="default"
                 className="animate-fade-slide-up stagger-2"
@@ -1167,8 +1179,8 @@ export default function AnalyticsPage() {
           <div className="glass animate-fade-slide-up stagger-1" style={{ padding: 24 }}>
             <SectionHeader
               icon="📈"
-              title="Kayıt & Tamamlanma Trendi"
-              subtitle="Zaman içindeki öğrenci aktivitesi"
+              title={t.analytics.enrollmentTrend}
+              subtitle={t.analytics.completionTrend}
             />
             {loading ? (
               <SkeletonChart height={260} />
@@ -1214,7 +1226,7 @@ export default function AnalyticsPage() {
                   />
                   <Area
                     type="monotone"
-                    dataKey="Kayıt"
+                    dataKey={t.tr("Kayıt")}
                     stroke="#2d7df6"
                     strokeWidth={2}
                     fill="url(#gradEnrollment)"
@@ -1239,8 +1251,8 @@ export default function AnalyticsPage() {
           <div className="glass animate-fade-slide-up stagger-2" style={{ padding: 24 }}>
             <SectionHeader
               icon="💹"
-              title="Günlük Gelir"
-              subtitle="₺ cinsinden dönemsel gelir dağılımı"
+              title={t.analytics.dailyRevenue}
+              subtitle={t.analytics.dailyRevenueDesc}
             />
             {loading ? (
               <SkeletonChart height={260} />
@@ -1312,8 +1324,8 @@ export default function AnalyticsPage() {
           <div className="glass animate-fade-slide-up stagger-3" style={{ padding: 24 }}>
             <SectionHeader
               icon="🏆"
-              title="En İyi 5 Kurs"
-              subtitle="Kayıt, tamamlanma ve gelire göre"
+              title={t.analytics.topCourses}
+              subtitle={t.analytics.completionTrend}
             />
             {loading ? (
               <div style={{ display: 'grid', gap: 10 }}>
@@ -1330,8 +1342,8 @@ export default function AnalyticsPage() {
           <div className="glass animate-fade-slide-up stagger-4" style={{ padding: 24 }}>
             <SectionHeader
               icon="🍩"
-              title="Kategori Dağılımı"
-              subtitle="İçerik kategorilerine göre kayıt oranları"
+              title={t.analytics.categoryDist}
+              subtitle={t.analytics.userActivityDesc}
             />
             {loading ? (
               <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -1357,8 +1369,8 @@ export default function AnalyticsPage() {
         <div className="glass" style={{ padding: 24 }}>
           <SectionHeader
             icon="🔥"
-            title="Kohort Tutma Analizi"
-            subtitle="7 kohort × 4 haftalık tutma oranları"
+            title={t.analytics.retention}
+            subtitle={t.analytics.retentionDesc}
           />
           {loading ? (
             <div style={{ display: 'grid', gap: 8 }}>
@@ -1392,15 +1404,15 @@ export default function AnalyticsPage() {
         }}
       >
         <span>
-          ATLASIO Analitik Merkezi · Dönem:{' '}
+          ATLASIO {t.analytics.title} · {t.tr("Dönem")}:{' '}
           <strong style={{ color: 'var(--ink-2)' }}>
-            {PERIOD_OPTIONS.find((o) => o.value === period)?.label}
+            {{ '7d': t.analytics.day7, '30d': t.analytics.day30, '90d': t.analytics.day90 }[period]}
           </strong>
         </span>
         <span>
           {lastUpdated
-            ? `Güncellendi: ${lastUpdated.toLocaleString('tr-TR')}`
-            : 'Yükleniyor…'}
+            ? `${t.tr("Güncellendi")}: ${lastUpdated.toLocaleString('tr-TR')}`
+            : t.tr("Yükleniyor…")}
         </span>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -170,6 +171,7 @@ const STATUS_CONFIG: Record<
 };
 
 function StatusBadge({ status }: { status: CertStatus }) {
+  const t = useI18n();
   const cfg = STATUS_CONFIG[status];
   return (
     <span
@@ -184,7 +186,7 @@ function StatusBadge({ status }: { status: CertStatus }) {
         className="w-1.5 h-1.5 rounded-full flex-shrink-0"
         style={{ background: cfg.dot }}
       />
-      {cfg.label}
+      {t.tr(cfg.label)}
     </span>
   );
 }
@@ -192,6 +194,7 @@ function StatusBadge({ status }: { status: CertStatus }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CertificateRenewalPage() {
+  const t = useI18n();
   const [certs, setCerts] = useState<Certificate[]>(DEMO_CERTS);
   const [activeTab, setActiveTab] = useState<FilterTab>("Tümü");
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -297,18 +300,18 @@ export default function CertificateRenewalPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="back-btn">
-              ← Geri
+              ← {t.common.back}
             </Link>
             <div className="sep">/</div>
             <Link href="/certificates" className="back-btn">
-              Sertifikalar
+              {t.tr("Sertifikalar")}
             </Link>
             <div className="sep">/</div>
             <span
               className="text-sm font-semibold"
               style={{ color: "var(--ink)" }}
             >
-              Yenileme Takibi
+              {t.tr("Yenileme Takibi")}
             </span>
           </div>
           <span
@@ -320,7 +323,7 @@ export default function CertificateRenewalPage() {
               color: "var(--accent-2)",
             }}
           >
-            🛡️ Yönetici Paneli
+            {t.tr("🛡️ Yönetici Paneli")}
           </span>
         </div>
       </header>
@@ -339,19 +342,19 @@ export default function CertificateRenewalPage() {
               color: "#dc2626",
             }}
           >
-            📋 Sertifika Yönetimi
+            {t.tr("📋 Sertifika Yönetimi")}
           </div>
           <h1
             className="text-3xl font-extrabold"
             style={{ color: "var(--ink)" }}
           >
-            Sertifika Yenileme Takibi
+            {t.certificates.title} — {t.certificates.renewBtn}
           </h1>
           <p
             className="text-base max-w-xl leading-relaxed"
             style={{ color: "var(--ink-2)" }}
           >
-            Yaklaşan ve süresi dolan sertifikalar
+            {t.certificates.subtitle}
           </p>
         </div>
       </section>
@@ -384,10 +387,10 @@ export default function CertificateRenewalPage() {
             icon: "✅",
           },
         ].map((s) => (
-          <div key={s.label} className="metric text-center">
+          <div key={t.tr(s.label)} className="metric text-center">
             <div className="label flex items-center justify-center gap-1">
               <span>{s.icon}</span>
-              {s.label}
+              {t.tr(s.label)}
             </div>
             <div className="value" style={{ color: s.color, fontSize: "28px" }}>
               {s.value}
@@ -421,7 +424,7 @@ export default function CertificateRenewalPage() {
                     activeTab === tab ? "var(--shadow-sm)" : "none",
                 }}
               >
-                {tab}
+                {t.tr(tab)}
                 {tab === "30 Gün İçinde" && stats.expiringSoon > 0 && (
                   <span
                     className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
@@ -469,12 +472,12 @@ export default function CertificateRenewalPage() {
                   className="inline-block w-4 h-4 rounded-full border-2 border-current border-t-transparent"
                   style={{ animation: "spin 0.7s linear infinite" }}
                 />
-                Güncelleniyor...
+                {t.tr("Güncelleniyor...")}
               </>
             ) : bulkSuccess ? (
-              "✓ Güncellendi"
+              `✓ ${t.tr("Güncellendi")}`
             ) : (
-              `Toplu Güncelle (${stats.expired} süresi dolmuş)`
+              `${t.tr("Toplu Güncelle")} (${stats.expired} ${t.tr("süresi dolmuş")})`
             )}
           </button>
         </div>
@@ -502,7 +505,7 @@ export default function CertificateRenewalPage() {
                     className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide"
                     style={{ color: "var(--muted)" }}
                   >
-                    {col}
+                    {t.tr(col)}
                   </th>
                 ))}
               </tr>
@@ -515,7 +518,7 @@ export default function CertificateRenewalPage() {
                     className="px-6 py-10 text-center text-sm"
                     style={{ color: "var(--muted)" }}
                   >
-                    Bu filtrede kayıt bulunamadı.
+                    {t.tr("Bu filtrede kayıt bulunamadı.")}
                   </td>
                 </tr>
               ) : (
@@ -606,7 +609,7 @@ export default function CertificateRenewalPage() {
                                 className="text-xs mt-0.5 font-semibold"
                                 style={{ color: "#d97706" }}
                               >
-                                {daysUntilExpiry(cert.expiresAt)} gün kaldı
+                                {daysUntilExpiry(cert.expiresAt)} {t.tr("gün kaldı")}
                               </div>
                             )}
                             {computedStatus === "EXPIRED" && (
@@ -614,7 +617,7 @@ export default function CertificateRenewalPage() {
                                 className="text-xs mt-0.5 font-semibold"
                                 style={{ color: "#dc2626" }}
                               >
-                                {Math.abs(daysUntilExpiry(cert.expiresAt))} gün önce doldu
+                                {Math.abs(daysUntilExpiry(cert.expiresAt))} {t.tr("gün önce doldu")}
                               </div>
                             )}
                           </div>
@@ -623,7 +626,7 @@ export default function CertificateRenewalPage() {
                             className="text-xs font-medium"
                             style={{ color: "var(--muted)" }}
                           >
-                            Süresiz
+                            {t.tr("Süresiz")}
                           </span>
                         )}
                       </td>
@@ -656,10 +659,10 @@ export default function CertificateRenewalPage() {
                                     animation: "spin 0.7s linear infinite",
                                   }}
                                 />
-                                İşleniyor
+                                {t.tr("İşleniyor")}
                               </>
                             ) : (
-                              <>✕ Süresi Doldu İşaretle</>
+                              <>{t.tr("✕ Süresi Doldu İşaretle")}</>
                             )}
                           </button>
                         ) : computedStatus === "EXPIRED" ? (
@@ -667,7 +670,7 @@ export default function CertificateRenewalPage() {
                             className="text-xs"
                             style={{ color: "var(--muted)" }}
                           >
-                            Süresi dolmuş
+                            {t.tr("Süresi dolmuş")}
                           </span>
                         ) : (
                           <span
@@ -692,10 +695,10 @@ export default function CertificateRenewalPage() {
           style={{ color: "var(--muted)" }}
         >
           <span className="text-xs">
-            {filtered.length} kayıt gösteriliyor (toplam {withStatus.length})
+            {filtered.length} {t.tr("kayıt gösteriliyor")} ({t.tr("toplam")} {withStatus.length})
           </span>
           <span className="text-xs">
-            Son güncelleme:{" "}
+            {t.tr("Son güncelleme")}:{" "}
             {TODAY.toLocaleDateString("tr-TR", {
               day: "2-digit",
               month: "long",

@@ -12,6 +12,7 @@
 **/.pnpm-store/
 **/.next/
 **/dist/
+apps/api/dist/
 **/build/
 **/.cache/
 **/coverage/
@@ -41,6 +42,12 @@
 **/yarn-debug.log*
 **/yarn-error.log*
 **/pnpm-debug.log*
+
+# Nested repo copy — should not be tracked
+atlasio-monorepo/
+
+# Redis dump — runtime artifact, not source
+dump.rdb
 
 # Large/system junk files from accidental CLI output
 atlasio-monorepo/infra/terraform/AWS_*

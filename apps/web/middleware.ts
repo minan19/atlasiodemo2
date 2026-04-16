@@ -35,6 +35,9 @@ const INSTRUCTOR_PREFIXES = ['/instructor'];
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Dev bypass — API sunucusu olmadan tüm sayfalara erişim
+  if (process.env.NODE_ENV === 'development') return NextResponse.next();
+
   const isProtected = PROTECTED_PREFIXES.some(p => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 

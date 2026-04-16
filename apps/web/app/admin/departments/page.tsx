@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useI18n } from "../../_i18n/use-i18n";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -69,7 +70,7 @@ function displayName(inst?: Instructor | null) {
 
 const AVATAR_GRADS = [
   "linear-gradient(135deg,#5B6EFF,#9B59FF)",
-  "linear-gradient(135deg,#00D4B4,#5B6EFF)",
+  "linear-gradient(135deg,#00B4D8,#5B6EFF)",
   "linear-gradient(135deg,#f59e0b,#d97706)",
   "linear-gradient(135deg,#ef4444,#dc2626)",
   "linear-gradient(135deg,#06b6d4,#0891b2)",
@@ -158,12 +159,12 @@ function Icon({ name, size = 16 }: { name: string; size?: number }) {
   return icons[name] ?? <svg width={s} height={s} viewBox="0 0 24 24" />;
 }
 
-function Spinner({ size = 16 }: { size?: number }) {
+function Spinner({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%",
-      border: `${size > 14 ? 2 : 1.5}px solid rgba(255,255,255,0.25)`,
-      borderTopColor: "#fff", animation: "admDeptSpin 0.7s linear infinite", flexShrink: 0,
+      border: `${size > 14 ? 2 : 1.5}px solid ${color === "#fff" ? "rgba(255,255,255,0.25)" : "var(--line)"}`,
+      borderTopColor: color, animation: "admDeptSpin 0.7s linear infinite", flexShrink: 0,
     }} />
   );
 }
@@ -171,6 +172,7 @@ function Spinner({ size = 16 }: { size?: number }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminDepartmentsPage() {
+  const t = useI18n();
   const [token, setToken] = useState("");
   const [departments, setDepartments] = useState<Department[]>([]);
   const [instructors, setInstructors] = useState<Instructor[]>([]);
@@ -194,8 +196,11 @@ export default function AdminDepartmentsPage() {
     if (typeof window !== "undefined") setToken(localStorage.getItem(ACCESS_TOKEN_KEY) ?? "");
   }, []);
 
-  const headers = useMemo<Record<string, string>>(
-    () => (token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" }),
+  const headers = useMemo(
+    () => (token
+      ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+      : { "Content-Type": "application/json" }
+    ) as Record<string, string>,
     [token]
   );
 
@@ -382,7 +387,7 @@ export default function AdminDepartmentsPage() {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                   <h1 style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: 800, color: "var(--ink)", margin: 0, letterSpacing: "-0.03em" }}>
-                    Departman Yönetimi
+                    {t.tr("Departman Yönetimi")}
                   </h1>
                   {isDemo && (
                     <span style={{
@@ -393,7 +398,7 @@ export default function AdminDepartmentsPage() {
                   )}
                 </div>
                 <p style={{ fontSize: 14, color: "var(--ink-2)", margin: 0 }}>
-                  Eğitim birimlerini, baş eğitmenleri ve kadroyu yönetin
+                  {t.tr("Eğitim birimlerini, baş eğitmenleri ve kadroyu yönetin")}
                 </p>
               </div>
             </div>
@@ -410,8 +415,8 @@ export default function AdminDepartmentsPage() {
                   opacity: busy ? 0.6 : 1, transition: "all var(--t-fast)",
                 }}
               >
-                {busy ? <Spinner size={14} /> : <Icon name="refresh" size={14} />}
-                Yenile
+                {busy ? <Spinner size={14} color="var(--ink-2)" /> : <Icon name="refresh" size={14} />}
+                {t.tr("Yenile")}
               </button>
               <button
                 onClick={() => { setShowCreateForm((v) => !v); setCreateError(null); }}
@@ -426,7 +431,7 @@ export default function AdminDepartmentsPage() {
                   transition: "all var(--t-fast)",
                 }}
               >
-                {showCreateForm ? <><Icon name="close" size={14} /> Kapat</> : <><Icon name="plus" size={14} /> Yeni Departman</>}
+                {showCreateForm ? <><Icon name="close" size={14} /> {t.tr("Kapat")}</> : <><Icon name="plus" size={14} /> {t.tr("Yeni Departman")}</>}
               </button>
             </div>
           </div>
@@ -448,7 +453,7 @@ export default function AdminDepartmentsPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>{t.tr(s.label)}</div>
                 </div>
               </div>
             ))}
@@ -474,7 +479,7 @@ export default function AdminDepartmentsPage() {
               }}>
                 <Icon name="department" size={15} />
               </div>
-              <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--ink)", margin: 0 }}>Yeni Departman Oluştur</h2>
+              <h2 style={{ fontSize: 15, fontWeight: 800, color: "var(--ink)", margin: 0 }}>{t.tr("Yeni Departman Oluştur")}</h2>
             </div>
 
             {createError && (
@@ -491,12 +496,12 @@ export default function AdminDepartmentsPage() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
               <div>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-2)", marginBottom: 7 }}>
-                  Departman Adı *
+                  {t.tr("Departman Adı *")}
                 </label>
                 <input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="ör. Bilgisayar Bilimleri"
+                  placeholder={t.tr("ör. Bilgisayar Bilimleri")}
                   autoFocus
                   style={{
                     width: "100%", padding: "10px 14px", borderRadius: "var(--r-md)",
@@ -508,7 +513,7 @@ export default function AdminDepartmentsPage() {
               </div>
               <div>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-2)", marginBottom: 7 }}>
-                  Baş Eğitmen *
+                  {t.tr("Baş Eğitmen *")}
                 </label>
                 <select
                   value={newHeadId}
@@ -520,7 +525,7 @@ export default function AdminDepartmentsPage() {
                     color: "var(--ink)", fontSize: 14, boxSizing: "border-box",
                   }}
                 >
-                  <option value="">— Eğitmen seçin —</option>
+                  <option value="">{t.tr("— Eğitmen seçin —")}</option>
                   {instructors.map((inst) => (
                     <option key={inst.id} value={inst.id}>{displayName(inst)}</option>
                   ))}
@@ -537,7 +542,7 @@ export default function AdminDepartmentsPage() {
                   color: "var(--ink-2)", fontSize: 14, fontWeight: 600, cursor: "pointer",
                 }}
               >
-                İptal
+                {t.tr("İptal")}
               </button>
               <button
                 onClick={handleCreate}
@@ -554,7 +559,7 @@ export default function AdminDepartmentsPage() {
                   boxShadow: newName.trim() && newHeadId ? "var(--glow-blue)" : "none",
                 }}
               >
-                {creating ? <><Spinner size={16} /> Oluşturuluyor…</> : <><Icon name="check" size={15} /> Oluştur</>}
+                {creating ? <><Spinner size={16} /> {t.tr("Oluşturuluyor…")}</> : <><Icon name="check" size={15} /> {t.tr("Oluştur")}</>}
               </button>
             </div>
           </div>
@@ -587,9 +592,9 @@ export default function AdminDepartmentsPage() {
               <Icon name="department" size={34} />
             </div>
             <div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink)", margin: "0 0 8px" }}>Henüz departman yok</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink)", margin: "0 0 8px" }}>{t.tr("Henüz departman yok")}</h2>
               <p style={{ fontSize: 14, color: "var(--muted)", maxWidth: 320 }}>
-                İlk departmanı oluşturarak kadroyu organize etmeye başlayın.
+                {t.tr("İlk departmanı oluşturarak kadroyu organize etmeye başlayın.")}
               </p>
             </div>
             <button
@@ -602,7 +607,7 @@ export default function AdminDepartmentsPage() {
                 boxShadow: "var(--glow-blue)",
               }}
             >
-              <Icon name="plus" size={15} /> İlk Departmanı Oluştur
+              <Icon name="plus" size={15} /> {t.tr("İlk Departmanı Oluştur")}
             </button>
           </div>
         ) : (
@@ -645,7 +650,7 @@ export default function AdminDepartmentsPage() {
 
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", marginBottom: 4 }}>
-                        {dept.name}
+                        {t.tr(dept.name)}
                       </div>
                       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                         {dept.HeadInstructor && (
@@ -654,7 +659,7 @@ export default function AdminDepartmentsPage() {
                           </span>
                         )}
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--muted)" }}>
-                          <Icon name="users" size={10} /> {instrCount} eğitmen
+                          <Icon name="users" size={10} /> {instrCount} {t.tr("eğitmen")}
                         </span>
                         <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--muted)" }}>
                           <Icon name="calendar" size={10} /> {fmtDate(dept.createdAt)}
@@ -682,7 +687,7 @@ export default function AdminDepartmentsPage() {
                           cursor: "pointer",
                         }}
                       >
-                        {isAddingHere ? <><Icon name="close" size={12} /> İptal</> : <><Icon name="userPlus" size={12} /> Eğitmen Ekle</>}
+                        {isAddingHere ? <><Icon name="close" size={12} /> {t.tr("İptal")}</> : <><Icon name="userPlus" size={12} /> {t.tr("Eğitmen Ekle")}</>}
                       </button>
 
                       {instrCount > 0 && (
@@ -725,7 +730,7 @@ export default function AdminDepartmentsPage() {
                             color: "var(--ink)", fontSize: 13,
                           }}
                         >
-                          <option value="">— Eğitmen seçin —</option>
+                          <option value="">{t.tr("— Eğitmen seçin —")}</option>
                           {instructors
                             .filter((inst) =>
                               !dept.DepartmentInstructor?.some((di) => di.Instructor.id === inst.id) &&
@@ -749,7 +754,7 @@ export default function AdminDepartmentsPage() {
                             cursor: addingInstructor || !addInstructorId ? "not-allowed" : "pointer",
                           }}
                         >
-                          {addingInstructor ? <><Spinner size={14} /> Ekleniyor…</> : <><Icon name="check" size={14} /> Ekle</>}
+                          {addingInstructor ? <><Spinner size={14} /> {t.tr("Ekleniyor…")}</> : <><Icon name="check" size={14} /> {t.tr("Ekle")}</>}
                         </button>
                       </div>
                     </div>
@@ -762,7 +767,7 @@ export default function AdminDepartmentsPage() {
                       animation: "admDeptIn 0.25s both",
                     }}>
                       <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.06em", marginBottom: 10 }}>
-                        EĞİTMENLER ({instrCount})
+                        {t.tr("EĞİTMENLER")} ({instrCount})
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                         {dept.DepartmentInstructor?.map(({ Instructor: inst }) => (
@@ -788,7 +793,7 @@ export default function AdminDepartmentsPage() {
                                 background: "color-mix(in srgb,var(--accent) 10%,var(--panel))",
                                 color: "var(--accent)", border: "1px solid color-mix(in srgb,var(--accent) 25%,var(--line))",
                               }}>
-                                <Icon name="crown" size={9} /> BAŞ EĞİTMEN
+                                <Icon name="crown" size={9} /> {t.tr("BAŞ EĞİTMEN")}
                               </span>
                             )}
                           </div>

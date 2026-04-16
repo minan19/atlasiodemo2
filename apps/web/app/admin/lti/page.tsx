@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -161,12 +162,13 @@ function Icon({ name, size = 16 }: { name: string; size?: number }) {
   return icons[name] ?? <svg width={s} height={s} viewBox="0 0 24 24" />;
 }
 
-function Spinner({ size = 16 }: { size?: number }) {
+function Spinner({ size = 16, dark = false }: { size?: number; dark?: boolean }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%",
-      border: `${size > 14 ? 2 : 1.5}px solid rgba(255,255,255,0.25)`,
-      borderTopColor: "#fff", animation: "ltiSpin 0.7s linear infinite", flexShrink: 0,
+      border: `${size > 14 ? 2 : 1.5}px solid ${dark ? "var(--line)" : "rgba(255,255,255,0.25)"}`,
+      borderTopColor: dark ? "var(--accent)" : "#fff",
+      animation: "ltiSpin 0.7s linear infinite", flexShrink: 0,
     }} />
   );
 }
@@ -187,6 +189,7 @@ function ToolCard({
   onDeploy: (toolId: string) => void;
   onEdit: (tool: LtiTool) => void;
 }) {
+  const t = useI18n();
   const deployCount = tool.LtiDeployment?.length ?? 0;
   const [copied, setCopied] = useState<string | null>(null);
 
@@ -235,7 +238,7 @@ function ToolCard({
               border: tool.isActive ? "1px solid rgba(34,197,94,0.3)" : "1px solid rgba(107,114,128,0.3)",
               color: tool.isActive ? "#22c55e" : "#6b7280",
             }}>
-              {tool.isActive ? "AKTİF" : "DEVRE DIŞI"}
+              {tool.isActive ? t.tr("AKTİF") : t.tr("DEVRE DIŞI")}
             </span>
             <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", marginLeft: 4 }}>
               LTI 1.3
@@ -256,7 +259,7 @@ function ToolCard({
         <div style={{ display: "flex", gap: 7, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => onEdit(tool)}
-            title="Düzenle"
+            title={t.tr("Düzenle")}
             style={{
               width: 30, height: 30, borderRadius: "var(--r-sm)",
               border: "1px solid color-mix(in srgb,var(--accent) 25%,var(--line))",
@@ -268,7 +271,7 @@ function ToolCard({
           </button>
           <button
             onClick={() => onDeploy(tool.id)}
-            title="Deployment Ekle"
+            title={t.tr("Deployment Ekle")}
             style={{
               display: "inline-flex", alignItems: "center", gap: 5,
               padding: "5px 12px", borderRadius: "var(--r-sm)",
@@ -299,7 +302,7 @@ function ToolCard({
           {/* Config fields */}
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.06em", marginBottom: 10 }}>
-              BAĞLANTI BİLGİLERİ
+              {t.tr("BAĞLANTI BİLGİLERİ")}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
@@ -366,10 +369,10 @@ function ToolCard({
                     }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>
-                        Kurs: <span style={{ fontFamily: "monospace", fontSize: 11 }}>{dep.courseId}</span>
+                        {t.tr("Kurs")}: <span style={{ fontFamily: "monospace", fontSize: 11 }}>{dep.courseId}</span>
                       </div>
                       <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
-                        {dep.instructors.length} eğitmen · {dep.learners.length} öğrenci · {fmtDate(dep.createdAt)}
+                        {dep.instructors.length} {t.tr("eğitmen")} · {dep.learners.length} {t.tr("öğrenci")} · {fmtDate(dep.createdAt)}
                       </div>
                     </div>
                     <span style={{
@@ -377,7 +380,7 @@ function ToolCard({
                       padding: "2px 8px", borderRadius: "var(--r-full)",
                       background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)",
                       color: "#22c55e",
-                    }}>AKTİF</span>
+                    }}>{t.tr("AKTİF")}</span>
                   </div>
                 ))}
               </div>
@@ -398,6 +401,7 @@ function ToolModal({
   onClose: () => void;
   onSaved: (tool: LtiTool) => void;
 }) {
+  const t = useI18n();
   const [form, setForm] = useState({
     name: existing?.name ?? "",
     clientId: existing?.clientId ?? "",
@@ -481,7 +485,7 @@ function ToolModal({
               <Icon name="plug" size={18} />
             </div>
             <h2 style={{ fontSize: 17, fontWeight: 800, color: "var(--ink)", margin: 0, letterSpacing: "-0.02em" }}>
-              {isEditing ? "LTI Aracını Düzenle" : "Yeni LTI Aracı"}
+              {isEditing ? t.tr("LTI Aracını Düzenle") : t.tr("Yeni LTI Aracı")}
             </h2>
           </div>
           <button
@@ -543,23 +547,26 @@ function ToolModal({
                 color: "var(--ink-2)", fontSize: 14, fontWeight: 600, cursor: "pointer",
               }}
             >
-              İptal
+              {t.tr("İptal")}
             </button>
             <button
               onClick={handleSave}
               disabled={saving || !form.name.trim() || !form.clientId.trim() || !form.issuer.trim()}
               style={{
                 flex: 2, padding: "11px", borderRadius: "var(--r-md)",
-                border: "none",
-                background: saving || !form.name.trim() || !form.clientId.trim() || !form.issuer.trim()
+                border: saving ? "1.5px solid var(--line)" : "none",
+                background: saving
+                  ? "var(--panel)"
+                  : !form.name.trim() || !form.clientId.trim() || !form.issuer.trim()
                   ? "color-mix(in srgb,var(--accent) 40%,var(--line))"
                   : "linear-gradient(135deg,var(--accent-2),var(--accent))",
-                color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer",
+                color: saving ? "var(--ink-2)" : "#fff",
+                fontSize: 14, fontWeight: 700, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                boxShadow: form.name.trim() ? "var(--glow-blue)" : "none",
+                boxShadow: form.name.trim() && !saving ? "var(--glow-blue)" : "none",
               }}
             >
-              {saving ? <><Spinner size={16} /> Kaydediliyor…</> : <><Icon name="check" size={15} /> {isEditing ? "Güncelle" : "Oluştur"}</>}
+              {saving ? <><Spinner size={16} dark /> {t.tr("Kaydediliyor…")}</> : <><Icon name="check" size={15} /> {isEditing ? t.tr("Güncelle") : t.tr("Oluştur")}</>}
             </button>
           </div>
         </div>
@@ -571,6 +578,7 @@ function ToolModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function LtiAdminPage() {
+  const t = useI18n();
   const [tools, setTools] = useState<LtiTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -609,16 +617,16 @@ export default function LtiAdminPage() {
 
   const handleSaved = (tool: LtiTool) => {
     setTools((prev) => {
-      const idx = prev.findIndex((t) => t.id === tool.id);
+      const idx = prev.findIndex((item) => item.id === tool.id);
       if (idx >= 0) { const next = [...prev]; next[idx] = tool; return next; }
       return [tool, ...prev];
     });
-    showToast(editingTool ? "Araç güncellendi!" : "LTI aracı oluşturuldu!");
+    showToast(editingTool ? t.tr("Araç güncellendi!") : t.tr("LTI aracı oluşturuldu!"));
     setEditingTool(null);
   };
 
   const handleDeploy = async (toolId: string) => {
-    const courseId = prompt("Deployment için Kurs ID girin:");
+    const courseId = prompt(t.tr("Deployment için Kurs ID girin:"));
     if (!courseId?.trim()) return;
     try {
       const res = await fetch(`${API_BASE}/lti/deployments`, {
@@ -627,25 +635,25 @@ export default function LtiAdminPage() {
       });
       if (!res.ok) throw new Error();
       const dep: LtiDeployment = await res.json();
-      setTools((prev) => prev.map((t) =>
-        t.id === toolId ? { ...t, LtiDeployment: [...(t.LtiDeployment ?? []), dep] } : t
+      setTools((prev) => prev.map((item) =>
+        item.id === toolId ? { ...item, LtiDeployment: [...(item.LtiDeployment ?? []), dep] } : item
       ));
-      showToast("Deployment oluşturuldu!");
+      showToast(t.tr("Deployment oluşturuldu!"));
     } catch {
       // Demo
       const dep: LtiDeployment = {
         id: `dep-${Date.now()}`, courseId: courseId.trim(),
         instructors: [], learners: [], createdAt: new Date().toISOString(),
       };
-      setTools((prev) => prev.map((t) =>
-        t.id === toolId ? { ...t, LtiDeployment: [...(t.LtiDeployment ?? []), dep] } : t
+      setTools((prev) => prev.map((item) =>
+        item.id === toolId ? { ...item, LtiDeployment: [...(item.LtiDeployment ?? []), dep] } : item
       ));
-      showToast("Deployment oluşturuldu (demo).");
+      showToast(t.tr("Deployment oluşturuldu (demo)."));
     }
   };
 
-  const activeCount = tools.filter((t) => t.isActive).length;
-  const totalDeployments = tools.reduce((s, t) => s + (t.LtiDeployment?.length ?? 0), 0);
+  const activeCount = tools.filter((item) => item.isActive).length;
+  const totalDeployments = tools.reduce((s, item) => s + (item.LtiDeployment?.length ?? 0), 0);
 
   return (
     <>
@@ -705,7 +713,7 @@ export default function LtiAdminPage() {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap" }}>
                   <h1 style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: 800, color: "var(--ink)", margin: 0, letterSpacing: "-0.03em" }}>
-                    LTI Entegrasyonları
+                    {t.tr("LTI Entegrasyonları")}
                   </h1>
                   <span style={{
                     fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: "var(--r-full)",
@@ -720,7 +728,7 @@ export default function LtiAdminPage() {
                   )}
                 </div>
                 <p style={{ fontSize: 14, color: "var(--ink-2)", margin: 0 }}>
-                  Learning Tools Interoperability araçlarını yönetin ve kurslara entegre edin
+                  {t.tr("Learning Tools Interoperability araçlarını yönetin ve kurslara entegre edin")}
                 </p>
               </div>
             </div>
@@ -735,7 +743,7 @@ export default function LtiAdminPage() {
                 boxShadow: "var(--glow-blue)", whiteSpace: "nowrap",
               }}
             >
-              <Icon name="plus" size={16} /> LTI Aracı Ekle
+              <Icon name="plus" size={16} /> {t.tr("LTI Aracı Ekle")}
             </button>
           </div>
 
@@ -746,7 +754,7 @@ export default function LtiAdminPage() {
               { label: "Aktif", value: activeCount, icon: "check", color: "#22c55e" },
               { label: "Deployment", value: totalDeployments, icon: "rocket", color: "var(--accent-3)" },
             ].map((s) => (
-              <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div key={t.tr(s.label)} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: "var(--r-sm)",
                   background: "color-mix(in srgb,var(--line) 50%,var(--panel))",
@@ -756,7 +764,7 @@ export default function LtiAdminPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>{t.tr(s.label)}</div>
                 </div>
               </div>
             ))}
@@ -789,9 +797,9 @@ export default function LtiAdminPage() {
               <Icon name="plug" size={34} />
             </div>
             <div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink)", margin: "0 0 8px" }}>Henüz LTI aracı yok</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--ink)", margin: "0 0 8px" }}>{t.tr("Henüz LTI aracı yok")}</h2>
               <p style={{ fontSize: 14, color: "var(--muted)", maxWidth: 360, lineHeight: 1.7 }}>
-                Khan Academy, Quizlet veya GeoGebra gibi harici öğrenme araçlarını LTI 1.3 ile entegre edin.
+                {t.tr("Khan Academy, Quizlet veya GeoGebra gibi harici öğrenme araçlarını LTI 1.3 ile entegre edin.")}
               </p>
             </div>
             <button
@@ -804,7 +812,7 @@ export default function LtiAdminPage() {
                 boxShadow: "var(--glow-blue)",
               }}
             >
-              <Icon name="plus" size={15} /> İlk Aracı Ekle
+              <Icon name="plus" size={15} /> {t.tr("İlk Aracı Ekle")}
             </button>
           </div>
         ) : (
@@ -816,7 +824,7 @@ export default function LtiAdminPage() {
                   expanded={expanded.has(tool.id)}
                   onToggle={() => toggleExpand(tool.id)}
                   onDeploy={handleDeploy}
-                  onEdit={(t) => { setEditingTool(t); setShowModal(true); }}
+                  onEdit={(tool) => { setEditingTool(tool); setShowModal(true); }}
                 />
               </div>
             ))}

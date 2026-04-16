@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "../_i18n/use-i18n";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -348,6 +349,7 @@ const PRINT_CSS = `
 // ---------------------------------------------------------------------------
 
 export default function ReportCardsPage() {
+  const t = useI18n();
   const [data, setData] = useState<TranscriptData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -384,7 +386,7 @@ export default function ReportCardsPage() {
         // Fall back to demo data so the page is always useful
         setData(DEMO);
         setLoading(false);
-        setError("API bağlantısı kurulamadı — demo veriler gösteriliyor.");
+        setError(t.tr("API bağlantısı kurulamadı — demo veriler gösteriliyor."));
       });
   }, []);
 
@@ -397,12 +399,12 @@ export default function ReportCardsPage() {
       {/* ── Hero ── */}
       <header className="glass hero rounded-2xl border border-slate-200 p-6">
         <div className="hero-content space-y-2 animate-fade-slide-up stagger-1">
-          <div className="pill w-fit no-print">Transkript</div>
+          <div className="pill w-fit no-print">{t.reportCards.title}</div>
           <h1 className="text-3xl font-semibold">
-            📄 Akademik Transkript
+            📄 {t.reportCards.title}
           </h1>
           <p className="text-sm text-slate-600 max-w-2xl">
-            Tüm kurs geçmişiniz ve notlarınız
+            {t.reportCards.subtitle}
           </p>
         </div>
       </header>
@@ -420,7 +422,7 @@ export default function ReportCardsPage() {
         <div className="glass rounded-2xl border border-slate-200 p-6 space-y-4">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-blue-400 to-violet-400 inline-block" />
-            Öğrenci Bilgileri
+            {t.tr("Öğrenci Bilgileri")}
           </h2>
 
           {loading ? (
@@ -432,28 +434,28 @@ export default function ReportCardsPage() {
           ) : data ? (
             <dl className="space-y-3">
               <div className="flex justify-between text-sm">
-                <dt className="text-slate-500">Ad Soyad</dt>
+                <dt className="text-slate-500">{t.tr("Ad Soyad")}</dt>
                 <dd className="font-semibold text-slate-800">{data.student.name}</dd>
               </div>
               <div className="flex justify-between text-sm">
-                <dt className="text-slate-500">Öğrenci No</dt>
+                <dt className="text-slate-500">{t.tr("Öğrenci No")}</dt>
                 <dd className="font-mono text-slate-700">{data.student.id}</dd>
               </div>
               <div className="flex justify-between text-sm">
-                <dt className="text-slate-500">Kayıt Tarihi</dt>
+                <dt className="text-slate-500">{t.tr("Kayıt Tarihi")}</dt>
                 <dd className="text-slate-700">{formatDate(data.student.enrolledAt)}</dd>
               </div>
               <hr className="border-slate-100" />
               <div className="flex justify-between text-sm">
-                <dt className="text-slate-500">Toplam Kredi</dt>
+                <dt className="text-slate-500">{t.tr("Toplam Kredi")}</dt>
                 <dd className="font-semibold text-slate-800">{data.totalCredits}</dd>
               </div>
               <div className="flex justify-between text-sm">
-                <dt className="text-slate-500">Tamamlanan Kredi</dt>
+                <dt className="text-slate-500">{t.tr("Tamamlanan Kredi")}</dt>
                 <dd className="font-semibold text-slate-800">{data.completedCredits}</dd>
               </div>
               <div className="flex justify-between items-baseline">
-                <dt className="text-slate-500 text-sm">Genel Not Ortalaması</dt>
+                <dt className="text-slate-500 text-sm">{t.tr("Genel Not Ortalaması")}</dt>
                 <dd className={`text-2xl font-bold ${gpaColor(data.gpa)}`}>
                   {data.gpa.toFixed(2)}
                 </dd>
@@ -466,7 +468,7 @@ export default function ReportCardsPage() {
         <div className="glass rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center space-y-2">
           <h2 className="text-base font-bold text-slate-800 self-start flex items-center gap-2 w-full">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
-            GPA Göstergesi
+            {t.tr("GPA Göstergesi")}
           </h2>
           {loading ? (
             <div className="skeleton h-36 w-48 rounded-xl animate-pulse" />
@@ -476,19 +478,19 @@ export default function ReportCardsPage() {
               <div className="flex gap-3 flex-wrap justify-center text-xs mt-1">
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-200 inline-block" />
-                  {"<"}1.5 Başarısız
+                  {"<"}1.5 {t.tr("Başarısız")}
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-200 inline-block" />
-                  1.5–2.5 Orta
+                  1.5–2.5 {t.tr("Orta")}
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-200 inline-block" />
-                  2.5–3.5 İyi
+                  {t.tr("2.5–3.5 İyi")}
                 </span>
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-200 inline-block" />
-                  {">"}3.5 Mükemmel
+                  {">"}3.5 {t.tr("Mükemmel")}
                 </span>
               </div>
             </>
@@ -522,11 +524,11 @@ export default function ReportCardsPage() {
                 <div className="flex items-center gap-2">
                   <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-400 to-blue-400 inline-block" />
                   <h2 className="text-sm font-bold text-slate-800">{label}</h2>
-                  <span className="pill text-xs no-print">{courses.length} kurs</span>
+                  <span className="pill text-xs no-print">{courses.length} {t.tr("kurs")}</span>
                 </div>
                 {semGpa > 0 && (
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-500">Dönem GPA:</span>
+                    <span className="text-xs text-slate-500">{t.tr("Dönem GPA:")}</span>
                     <span className={`text-sm font-bold ${gpaColor(semGpa)}`}>
                       {semGpa.toFixed(2)}
                     </span>
@@ -540,25 +542,25 @@ export default function ReportCardsPage() {
                   <thead>
                     <tr className="border-b border-slate-100 bg-white/60">
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Kurs Adı
+                        {t.tr("Kurs Adı")}
                       </th>
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Eğitmen
+                        {t.tr("Eğitmen")}
                       </th>
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Başlangıç
+                        {t.tr("Başlangıç")}
                       </th>
                       <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Bitiş
+                        {t.tr("Bitiş")}
                       </th>
                       <th className="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Puan
+                        {t.tr("Puan")}
                       </th>
                       <th className="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Not
+                        {t.tr("Not")}
                       </th>
                       <th className="px-4 py-2.5 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                        Durum
+                        {t.tr("Durum")}
                       </th>
                     </tr>
                   </thead>
@@ -608,7 +610,7 @@ export default function ReportCardsPage() {
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCls}`}
                             >
-                              {statusLabel}
+                              {t.tr(statusLabel)}
                             </span>
                           </td>
                         </tr>
@@ -628,10 +630,10 @@ export default function ReportCardsPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
               <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-              Kredi Durumu
+              {t.tr("Kredi Durumu")}
             </h2>
             <span className="pill text-xs no-print">
-              {data.completedCredits} / {data.totalCredits} kredi
+              {data.completedCredits} / {data.totalCredits} {t.tr("kredi")}
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -649,17 +651,17 @@ export default function ReportCardsPage() {
           </div>
           <div className="flex gap-6 text-sm text-slate-600">
             <span>
-              Tamamlanan:{" "}
+              {t.tr("Tamamlanan")}:{" "}
               <strong className="text-emerald-600">{data.completedCredits}</strong>
             </span>
             <span>
-              Kalan:{" "}
+              {t.tr("Kalan")}:{" "}
               <strong className="text-blue-600">
                 {data.totalCredits - data.completedCredits}
               </strong>
             </span>
             <span>
-              Toplam: <strong className="text-slate-800">{data.totalCredits}</strong>
+              {t.tr("Toplam")}: <strong className="text-slate-800">{data.totalCredits}</strong>
             </span>
           </div>
         </section>
@@ -684,7 +686,7 @@ export default function ReportCardsPage() {
               d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          PDF İndir
+          {t.reportCards.downloadPDF}
         </button>
         <button
           onClick={() => window.print()}
@@ -703,7 +705,7 @@ export default function ReportCardsPage() {
               d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
             />
           </svg>
-          Yazdır
+          {t.tr("Yazdır")}
         </button>
       </div>
     </main>

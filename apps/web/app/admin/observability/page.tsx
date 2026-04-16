@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -113,25 +114,162 @@ const DEMO_SNAPSHOTS: Snapshot[] = [
   { id: 's5', createdAt: new Date(Date.now() - 60_000 * 25).toISOString(), cpuUsage: 36, memUsage: 58, p50: 40,  p95: 109, requestCount: 2900 },
 ];
 
+/* ── Icon component ─────────────────────────────────────────── */
+
+function Icon({ name, size = 16 }: { name: string; size?: number }) {
+  const props = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.7,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    style: { display: 'inline-block', flexShrink: 0 },
+  };
+
+  switch (name) {
+    case 'telescope':
+      return (
+        <svg {...props}>
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+          <path d="M11 8v6M8 11h6" />
+        </svg>
+      );
+    case 'users':
+      return (
+        <svg {...props}>
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      );
+    case 'zap':
+      return (
+        <svg {...props}>
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+      );
+    case 'alert-triangle':
+      return (
+        <svg {...props}>
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    case 'database':
+      return (
+        <svg {...props}>
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+      );
+    case 'shield-check':
+      return (
+        <svg {...props}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <polyline points="9 12 11 14 15 10" />
+        </svg>
+      );
+    case 'activity':
+      return (
+        <svg {...props}>
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      );
+    case 'clock':
+      return (
+        <svg {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      );
+    case 'check':
+      return (
+        <svg {...props}>
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      );
+    case 'x':
+      return (
+        <svg {...props}>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      );
+    case 'circle-check':
+      return (
+        <svg {...props}>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      );
+    case 'cpu':
+      return (
+        <svg {...props}>
+          <rect x="4" y="4" width="16" height="16" rx="2" />
+          <rect x="9" y="9" width="6" height="6" />
+          <line x1="9" y1="1" x2="9" y2="4" />
+          <line x1="15" y1="1" x2="15" y2="4" />
+          <line x1="9" y1="20" x2="9" y2="23" />
+          <line x1="15" y1="20" x2="15" y2="23" />
+          <line x1="20" y1="9" x2="23" y2="9" />
+          <line x1="20" y1="14" x2="23" y2="14" />
+          <line x1="1" y1="9" x2="4" y2="9" />
+          <line x1="1" y1="14" x2="4" y2="14" />
+        </svg>
+      );
+    case 'memory':
+      return (
+        <svg {...props}>
+          <path d="M6 19v-3" /><path d="M10 19v-3" /><path d="M14 19v-3" /><path d="M18 19v-3" />
+          <rect x="2" y="5" width="20" height="11" rx="2" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
 /* ── Small helpers ──────────────────────────────────────────── */
 
-function usageColor(val: number): string {
-  if (val >= 80) return 'text-red-600';
-  if (val >= 50) return 'text-amber-600';
-  return 'text-emerald-600';
+function usageColorStyle(val: number): React.CSSProperties {
+  if (val >= 80) return { color: '#ef4444' };
+  if (val >= 50) return { color: '#f59e0b' };
+  return { color: '#10b981' };
 }
 
-function usageBg(val: number): string {
-  if (val >= 80) return 'bg-red-500';
-  if (val >= 50) return 'bg-amber-400';
-  return 'bg-emerald-500';
+function usageBarColor(val: number): string {
+  if (val >= 80) return '#ef4444';
+  if (val >= 50) return '#f59e0b';
+  return '#10b981';
 }
 
-function severityStyle(sev: string): string {
+function severityStyleInline(sev: string): React.CSSProperties {
   switch (sev.toUpperCase()) {
-    case 'HIGH':   return 'bg-red-100 text-red-700 border border-red-200';
-    case 'MEDIUM': return 'bg-amber-100 text-amber-700 border border-amber-200';
-    default:       return 'bg-slate-100 text-slate-600 border border-slate-200';
+    case 'HIGH':
+      return {
+        background: 'color-mix(in srgb, #ef4444 12%, var(--panel))',
+        color: '#ef4444',
+        border: '1px solid color-mix(in srgb, #ef4444 25%, transparent)',
+      };
+    case 'MEDIUM':
+      return {
+        background: 'color-mix(in srgb, #f59e0b 12%, var(--panel))',
+        color: '#f59e0b',
+        border: '1px solid color-mix(in srgb, #f59e0b 25%, transparent)',
+      };
+    default:
+      return {
+        background: 'color-mix(in srgb, var(--muted) 15%, var(--panel))',
+        color: 'var(--ink-2)',
+        border: '1px solid var(--line)',
+      };
   }
 }
 
@@ -147,10 +285,19 @@ function fmtTime(iso: string): string {
 
 function SkeletonCard() {
   return (
-    <div className="glass rounded-2xl p-6 animate-pulse">
-      <div className="skeleton h-4 w-1/3 rounded mb-3" />
-      <div className="skeleton h-8 w-1/2 rounded mb-2" />
-      <div className="skeleton h-3 w-2/3 rounded" />
+    <div
+      style={{
+        borderRadius: 'var(--r-xl)',
+        background: 'var(--panel)',
+        border: '1.5px solid var(--line)',
+        padding: 24,
+        boxShadow: 'var(--shadow-sm)',
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }}
+    >
+      <div style={{ height: 14, width: '33%', borderRadius: 'var(--r-sm)', background: 'var(--line)', marginBottom: 12 }} />
+      <div style={{ height: 28, width: '50%', borderRadius: 'var(--r-sm)', background: 'var(--line)', marginBottom: 8 }} />
+      <div style={{ height: 10, width: '66%', borderRadius: 'var(--r-sm)', background: 'var(--line)' }} />
     </div>
   );
 }
@@ -158,15 +305,35 @@ function SkeletonCard() {
 interface MetricCardProps {
   label: string;
   value: string;
-  color: string;
-  stagger: string;
+  valueColor: string;
+  icon: string;
 }
 
-function MetricCard({ label, value, color, stagger }: MetricCardProps) {
+function MetricCard({ label, value, valueColor, icon }: MetricCardProps) {
   return (
-    <div className={`glass rounded-2xl p-6 animate-fade-slide-up ${stagger}`}>
-      <p className="text-sm text-slate-500 font-medium mb-1">{label}</p>
-      <p className={`metric text-3xl font-bold ${color}`}>{value}</p>
+    <div
+      style={{
+        borderRadius: 'var(--r-xl)',
+        background: 'var(--panel)',
+        border: '1.5px solid var(--line)',
+        padding: 20,
+        boxShadow: 'var(--shadow-sm)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        transition: 'box-shadow var(--t-fast), transform var(--t-fast)',
+      }}
+      className="obs-metric-card"
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--ink-2)' }}>
+        <Icon name={icon} size={15} />
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink-2)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          {label}
+        </span>
+      </div>
+      <p style={{ fontSize: 28, fontWeight: 800, color: valueColor, lineHeight: 1, margin: 0, fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </p>
     </div>
   );
 }
@@ -180,15 +347,28 @@ interface ProgressBarProps {
 function ProgressBar({ label, value, max = 100 }: ProgressBarProps) {
   const pct = Math.min((value / max) * 100, 100);
   return (
-    <div className="mb-3">
-      <div className="flex justify-between text-sm mb-1">
-        <span className="text-slate-600 capitalize">{label}</span>
-        <span className="font-semibold text-slate-800">{value}%</span>
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 13, color: 'var(--ink-2)', textTransform: 'capitalize' }}>{label}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{value}%</span>
       </div>
-      <div className="w-full bg-slate-200 rounded-full h-2">
+      <div
+        style={{
+          width: '100%',
+          height: 6,
+          borderRadius: 99,
+          background: 'color-mix(in srgb, var(--accent) 12%, var(--panel))',
+          overflow: 'hidden',
+        }}
+      >
         <div
-          className="bg-violet-500 h-2 rounded-full transition-all duration-700"
-          style={{ width: `${pct}%` }}
+          style={{
+            height: '100%',
+            borderRadius: 99,
+            width: `${pct}%`,
+            background: 'var(--accent)',
+            transition: 'width 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
         />
       </div>
     </div>
@@ -198,6 +378,7 @@ function ProgressBar({ label, value, max = 100 }: ProgressBarProps) {
 /* ── Page ───────────────────────────────────────────────────── */
 
 export default function ObservabilityPage() {
+  const i18n = useI18n();
   const [health, setHealth]         = useState<HealthScore | null>(null);
   const [drift, setDrift]           = useState<DriftData | null>(null);
   const [compliance, setCompliance] = useState<ComplianceData | null>(null);
@@ -222,12 +403,12 @@ export default function ObservabilityPage() {
       if (cancelled) return;
 
       const [r0, r1, r2, r3, r4, r5] = results;
-      setHealth(r0.status    === 'fulfilled' ? r0.value : DEMO_HEALTH);
-      setDrift(r1.status     === 'fulfilled' ? r1.value : DEMO_DRIFT);
-      setCompliance(r2.status === 'fulfilled' ? r2.value : DEMO_COMPLIANCE);
-      setTenant(r3.status    === 'fulfilled' ? r3.value : DEMO_TENANT);
-      setLatency(r4.status   === 'fulfilled' ? r4.value : DEMO_LATENCY);
-      setSnapshots(r5.status === 'fulfilled' ? r5.value : DEMO_SNAPSHOTS);
+      setHealth(r0.status    === 'fulfilled' ? { ...DEMO_HEALTH, ...r0.value } : DEMO_HEALTH);
+      setDrift(r1.status     === 'fulfilled' ? { ...DEMO_DRIFT, ...(r1.value as DriftData), alerts: Array.isArray((r1.value as DriftData)?.alerts) ? (r1.value as DriftData).alerts : DEMO_DRIFT.alerts } : DEMO_DRIFT);
+      setCompliance(r2.status === 'fulfilled' ? { ...DEMO_COMPLIANCE, ...r2.value, passed: Array.isArray((r2.value as ComplianceData)?.passed) ? (r2.value as ComplianceData).passed : DEMO_COMPLIANCE.passed, failed: Array.isArray((r2.value as ComplianceData)?.failed) ? (r2.value as ComplianceData).failed : DEMO_COMPLIANCE.failed, recommendations: Array.isArray((r2.value as ComplianceData)?.recommendations) ? (r2.value as ComplianceData).recommendations : DEMO_COMPLIANCE.recommendations } : DEMO_COMPLIANCE);
+      setTenant(r3.status    === 'fulfilled' ? { ...DEMO_TENANT, ...r3.value } : DEMO_TENANT);
+      setLatency(r4.status   === 'fulfilled' ? { ...DEMO_LATENCY, ...r4.value } : DEMO_LATENCY);
+      setSnapshots(r5.status === 'fulfilled' && Array.isArray(r5.value) && r5.value.length > 0 ? r5.value : DEMO_SNAPSHOTS);
       setLoading(false);
     }
 
@@ -243,91 +424,229 @@ export default function ObservabilityPage() {
   const s = snapshots ?? DEMO_SNAPSHOTS;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 p-6">
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: 24 }}>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.45; }
+        }
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .obs-fade { animation: fadeSlideUp 0.45s ease both; }
+
+        .obs-metric-card:hover {
+          box-shadow: var(--shadow-md);
+          transform: translateY(-2px);
+        }
+        .obs-snap-row:hover {
+          background: color-mix(in srgb, var(--accent) 4%, var(--panel)) !important;
+        }
+        .obs-latency-cell:hover {
+          box-shadow: var(--shadow-md);
+          transform: translateY(-2px);
+        }
+
+        /* Responsive grids */
+        .obs-metric-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+          margin-bottom: 24px;
+        }
+        @media (min-width: 768px) {
+          .obs-metric-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+
+        .obs-two-col {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+          margin-bottom: 24px;
+        }
+        @media (min-width: 768px) {
+          .obs-two-col {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        .obs-latency-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+        }
+        @media (min-width: 768px) {
+          .obs-latency-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
+        }
+
+        .obs-health-inner {
+          display: flex;
+          flex-direction: column;
+          gap: 32px;
+          align-items: flex-start;
+        }
+        @media (min-width: 768px) {
+          .obs-health-inner {
+            flex-direction: row;
+          }
+        }
+      `}</style>
 
       {/* ── Hero ── */}
-      <section className="hero mb-8 animate-fade-slide-up stagger-1">
-        <div className="hero-content text-center py-10">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-            🔭 Platform Gözlemlenebilirlik
-          </h1>
-          <p className="text-slate-500 text-lg">
-            Sistem sağlığı, performans ve uyumluluk metrikleri
+      <section
+        className="obs-fade"
+        style={{ marginBottom: 28, animationDelay: '0ms' }}
+      >
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'color-mix(in srgb, var(--accent) 6%, var(--panel))',
+            border: '1.5px solid color-mix(in srgb, var(--accent) 18%, var(--line))',
+            padding: '32px 28px',
+            boxShadow: 'var(--shadow-sm)',
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
+            <span style={{ color: 'var(--accent)' }}>
+              <Icon name="telescope" size={28} />
+            </span>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--ink)', letterSpacing: '-0.03em', margin: 0 }}>
+              {i18n.tr("Platform Gözlemlenebilirlik")}
+            </h1>
+          </div>
+          <p style={{ color: 'var(--ink-2)', fontSize: 15, margin: 0 }}>
+            {i18n.tr("Sistem sağlığı, performans ve uyumluluk metrikleri")}
           </p>
         </div>
       </section>
 
       {/* ── Top metric strip ── */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <section className="obs-metric-grid obs-fade" style={{ animationDelay: '60ms' }}>
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
           <>
             <MetricCard
-              label="Aktif Kullanıcı"
-              value={t.activeUsers.toLocaleString('tr-TR')}
-              color="text-blue-600"
-              stagger="stagger-1"
+              label={i18n.tr("Aktif Kullanıcı")}
+              value={(t.activeUsers ?? 0).toLocaleString('tr-TR')}
+              valueColor="var(--accent)"
+              icon="users"
             />
             <MetricCard
-              label="API Çağrısı"
-              value={t.apiCalls.toLocaleString('tr-TR')}
-              color="text-violet-600"
-              stagger="stagger-2"
+              label={i18n.tr("API Çağrısı")}
+              value={(t.apiCalls ?? 0).toLocaleString('tr-TR')}
+              valueColor="var(--accent-2)"
+              icon="zap"
             />
             <MetricCard
-              label="Hata Oranı"
-              value={`%${t.errorRate.toFixed(2)}`}
-              color={t.errorRate > 1 ? 'text-red-600' : 'text-emerald-600'}
-              stagger="stagger-3"
+              label={i18n.tr("Hata Oranı")}
+              value={`%${(t.errorRate ?? 0).toFixed(2)}`}
+              valueColor={(t.errorRate ?? 0) > 1 ? '#ef4444' : '#10b981'}
+              icon="alert-triangle"
             />
             <MetricCard
-              label="Depolama"
-              value={`${t.storageUsed} GB`}
-              color="text-slate-700"
-              stagger="stagger-4"
+              label={i18n.tr("Depolama")}
+              value={`${t.storageUsed ?? 0} GB`}
+              valueColor="var(--ink)"
+              icon="database"
             />
           </>
         )}
       </section>
 
       {/* ── Health Score ── */}
-      <section className="mb-8 animate-fade-slide-up stagger-2">
-        <div className="glass rounded-3xl p-8 bg-gradient-to-br from-violet-50 to-purple-100 border border-violet-200">
-          <h2 className="text-xl font-bold text-violet-900 mb-6">Sistem Sağlık Skoru</h2>
+      <section className="obs-fade" style={{ marginBottom: 24, animationDelay: '120ms' }}>
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'color-mix(in srgb, var(--accent) 5%, var(--panel))',
+            border: '1.5px solid color-mix(in srgb, var(--accent) 20%, var(--line))',
+            padding: 28,
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
+            <span style={{ color: 'var(--accent)' }}>
+              <Icon name="activity" size={18} />
+            </span>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+              {i18n.tr("Sistem Sağlık Skoru")}
+            </h2>
+          </div>
+
           {loading ? (
-            <div className="skeleton h-32 rounded-xl" />
+            <div style={{ height: 120, borderRadius: 'var(--r-lg)', background: 'var(--line)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : (
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              {/* Big score */}
-              <div className="flex flex-col items-center justify-center min-w-[160px]">
-                <div className="relative w-36 h-36">
-                  <svg className="w-36 h-36 -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#e9d5ff" strokeWidth="10" />
+            <div className="obs-health-inner">
+              {/* Big score ring */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 160 }}>
+                <div style={{ position: 'relative', width: 144, height: 144 }}>
+                  <svg
+                    width="144"
+                    height="144"
+                    viewBox="0 0 100 100"
+                    style={{ transform: 'rotate(-90deg)', display: 'block' }}
+                  >
                     <circle
                       cx="50" cy="50" r="42"
                       fill="none"
-                      stroke="#7c3aed"
-                      strokeWidth="10"
+                      stroke="color-mix(in srgb, var(--accent) 15%, var(--line))"
+                      strokeWidth="9"
+                    />
+                    <circle
+                      cx="50" cy="50" r="42"
+                      fill="none"
+                      stroke="var(--accent)"
+                      strokeWidth="9"
                       strokeDasharray={`${(h.score / 100) * 263.9} 263.9`}
                       strokeLinecap="round"
                     />
                   </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-extrabold text-violet-900">{h.score}</span>
-                    <span className="text-sm text-violet-600 font-semibold">/ 100</span>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <span style={{ fontSize: 36, fontWeight: 900, color: 'var(--ink)', lineHeight: 1 }}>{h.score}</span>
+                    <span style={{ fontSize: 12, color: 'var(--ink-2)', fontWeight: 600 }}>/ 100</span>
                   </div>
                 </div>
-                <span className="pill mt-3 bg-violet-600 text-white px-4 py-1 rounded-full text-lg font-bold">
+                <span
+                  style={{
+                    marginTop: 12,
+                    background: 'var(--accent)',
+                    color: '#fff',
+                    borderRadius: 99,
+                    padding: '4px 18px',
+                    fontSize: 16,
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    boxShadow: 'var(--glow-blue)',
+                  }}
+                >
                   {h.grade}
                 </span>
               </div>
 
               {/* Detail bars */}
-              <div className="flex-1 w-full">
-                {Object.entries(h.details).map(([key, val]) => (
-                  <ProgressBar key={key} label={key} value={val} />
-                ))}
+              <div style={{ flex: 1, width: '100%' }}>
+                {Object.entries(h.details)
+                  .filter(([, val]) => typeof val === 'number')
+                  .map(([key, val]) => (
+                    <ProgressBar key={key} label={key} value={val as number} />
+                  ))}
               </div>
             </div>
           )}
@@ -335,32 +654,54 @@ export default function ObservabilityPage() {
       </section>
 
       {/* ── Two-column: Compliance + Drift ── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 animate-fade-slide-up stagger-3">
+      <section className="obs-two-col obs-fade" style={{ animationDelay: '180ms' }}>
 
         {/* Compliance */}
-        <div className="glass rounded-2xl p-6 border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Uyumluluk Raporu</h2>
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'var(--panel)',
+            border: '1.5px solid var(--line)',
+            padding: 22,
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+            <span style={{ color: '#10b981' }}>
+              <Icon name="shield-check" size={17} />
+            </span>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+              {i18n.tr("Uyumluluk Raporu")}
+            </h2>
+          </div>
+
           {loading ? (
-            <div className="skeleton h-48 rounded-xl" />
+            <div style={{ height: 180, borderRadius: 'var(--r-lg)', background: 'var(--line)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : (
             <>
-              <div className="flex items-baseline gap-3 mb-4">
-                <span className="text-5xl font-extrabold text-emerald-600">{c.score}</span>
-                <div className="text-slate-500 text-sm">
-                  <span className="text-emerald-600 font-semibold">{c.passed.length} geçti</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 18 }}>
+                <span style={{ fontSize: 44, fontWeight: 900, color: '#10b981', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                  {typeof c.score === 'number' ? c.score : 0}
+                </span>
+                <div style={{ fontSize: 13, color: 'var(--ink-2)' }}>
+                  <span style={{ color: '#10b981', fontWeight: 700 }}>{c.passed.length} geçti</span>
                   {' · '}
-                  <span className="text-red-500 font-semibold">{c.failed.length} başarısız</span>
+                  <span style={{ color: '#ef4444', fontWeight: 700 }}>{c.failed.length} başarısız</span>
                 </div>
               </div>
 
               {c.passed.slice(0, 5).length > 0 && (
-                <div className="mb-3">
-                  <p className="text-xs font-semibold uppercase text-emerald-700 mb-1 tracking-wide">Geçti</p>
-                  <ul className="space-y-1">
+                <div style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#10b981', marginBottom: 8, margin: '0 0 6px 0' }}>
+                    {i18n.tr("Geçti")}
+                  </p>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
                     {c.passed.slice(0, 5).map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <span className="text-emerald-500 mt-0.5">✓</span>
-                        {item}
+                      <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--ink)' }}>
+                        <span style={{ color: '#10b981', marginTop: 1, flexShrink: 0 }}>
+                          <Icon name="check" size={13} />
+                        </span>
+                        {typeof item === 'string' ? item : JSON.stringify(item)}
                       </li>
                     ))}
                   </ul>
@@ -368,13 +709,17 @@ export default function ObservabilityPage() {
               )}
 
               {c.failed.length > 0 && (
-                <div className="mb-3">
-                  <p className="text-xs font-semibold uppercase text-red-600 mb-1 tracking-wide">Başarısız</p>
-                  <ul className="space-y-1">
+                <div style={{ marginBottom: 14 }}>
+                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#ef4444', margin: '0 0 6px 0' }}>
+                    {i18n.tr("Başarısız")}
+                  </p>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
                     {c.failed.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <span className="text-red-500 mt-0.5">✗</span>
-                        {item}
+                      <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--ink)' }}>
+                        <span style={{ color: '#ef4444', marginTop: 1, flexShrink: 0 }}>
+                          <Icon name="x" size={13} />
+                        </span>
+                        {typeof item === 'string' ? item : JSON.stringify(item)}
                       </li>
                     ))}
                   </ul>
@@ -383,12 +728,14 @@ export default function ObservabilityPage() {
 
               {c.recommendations.length > 0 && (
                 <div>
-                  <p className="text-xs font-semibold uppercase text-amber-600 mb-1 tracking-wide">Öneriler</p>
-                  <ul className="space-y-1">
+                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#f59e0b', margin: '0 0 6px 0' }}>
+                    {i18n.tr("Öneriler")}
+                  </p>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 5 }}>
                     {c.recommendations.map((rec, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                        <span className="text-amber-500 mt-0.5">•</span>
-                        {rec}
+                      <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--ink)' }}>
+                        <span style={{ color: '#f59e0b', marginTop: 1, flexShrink: 0, fontSize: 16, lineHeight: '13px' }}>·</span>
+                        {typeof rec === 'string' ? rec : JSON.stringify(rec)}
                       </li>
                     ))}
                   </ul>
@@ -399,33 +746,81 @@ export default function ObservabilityPage() {
         </div>
 
         {/* Drift Alerts */}
-        <div className="glass rounded-2xl p-6 border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Drift Uyarıları</h2>
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'var(--panel)',
+            border: '1.5px solid var(--line)',
+            padding: 22,
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+            <span style={{ color: '#f59e0b' }}>
+              <Icon name="alert-triangle" size={17} />
+            </span>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+              {i18n.tr("Drift Uyarıları")}
+            </h2>
+          </div>
+
           {loading ? (
-            <div className="skeleton h-48 rounded-xl" />
+            <div style={{ height: 180, borderRadius: 'var(--r-lg)', background: 'var(--line)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : d.alerts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-slate-400 text-sm">
-              <span className="text-3xl mb-2">✅</span>
-              Drift algılanmadı
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 120,
+                gap: 10,
+                color: 'var(--muted)',
+              }}
+            >
+              <span style={{ color: '#10b981' }}>
+                <Icon name="circle-check" size={32} />
+              </span>
+              <span style={{ fontSize: 13 }}>{i18n.tr("Drift algılanmadı")}</span>
             </div>
           ) : (
-            <ul className="space-y-3">
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {d.alerts.map((alert, i) => (
-                <li key={i} className="rounded-xl border border-slate-100 p-4 bg-white/60">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-slate-800 text-sm">{alert.field}</span>
-                    <span className={`pill text-xs font-bold px-2 py-0.5 rounded-full ${severityStyle(alert.severity)}`}>
+                <li
+                  key={i}
+                  style={{
+                    borderRadius: 'var(--r-lg)',
+                    border: '1px solid var(--line)',
+                    padding: '12px 14px',
+                    background: 'color-mix(in srgb, var(--accent) 3%, var(--panel))',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={{ fontWeight: 700, color: 'var(--ink)', fontSize: 13 }}>{alert.field}</span>
+                    <span
+                      style={{
+                        borderRadius: 99,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        ...severityStyleInline(alert.severity),
+                      }}
+                    >
                       {alert.severity}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                     <div>
-                      <span className="font-medium text-slate-400 uppercase tracking-wide">Beklenen</span>
-                      <p className="text-slate-700 font-semibold mt-0.5">{fmt(alert.expected)}</p>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        {i18n.tr("Beklenen")}
+                      </span>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', margin: '3px 0 0 0' }}>{fmt(alert.expected)}</p>
                     </div>
                     <div>
-                      <span className="font-medium text-slate-400 uppercase tracking-wide">Gerçek</span>
-                      <p className="text-slate-700 font-semibold mt-0.5">{fmt(alert.actual)}</p>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        {i18n.tr("Gerçek")}
+                      </span>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', margin: '3px 0 0 0' }}>{fmt(alert.actual)}</p>
                     </div>
                   </div>
                 </li>
@@ -436,23 +831,54 @@ export default function ObservabilityPage() {
       </section>
 
       {/* ── Latency Distribution ── */}
-      <section className="mb-8 animate-fade-slide-up stagger-4">
-        <div className="glass rounded-2xl p-6 border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-6">Gecikme Dağılımı</h2>
+      <section className="obs-fade" style={{ marginBottom: 24, animationDelay: '240ms' }}>
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'var(--panel)',
+            border: '1.5px solid var(--line)',
+            padding: 22,
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <span style={{ color: 'var(--accent)' }}>
+              <Icon name="clock" size={17} />
+            </span>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+              {i18n.tr("Gecikme Dağılımı")}
+            </h2>
+          </div>
+
           {loading ? (
-            <div className="skeleton h-20 rounded-xl" />
+            <div style={{ height: 72, borderRadius: 'var(--r-lg)', background: 'var(--line)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="obs-latency-grid">
               {([
                 { label: 'P50', value: l.p50 },
                 { label: 'P95', value: l.p95 },
                 { label: 'P99', value: l.p99 },
                 { label: 'Ort', value: l.avg },
               ] as { label: string; value: number }[]).map(({ label, value }) => (
-                <div key={label} className="rounded-xl bg-white/60 border border-slate-100 p-4 text-center">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">{label}</p>
-                  <p className="metric text-3xl font-extrabold text-slate-800">{value}</p>
-                  <p className="text-xs text-slate-400 mt-1">ms</p>
+                <div
+                  key={label}
+                  className="obs-latency-cell"
+                  style={{
+                    borderRadius: 'var(--r-lg)',
+                    background: 'color-mix(in srgb, var(--accent) 5%, var(--panel))',
+                    border: '1px solid color-mix(in srgb, var(--accent) 15%, var(--line))',
+                    padding: '16px 12px',
+                    textAlign: 'center',
+                    transition: 'box-shadow var(--t-fast), transform var(--t-fast)',
+                  }}
+                >
+                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 6, margin: '0 0 6px 0' }}>
+                    {label}
+                  </p>
+                  <p style={{ fontSize: 30, fontWeight: 900, color: 'var(--ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums', margin: 0 }}>
+                    {value}
+                  </p>
+                  <p style={{ fontSize: 11, color: 'var(--ink-2)', marginTop: 4, margin: '4px 0 0 0' }}>ms</p>
                 </div>
               ))}
             </div>
@@ -461,42 +887,103 @@ export default function ObservabilityPage() {
       </section>
 
       {/* ── Performance Snapshots Table ── */}
-      <section className="animate-fade-slide-up stagger-4">
-        <div className="glass rounded-2xl p-6 border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-4">Performans Anlık Görüntüleri</h2>
+      <section className="obs-fade" style={{ animationDelay: '300ms' }}>
+        <div
+          style={{
+            borderRadius: 'var(--r-xl)',
+            background: 'var(--panel)',
+            border: '1.5px solid var(--line)',
+            padding: 22,
+            boxShadow: 'var(--shadow-sm)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+            <span style={{ color: 'var(--accent-3)' }}>
+              <Icon name="cpu" size={17} />
+            </span>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', margin: 0 }}>
+              {i18n.tr("Performans Anlık Görüntüleri")}
+            </h2>
+          </div>
+
           {loading ? (
-            <div className="skeleton h-40 rounded-xl" />
+            <div style={{ height: 140, borderRadius: 'var(--r-lg)', background: 'var(--line)', animation: 'pulse 1.5s ease-in-out infinite' }} />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
-                  <tr className="border-b border-slate-100">
+                  <tr style={{ borderBottom: '1.5px solid var(--line)' }}>
                     {['Zaman', 'CPU', 'Bellek', 'P50', 'P95', 'İstek Sayısı'].map((col) => (
-                      <th key={col} className="pb-3 text-left font-semibold text-slate-400 uppercase text-xs tracking-wide pr-4">
-                        {col}
+                      <th
+                        key={col}
+                        style={{
+                          paddingBottom: 10,
+                          paddingRight: 14,
+                          textAlign: 'left',
+                          fontWeight: 700,
+                          color: 'var(--muted)',
+                          textTransform: 'uppercase',
+                          fontSize: 10,
+                          letterSpacing: '0.08em',
+                        }}
+                      >
+                        {i18n.tr(col)}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {s.map((snap) => (
-                    <tr key={snap.id} className="border-b border-slate-50 hover:bg-white/40 transition-colors">
-                      <td className="py-3 pr-4 text-slate-600 tabular-nums">{fmtTime(snap.createdAt)}</td>
-                      <td className={`py-3 pr-4 font-semibold tabular-nums ${usageColor(snap.cpuUsage)}`}>
-                        {snap.cpuUsage}%
-                        <div className="w-16 bg-slate-100 rounded-full h-1 mt-1">
-                          <div className={`h-1 rounded-full ${usageBg(snap.cpuUsage)}`} style={{ width: `${snap.cpuUsage}%` }} />
+                    <tr
+                      key={snap.id}
+                      className="obs-snap-row"
+                      style={{
+                        borderBottom: '1px solid var(--line)',
+                        transition: 'background var(--t-fast)',
+                      }}
+                    >
+                      <td style={{ padding: '11px 14px 11px 0', color: 'var(--ink-2)', fontVariantNumeric: 'tabular-nums' }}>
+                        {fmtTime(snap.createdAt)}
+                      </td>
+                      <td style={{ padding: '11px 14px 11px 0', fontVariantNumeric: 'tabular-nums' }}>
+                        <span style={{ fontWeight: 700, ...usageColorStyle(snap.cpuUsage) }}>
+                          {snap.cpuUsage}%
+                        </span>
+                        <div style={{ width: 56, height: 4, borderRadius: 99, background: 'var(--line)', marginTop: 4, overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              height: '100%',
+                              borderRadius: 99,
+                              width: `${snap.cpuUsage}%`,
+                              background: usageBarColor(snap.cpuUsage),
+                            }}
+                          />
                         </div>
                       </td>
-                      <td className={`py-3 pr-4 font-semibold tabular-nums ${usageColor(snap.memUsage)}`}>
-                        {snap.memUsage}%
-                        <div className="w-16 bg-slate-100 rounded-full h-1 mt-1">
-                          <div className={`h-1 rounded-full ${usageBg(snap.memUsage)}`} style={{ width: `${snap.memUsage}%` }} />
+                      <td style={{ padding: '11px 14px 11px 0', fontVariantNumeric: 'tabular-nums' }}>
+                        <span style={{ fontWeight: 700, ...usageColorStyle(snap.memUsage) }}>
+                          {snap.memUsage}%
+                        </span>
+                        <div style={{ width: 56, height: 4, borderRadius: 99, background: 'var(--line)', marginTop: 4, overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              height: '100%',
+                              borderRadius: 99,
+                              width: `${snap.memUsage}%`,
+                              background: usageBarColor(snap.memUsage),
+                            }}
+                          />
                         </div>
                       </td>
-                      <td className="py-3 pr-4 text-slate-700 tabular-nums">{snap.p50} ms</td>
-                      <td className="py-3 pr-4 text-slate-700 tabular-nums">{snap.p95} ms</td>
-                      <td className="py-3 pr-4 text-slate-700 tabular-nums">{snap.requestCount.toLocaleString('tr-TR')}</td>
+                      <td style={{ padding: '11px 14px 11px 0', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+                        {snap.p50} ms
+                      </td>
+                      <td style={{ padding: '11px 14px 11px 0', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+                        {snap.p95} ms
+                      </td>
+                      <td style={{ padding: '11px 14px 11px 0', color: 'var(--ink)', fontVariantNumeric: 'tabular-nums' }}>
+                        {(snap.requestCount ?? 0).toLocaleString('tr-TR')}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

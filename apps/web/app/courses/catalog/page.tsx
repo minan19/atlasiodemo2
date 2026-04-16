@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useI18n } from '../../_i18n/use-i18n';
 
 /* ─────────────────────────────────────────────────────────────
    Config
@@ -95,13 +96,7 @@ const LEVEL_COLORS: Record<Level, string> = {
   ADVANCED:     'bg-rose-100 text-rose-700',
 };
 
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'popular',      label: 'En Popüler' },
-  { key: 'newest',       label: 'En Yeni' },
-  { key: 'top-rated',    label: 'En Yüksek Puan' },
-  { key: 'lowest-price', label: 'En Düşük Fiyat' },
-  { key: 'free-first',   label: 'Ücretsiz Önce' },
-];
+const SORT_KEYS: SortKey[] = ['popular', 'newest', 'top-rated', 'lowest-price', 'free-first'];
 
 /* ─────────────────────────────────────────────────────────────
    Demo data
@@ -347,11 +342,14 @@ function CourseCard({
   course,
   idx,
   enrolled,
+  tCourses,
 }: {
   course: Course;
   idx: number;
   enrolled: boolean;
+  tCourses: { free: string; enrolled: string; continue: string; enroll: string; students: string };
 }) {
+  const t = useI18n();
   const gradient = CATEGORY_GRADIENTS[course.category] ?? 'from-slate-500 to-slate-700';
   const emoji = CATEGORY_EMOJI[course.category] ?? '📚';
   const stagger = `stagger-${Math.min((idx % 4) + 1, 4)}` as 'stagger-1' | 'stagger-2' | 'stagger-3' | 'stagger-4';
@@ -376,7 +374,7 @@ function CourseCard({
             {course.category}
           </span>
           <span className={`text-[10px] font-semibold rounded-full px-2.5 py-1 ${LEVEL_COLORS[course.level]}`}>
-            {LEVEL_LABELS[course.level]}
+            {t.tr(LEVEL_LABELS[course.level])}
           </span>
         </div>
       </div>
@@ -405,7 +403,7 @@ function CourseCard({
         {/* Duration + Enrollment */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="pill pill-xs">⏱ {formatDuration(course.duration ?? 0)}</span>
-          <span className="pill pill-xs">👥 {formatCount(course.enrollmentCount ?? 0)} öğrenci</span>
+          <span className="pill pill-xs">👥 {formatCount(course.enrollmentCount ?? 0)} {tCourses.students}</span>
         </div>
 
         {/* Tags */}
@@ -428,7 +426,7 @@ function CourseCard({
         {/* Price + CTA */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-slate-700">
           {course.isFree ? (
-            <span className="text-sm font-bold text-emerald-600">ÜCRETSİZ</span>
+            <span className="text-sm font-bold text-emerald-600">{tCourses.free.toUpperCase()}</span>
           ) : (
             <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
               ₺{course.price}
@@ -438,7 +436,7 @@ function CourseCard({
             href={`/courses/${course.id}`}
             className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm hover:shadow-md"
           >
-            {enrolled ? 'Devam Et' : 'Kaydol'}
+            {enrolled ? tCourses.continue : tCourses.enroll}
           </Link>
         </div>
       </div>
@@ -446,19 +444,20 @@ function CourseCard({
   );
 }
 
-function EmptyState({ onReset }: { onReset: () => void }) {
+function EmptyState({ onReset, tCourses, tCommon }: { onReset: () => void; tCourses: { noCoursesFound: string }; tCommon: { reset: string } }) {
+  const t = useI18n();
   return (
     <div className="col-span-3 glass rounded-2xl py-20 flex flex-col items-center gap-4 text-center px-8">
       <span className="text-6xl">🔍</span>
-      <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">Kurs bulunamadı</h3>
+      <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">{tCourses.noCoursesFound}</h3>
       <p className="text-sm text-slate-500 max-w-sm">
-        Seçtiğiniz filtrelerle eşleşen kurs yok. Filtreleri temizleyerek tüm kurslara göz atın.
+        {t.tr('Seçtiğiniz filtrelerle eşleşen kurs yok. Filtreleri temizleyerek tüm kurslara göz atın.')}
       </p>
       <button
         onClick={onReset}
         className="mt-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-sm hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm hover:shadow-md"
       >
-        Filtreleri Temizle
+        {tCommon.reset}
       </button>
     </div>
   );
@@ -468,10 +467,14 @@ function PaginationBar({
   page,
   totalPages,
   onPage,
+  prevLabel,
+  nextLabel,
 }: {
   page: number;
   totalPages: number;
   onPage: (p: number) => void;
+  prevLabel: string;
+  nextLabel: string;
 }) {
   if (totalPages <= 1) return null;
 
@@ -493,7 +496,7 @@ function PaginationBar({
         onClick={() => onPage(page - 1)}
         className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
       >
-        ← Önceki
+        ← {prevLabel}
       </button>
       {pages.map((p, i) =>
         p === '...' ? (
@@ -519,7 +522,7 @@ function PaginationBar({
         onClick={() => onPage(page + 1)}
         className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-200 disabled:opacity-40 hover:bg-slate-50 transition-colors"
       >
-        Sonraki →
+        {nextLabel} →
       </button>
     </div>
   );
@@ -530,6 +533,17 @@ function PaginationBar({
 ───────────────────────────────────────────────────────────── */
 
 export default function CourseCatalogPage() {
+  const t = useI18n();
+
+  /* ── Sort options (i18n) ── */
+  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+    { key: 'popular',      label: t.courses.sortPopular },
+    { key: 'newest',       label: t.courses.sortNewest },
+    { key: 'top-rated',    label: t.courses.sortRating },
+    { key: 'lowest-price', label: t.tr('En Düşük Fiyat') },
+    { key: 'free-first',   label: t.courses.filterFree },
+  ];
+
   /* ── State ── */
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -720,13 +734,13 @@ export default function CourseCatalogPage() {
           <div className="animate-fade-slide-up stagger-1">
             <div className="pill w-fit mx-auto mb-3 bg-white/20 border-white/30 text-white text-xs">
               <span className="status-dot online" />
-              {loading ? '…' : `${courses.length} kurs mevcut`}
+              {loading ? '…' : `${courses.length} ${t.tr('kurs mevcut')}`}
             </div>
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
-              🎓 Kurs Kataloğu
+              🎓 {t.courses.catalogTitle}
             </h1>
             <p className="text-emerald-100 mt-2 text-sm md:text-base max-w-xl mx-auto">
-              Profesyonel kurslar, uzman eğitmenler ve sertifika programlarıyla kariyerinizi hızlandırın.
+              {t.courses.catalogDesc}
             </p>
           </div>
 
@@ -742,14 +756,14 @@ export default function CourseCatalogPage() {
               <input
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Kurs, eğitmen veya konu ara…"
+                placeholder={t.courses.searchPh}
                 className="flex-1 rounded-2xl border-0 bg-white/95 shadow-lg pl-12 pr-4 py-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
               />
               <button
                 type="submit"
                 className="px-6 py-3.5 rounded-2xl bg-white text-emerald-700 font-bold text-sm shadow-lg hover:bg-emerald-50 transition-colors flex-shrink-0"
               >
-                Ara
+                {t.common.search}
               </button>
             </div>
           </form>
@@ -758,18 +772,18 @@ export default function CourseCatalogPage() {
           {!loading && (
             <div className="flex flex-wrap gap-3 justify-center animate-fade-slide-up stagger-3">
               {[
-                { icon: '📚', value: courses.length, label: 'Toplam Kurs' },
-                { icon: '🆓', value: freeCount, label: 'Ücretsiz' },
-                { icon: '⭐', value: avgRating, label: 'Ort. Puan' },
-                { icon: '👥', value: formatCount(courses.reduce((s, c) => s + (c.enrollmentCount ?? 0), 0)), label: 'Toplam Kayıt' },
+                { icon: '📚', value: courses.length, label: t.courses.catalogTitle },
+                { icon: '🆓', value: freeCount, label: t.courses.filterFree },
+                { icon: '⭐', value: avgRating, label: t.courses.rating },
+                { icon: '👥', value: formatCount(courses.reduce((s, c) => s + (c.enrollmentCount ?? 0), 0)), label: t.courses.enrolled },
               ].map((m) => (
                 <div
-                  key={m.label}
+                  key={t.tr(m.label)}
                   className="metric flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl px-4 py-2 text-white"
                 >
                   <span className="text-base">{m.icon}</span>
                   <span className="font-bold text-sm">{m.value}</span>
-                  <span className="text-emerald-100 text-xs">{m.label}</span>
+                  <span className="text-emerald-100 text-xs">{t.tr(m.label)}</span>
                 </div>
               ))}
             </div>
@@ -786,20 +800,20 @@ export default function CourseCatalogPage() {
 
             {/* Header */}
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-sm text-slate-700 dark:text-slate-200">Filtreler</h2>
+              <h2 className="font-bold text-sm text-slate-700 dark:text-slate-200">{t.common.filter}</h2>
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
                   className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
                 >
-                  Temizle
+                  {t.common.reset}
                 </button>
               )}
             </div>
 
             {/* Category */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.tr('Kategori')}</h3>
               <div className="space-y-1.5">
                 {ALL_CATEGORIES.map(({ key, icon }) => (
                   <label
@@ -814,7 +828,7 @@ export default function CourseCatalogPage() {
                     />
                     <span className="text-base leading-none">{icon}</span>
                     <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-emerald-600 transition-colors">
-                      {key}
+                      {t.tr(key)}
                     </span>
                     <span className="ml-auto text-[10px] text-slate-400">
                       {courses.filter((c) => c.category === key).length}
@@ -828,7 +842,7 @@ export default function CourseCatalogPage() {
 
             {/* Level */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Seviye</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.courses.level}</h3>
               <div className="flex flex-wrap gap-2">
                 {(['BEGINNER', 'INTERMEDIATE', 'ADVANCED'] as Level[]).map((lvl) => (
                   <button
@@ -840,7 +854,7 @@ export default function CourseCatalogPage() {
                         : 'hover:border-emerald-400'
                     }`}
                   >
-                    {LEVEL_LABELS[lvl]}
+                    {t.tr(LEVEL_LABELS[lvl])}
                   </button>
                 ))}
               </div>
@@ -850,12 +864,12 @@ export default function CourseCatalogPage() {
 
             {/* Price */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Fiyat</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.tr('Fiyat')}</h3>
               <div className="flex flex-wrap gap-2">
                 {([
-                  { key: 'all',  label: 'Tümü' },
-                  { key: 'free', label: 'Ücretsiz' },
-                  { key: 'paid', label: 'Ücretli' },
+                  { key: 'all',  label: t.courses.filterAll },
+                  { key: 'free', label: t.courses.filterFree },
+                  { key: 'paid', label: t.courses.filterPremium },
                 ] as { key: PriceFilter; label: string }[]).map(({ key, label }) => (
                   <button
                     key={key}
@@ -876,10 +890,10 @@ export default function CourseCatalogPage() {
 
             {/* Rating */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Puan</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.courses.rating}</h3>
               <div className="flex flex-wrap gap-2">
                 {([
-                  { key: 'all', label: 'Tümü' },
+                  { key: 'all', label: t.courses.filterAll },
                   { key: '4.5', label: '⭐ 4.5+' },
                   { key: '4.0', label: '⭐ 4.0+' },
                 ] as { key: RatingFilter; label: string }[]).map(({ key, label }) => (
@@ -902,13 +916,13 @@ export default function CourseCatalogPage() {
 
             {/* Duration */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Süre</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.courses.duration}</h3>
               <div className="flex flex-wrap gap-2">
                 {([
-                  { key: 'all',  label: 'Tümü' },
-                  { key: '0-5',  label: '0-5 saat' },
-                  { key: '5-20', label: '5-20 saat' },
-                  { key: '20+',  label: '20+ saat' },
+                  { key: 'all',  label: t.courses.filterAll },
+                  { key: '0-5',  label: t.tr('0-5 saat') },
+                  { key: '5-20', label: t.tr('5-20 saat') },
+                  { key: '20+',  label: t.tr('20+ saat') },
                 ] as { key: DurationFilter; label: string }[]).map(({ key, label }) => (
                   <button
                     key={key}
@@ -933,7 +947,7 @@ export default function CourseCatalogPage() {
               disabled={!hasActiveFilters}
               className="w-full py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-600 hover:border-rose-300 hover:text-rose-600 hover:bg-rose-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
-              Filtreleri Temizle
+              {t.common.reset}
             </button>
           </div>
         </aside>
@@ -943,7 +957,7 @@ export default function CourseCatalogPage() {
 
           {/* Mobile filter strip */}
           <div className="lg:hidden glass rounded-2xl p-3 flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-semibold text-slate-500 mr-1">Filtrele:</span>
+            <span className="text-xs font-semibold text-slate-500 mr-1">{t.common.filter}:</span>
             {ALL_CATEGORIES.map(({ key, icon }) => (
               <button
                 key={key}
@@ -954,7 +968,7 @@ export default function CourseCatalogPage() {
                     : 'hover:border-emerald-400'
                 }`}
               >
-                {icon} {key}
+                {icon} {t.tr(key)}
               </button>
             ))}
             {hasActiveFilters && (
@@ -962,7 +976,7 @@ export default function CourseCatalogPage() {
                 onClick={clearFilters}
                 className="pill pill-xs text-rose-500 border-rose-300 hover:bg-rose-50 ml-auto"
               >
-                ✕ Temizle
+                ✕ {t.common.reset}
               </button>
             )}
           </div>
@@ -990,14 +1004,14 @@ export default function CourseCatalogPage() {
               ) : (
                 <strong>{filtered.length}</strong>
               )}{' '}
-              {!loading && 'kurs bulundu'}
+              {!loading && t.tr('kurs bulundu')}
             </span>
           </div>
 
           {/* ── Error banner ── */}
           {error && (
             <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-              ⚠️ Kurslar yüklenemedi: {error} — Demo veriler gösteriliyor.
+              ⚠️ {t.common.error}: {error} — {t.common.demoMode}.
             </div>
           )}
 
@@ -1008,7 +1022,7 @@ export default function CourseCatalogPage() {
                 <CourseCardSkeleton key={i} />
               ))
             ) : paginated.length === 0 ? (
-              <EmptyState onReset={clearFilters} />
+              <EmptyState onReset={clearFilters} tCourses={t.courses} tCommon={t.common} />
             ) : (
               paginated.map((course, idx) => (
                 <CourseCard
@@ -1016,6 +1030,7 @@ export default function CourseCatalogPage() {
                   course={course}
                   idx={idx}
                   enrolled={enrolledIds.has(course.id)}
+                  tCourses={t.courses}
                 />
               ))
             )}
@@ -1030,13 +1045,15 @@ export default function CourseCatalogPage() {
                 setPage(p);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              prevLabel={t.common.previous}
+              nextLabel={t.common.next}
             />
           )}
 
           {/* ── Page info ── */}
           {!loading && filtered.length > 0 && (
             <p className="text-center text-xs text-slate-400 mt-2">
-              Sayfa {page} / {totalPages} — Toplam {filtered.length} kurs
+              {t.tr('Sayfa')} {page} / {totalPages} — {t.tr('Toplam')} {filtered.length} {t.tr('kurs')}
             </p>
           )}
         </div>

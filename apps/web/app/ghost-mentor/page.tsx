@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useI18n } from '../_i18n/use-i18n';
 
 /* ─────────────────────────────────────────────────────────────
    Constants & Types
@@ -114,7 +115,7 @@ function demoAnswer(question: string): { answer: string; sources: string[]; conf
    Confidence pill helper
 ───────────────────────────────────────────────────────────── */
 
-function ConfidencePill({ confidence }: { confidence: number }) {
+function ConfidencePill({ confidence, tr }: { confidence: number; tr: (s: string) => string }) {
   if (confidence > 0.8) {
     return (
       <span
@@ -132,7 +133,7 @@ function ConfidencePill({ confidence }: { confidence: number }) {
           letterSpacing: '0.01em',
         }}
       >
-        ✓ Yüksek Güven
+        ✓ {tr("Yüksek Güven")}
       </span>
     );
   }
@@ -153,7 +154,7 @@ function ConfidencePill({ confidence }: { confidence: number }) {
           letterSpacing: '0.01em',
         }}
       >
-        ~ Orta Güven
+        ~ {tr("Orta Güven")}
       </span>
     );
   }
@@ -173,7 +174,7 @@ function ConfidencePill({ confidence }: { confidence: number }) {
         letterSpacing: '0.01em',
       }}
     >
-      ! Düşük Güven
+      ! {tr("Düşük Güven")}
     </span>
   );
 }
@@ -220,7 +221,7 @@ function LoadingDots() {
    Message bubble component
 ───────────────────────────────────────────────────────────── */
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message, tr }: { message: Message; tr: (s: string) => string }) {
   const isUser = message.role === 'user';
 
   const timeStr = message.timestamp.toLocaleTimeString('tr-TR', {
@@ -310,7 +311,7 @@ function MessageBubble({ message }: { message: Message }) {
           >
             {/* Confidence */}
             {message.confidence !== undefined && (
-              <ConfidencePill confidence={message.confidence} />
+              <ConfidencePill confidence={message.confidence} tr={tr} />
             )}
 
             {/* Sources */}
@@ -357,7 +358,7 @@ function MessageBubble({ message }: { message: Message }) {
    Welcome state
 ───────────────────────────────────────────────────────────── */
 
-function WelcomeState() {
+function WelcomeState({ tr }: { tr: (s: string) => string }) {
   return (
     <div
       style={{
@@ -422,7 +423,7 @@ function WelcomeState() {
             letterSpacing: '-0.02em',
           }}
         >
-          Merhaba! Ben Ghost Mentor
+          {tr("Merhaba! Ben Ghost Mentor")}
         </h3>
         <p
           style={{
@@ -433,8 +434,7 @@ function WelcomeState() {
             lineHeight: 1.6,
           }}
         >
-          Sorularını yaz, kurslarındaki konuları açıklayayım, örnek vereyim veya
-          sınava hazırlanalım. Başlamak için aşağıya bir şeyler yaz!
+          {tr("Sorularını yaz, kurslarındaki konuları açıklayayım, örnek vereyim veya sınava hazırlanalım. Başlamak için aşağıya bir şeyler yaz!")}
         </p>
       </div>
 
@@ -466,7 +466,7 @@ function WelcomeState() {
             }}
           >
             <span style={{ fontSize: 16 }}>{icon}</span>
-            {label}
+            {tr(label)}
           </span>
         ))}
       </div>
@@ -490,6 +490,7 @@ function WelcomeState() {
 ───────────────────────────────────────────────────────────── */
 
 export default function GhostMentorPage() {
+  const t = useI18n();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -657,7 +658,7 @@ export default function GhostMentorPage() {
               marginTop: 2,
             }}
           >
-            Yapay zeka destekli kişisel öğrenme asistanın
+            {t.tr("Yapay zeka destekli kişisel öğrenme asistanın")}
           </p>
         </div>
 
@@ -688,7 +689,7 @@ export default function GhostMentorPage() {
                 animation: 'pulse 2s ease-in-out infinite',
               }}
             />
-            Çevrimiçi
+            {t.tr("Çevrimiçi")}
           </span>
         </div>
       </div>
@@ -719,10 +720,10 @@ export default function GhostMentorPage() {
           }}
         >
           {messages.length === 0 ? (
-            <WelcomeState />
+            <WelcomeState tr={t.tr} />
           ) : (
             messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
+              <MessageBubble key={msg.id} message={msg} tr={t.tr} />
             ))
           )}
           <div ref={messagesEndRef} />
@@ -767,7 +768,7 @@ export default function GhostMentorPage() {
                 marginRight: 2,
               }}
             >
-              Öneri:
+              {t.tr("Öneri:")}
             </span>
             {FAQ_CHIPS.map((chip) => (
               <button
@@ -800,7 +801,7 @@ export default function GhostMentorPage() {
                   el.style.background = 'var(--panel)';
                 }}
               >
-                {chip}
+                {t.tr(chip)}
               </button>
             ))}
           </div>
@@ -839,7 +840,7 @@ export default function GhostMentorPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Bir soru sor… (Shift+Enter yeni satır, Enter gönder)"
+                placeholder={t.ai.placeholder}
                 disabled={isLoading}
                 rows={1}
                 style={{
@@ -914,8 +915,8 @@ export default function GhostMentorPage() {
                   style={{
                     width: 16,
                     height: 16,
-                    border: '2px solid rgba(255,255,255,0.4)',
-                    borderTopColor: '#fff',
+                    border: '2px solid var(--line-accent)',
+                    borderTopColor: 'var(--accent)',
                     borderRadius: '50%',
                     display: 'inline-block',
                     animation: 'spin 0.7s linear infinite',
@@ -923,7 +924,7 @@ export default function GhostMentorPage() {
                 />
               ) : (
                 <>
-                  <span style={{ fontSize: 15 }}>↑</span> Sor
+                  <span style={{ fontSize: 15 }}>↑</span> {t.tr("Sor")}
                 </>
               )}
               <style>{`
@@ -948,8 +949,7 @@ export default function GhostMentorPage() {
               opacity: 0.8,
             }}
           >
-            Ghost Mentor yapay zeka desteklidir — kritik kararlar için lütfen
-            kurs eğitmeninize danışın.
+            {t.ai.disclaimer}
           </p>
         </div>
       </div>

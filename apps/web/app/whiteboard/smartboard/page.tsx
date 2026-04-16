@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { useI18n } from "../../_i18n/use-i18n";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -177,6 +178,7 @@ export default function SmartBoardPage({
 }: {
   searchParams: { sessionId?: string };
 }) {
+  const t = useI18n();
   const sessionId = searchParams.sessionId ?? "demo-session";
 
   // --- Tool state ---
@@ -1318,7 +1320,7 @@ export default function SmartBoardPage({
                       >
                         <option value="">Style</option>
                         {STYLE_PRESETS.map((p) => (
-                          <option key={p.label} value={p.label}>{p.label}</option>
+                          <option key={t.tr(p.label)} value={t.tr(p.label)}>{t.tr(p.label)}</option>
                         ))}
                       </select>
                       {/* Font family */}
@@ -1521,7 +1523,7 @@ export default function SmartBoardPage({
                   </div>
                   {/* Sticky text */}
                   <textarea
-                    value={sticky.text}
+                    value={t.tr(sticky.text)}
                     onChange={(e) => {
                       const val = e.target.value;
                       setBoardStickies((prev) => prev.map((s) => s.id === sticky.id ? { ...s, text: val } : s));
@@ -1745,7 +1747,7 @@ export default function SmartBoardPage({
                   key={layer.id ?? layer.name}
                   className="group flex items-center justify-between rounded-lg bg-slate-700/50 px-2.5 py-1.5 text-xs text-slate-300 hover:bg-slate-700"
                 >
-                  <span className="truncate">{layer.name}</span>
+                  <span className="truncate">{t.tr(layer.name)}</span>
                   <button
                     onClick={() => handleDeleteLayer(layer.name)}
                     className="ml-1 hidden text-slate-600 hover:text-red-400 transition-colors group-hover:block"
@@ -1804,39 +1806,39 @@ export default function SmartBoardPage({
             {/* AI Assist */}
             {aiStudioTab === "assist" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">Tahtaya ne çizmek istediğinizi açıklayın, AI önerisini alın.</p>
+                <p className="text-xs text-slate-400">{t.tr("Tahtaya ne çizmek istediğinizi açıklayın, AI önerisini alın.")}</p>
                 <textarea
                   className="w-full resize-none rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
-                  rows={4} placeholder="örn. Fotosentez için mind map oluştur" value={aiPrompt}
+                  rows={4} placeholder={t.tr("örn. Fotosentez için mind map oluştur")} value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                 />
                 <button onClick={handleAiAssist} disabled={aiLoading || !aiPrompt.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:from-violet-500 hover:to-indigo-500 transition-all">
-                  {aiLoading ? "Düşünüyor…" : "Oluştur"}
+                  {aiLoading ? t.tr("Düşünüyor…") : t.tr("Oluştur")}
                 </button>
                 {aiError && <p className="text-xs text-red-400">{aiError}</p>}
-                {aiSuggestion?.text && <div className="rounded-xl border border-violet-800/40 bg-violet-950/20 p-3 text-xs text-slate-300 leading-relaxed">{aiSuggestion.text}</div>}
+                {aiSuggestion?.text && <div className="rounded-xl border border-violet-800/40 bg-violet-950/20 p-3 text-xs text-slate-300 leading-relaxed">{t.tr(aiSuggestion.text)}</div>}
               </div>
             )}
 
             {/* Magic Write */}
             {aiStudioTab === "write" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">İçeriği yeniden yaz veya tonu değiştir.</p>
+                <p className="text-xs text-slate-400">{t.tr("İçeriği yeniden yaz veya tonu değiştir.")}</p>
                 <textarea
                   className="w-full resize-none rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
-                  rows={4} placeholder="Yeniden yazmak istediğiniz metni girin…" value={mwText}
+                  rows={4} placeholder={t.tr("Yeniden yazmak istediğiniz metni girin…")} value={mwText}
                   onChange={(e) => setMwText(e.target.value)}
                 />
                 <div className="flex gap-2">
-                  {(["formal","casual","academic","simple"] as const).map((t) => (
-                    <button key={t} onClick={() => setMwTone(t)}
-                      className={`flex-1 rounded-lg py-1.5 text-[10px] font-medium transition-all ${mwTone === t ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}>
-                      {t === "formal" ? "Resmi" : t === "casual" ? "Sade" : t === "academic" ? "Akademik" : "Basit"}
+                  {(["formal","casual","academic","simple"] as const).map((tone) => (
+                    <button key={tone} onClick={() => setMwTone(tone)}
+                      className={`flex-1 rounded-lg py-1.5 text-[10px] font-medium transition-all ${mwTone === tone ? "bg-violet-600 text-white" : "bg-slate-800 text-slate-400 hover:bg-slate-700"}`}>
+                      {tone === "formal" ? t.tr("Resmi") : tone === "casual" ? t.tr("Sade") : tone === "academic" ? t.tr("Akademik") : t.tr("Basit")}
                     </button>
                   ))}
                 </div>
                 <button onClick={handleMagicWrite} disabled={mwLoading || !mwText.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
-                  {mwLoading ? "Yazıyor…" : "✏️ Yeniden Yaz"}
+                  {mwLoading ? t.tr("Yazıyor…") : t.tr("✏️ Yeniden Yaz")}
                 </button>
                 {mwResult && (
                   <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
@@ -1849,21 +1851,21 @@ export default function SmartBoardPage({
             {/* Brainstorm Sticky Notes */}
             {aiStudioTab === "brainstorm" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">Konu için yapışkan not fikirleri üret.</p>
+                <p className="text-xs text-slate-400">{t.tr("Konu için yapışkan not fikirleri üret.")}</p>
                 <input
                   className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
-                  placeholder="örn. Fotosentez" value={bsTopic}
+                  placeholder={t.tr("örn. Fotosentez")} value={bsTopic}
                   onChange={(e) => setBsTopic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleBrainstorm()}
                 />
                 <button onClick={handleBrainstorm} disabled={bsLoading || !bsTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
-                  {bsLoading ? "Üretiyor…" : "💡 Fikir Üret"}
+                  {bsLoading ? t.tr("Üretiyor…") : t.tr("💡 Fikir Üret")}
                 </button>
                 {bsNotes.length > 0 && (
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {bsNotes.map((n) => (
                       <div key={n.id} className="rounded-lg p-2.5 text-[11px] font-medium text-slate-800 shadow-sm leading-snug" style={{ background: n.color }}>
-                        {n.text}
+                        {t.tr(n.text)}
                       </div>
                     ))}
                   </div>
@@ -1874,27 +1876,27 @@ export default function SmartBoardPage({
             {/* Mind Map */}
             {aiStudioTab === "mindmap" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">Konunun zihin haritasını oluştur.</p>
+                <p className="text-xs text-slate-400">{t.tr("Konunun zihin haritasını oluştur.")}</p>
                 <input
                   className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
-                  placeholder="örn. Hücre Bölünmesi" value={mmTopic}
+                  placeholder={t.tr("örn. Hücre Bölünmesi")} value={mmTopic}
                   onChange={(e) => setMmTopic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleMindMap()}
                 />
                 <button onClick={handleMindMap} disabled={mmLoading || !mmTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
-                  {mmLoading ? "Oluşturuyor…" : "🗺 Harita Oluştur"}
+                  {mmLoading ? t.tr("Oluşturuyor…") : t.tr("🗺 Harita Oluştur")}
                 </button>
                 {mmData && (
                   <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3">
-                    <div className="text-xs font-bold text-violet-300 mb-2 text-center">{mmData.label}</div>
+                    <div className="text-xs font-bold text-violet-300 mb-2 text-center">{t.tr(mmData.label)}</div>
                     <div className="space-y-1.5">
                       {mmData.children.map((branch) => (
                         <div key={branch.id} className="rounded-lg bg-slate-700/60 px-3 py-2">
-                          <div className="text-[11px] font-semibold text-slate-200 mb-1">{branch.label}</div>
+                          <div className="text-[11px] font-semibold text-slate-200 mb-1">{t.tr(branch.label)}</div>
                           {branch.children.length > 0 && (
                             <div className="space-y-1 pl-2 border-l border-slate-600">
                               {branch.children.map((child) => (
-                                <div key={child.id} className="text-[10px] text-slate-400">{child.label}</div>
+                                <div key={child.id} className="text-[10px] text-slate-400">{t.tr(child.label)}</div>
                               ))}
                             </div>
                           )}
@@ -1909,21 +1911,21 @@ export default function SmartBoardPage({
             {/* Presentation */}
             {aiStudioTab === "presentation" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">Konudan tam slayt sunumu oluştur.</p>
+                <p className="text-xs text-slate-400">{t.tr("Konudan tam slayt sunumu oluştur.")}</p>
                 <input
                   className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:border-violet-500 focus:outline-none"
-                  placeholder="örn. Makine Öğrenmesi" value={pTopic}
+                  placeholder={t.tr("örn. Makine Öğrenmesi")} value={pTopic}
                   onChange={(e) => setPTopic(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handlePresentation()}
                 />
                 <button onClick={handlePresentation} disabled={pLoading || !pTopic.trim()} className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2 text-xs font-semibold text-white disabled:opacity-50 transition-all">
-                  {pLoading ? "Hazırlıyor…" : "🎨 Sunum Oluştur"}
+                  {pLoading ? t.tr("Hazırlıyor…") : t.tr("🎨 Sunum Oluştur")}
                 </button>
                 {pSlides && (
                   <div className="space-y-2">
                     <div className="rounded-xl bg-gradient-to-br from-violet-900/60 to-indigo-900/60 border border-violet-700/40 p-4 text-center">
-                      <div className="text-sm font-bold text-slate-100">{pSlides.title}</div>
-                      <div className="text-[11px] text-violet-300 mt-0.5">{pSlides.subtitle}</div>
+                      <div className="text-sm font-bold text-slate-100">{t.tr(pSlides.title)}</div>
+                      <div className="text-[11px] text-violet-300 mt-0.5">{t.tr(pSlides.subtitle)}</div>
                     </div>
                     <div className="flex gap-1 flex-wrap">
                       {pSlides.slides.map((_, i) => (
@@ -1945,7 +1947,7 @@ export default function SmartBoardPage({
                         </ul>
                         {pSlides.slides[pActiveSlide].speakerNote && (
                           <div className="mt-2 rounded-lg bg-amber-950/30 border border-amber-800/30 px-2 py-1.5 text-[10px] text-amber-300/80">
-                            Not: {pSlides.slides[pActiveSlide].speakerNote}
+                            {t.tr("Not:")} {pSlides.slides[pActiveSlide].speakerNote}
                           </div>
                         )}
                       </div>
@@ -1958,28 +1960,28 @@ export default function SmartBoardPage({
             {/* Magic Switch — Summarize */}
             {aiStudioTab === "summarize" && (
               <div className="space-y-3">
-                <p className="text-xs text-slate-400">Tahta içeriğini yapılandırılmış ders dokümanına dönüştür.</p>
+                <p className="text-xs text-slate-400">{t.tr("Tahta içeriğini yapılandırılmış ders dokümanına dönüştür.")}</p>
                 <div className="rounded-xl border border-slate-700 bg-slate-800/40 px-3 py-2.5 text-[11px] text-slate-500">
-                  Tahtadaki tüm TEXT eylemleri otomatik analiz edilir.
+                  {t.tr("Tahtadaki tüm TEXT eylemleri otomatik analiz edilir.")}
                 </div>
                 <button onClick={handleSummarize} disabled={sumLoading} className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:from-emerald-500 hover:to-teal-500 transition-all">
-                  {sumLoading ? "Analiz ediliyor…" : "📄 Dönüştür"}
+                  {sumLoading ? t.tr("Analiz ediliyor…") : t.tr("📄 Dönüştür")}
                 </button>
                 {sumResult && (
                   <div className="space-y-3">
                     <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3">
-                      <div className="text-xs font-bold text-emerald-300 mb-1">{sumResult.title}</div>
+                      <div className="text-xs font-bold text-emerald-300 mb-1">{t.tr(sumResult.title)}</div>
                       <p className="text-[11px] text-slate-300 leading-relaxed">{sumResult.introduction}</p>
                     </div>
                     {sumResult.sections.map((s, i) => (
                       <div key={i} className="rounded-xl border border-slate-700 bg-slate-800/40 p-3">
-                        <div className="text-[11px] font-semibold text-slate-200 mb-1">{s.heading}</div>
-                        <p className="text-[10px] text-slate-400 leading-relaxed">{s.content}</p>
+                        <div className="text-[11px] font-semibold text-slate-200 mb-1">{t.tr(s.heading)}</div>
+                        <p className="text-[10px] text-slate-400 leading-relaxed">{t.tr(s.content)}</p>
                       </div>
                     ))}
                     {sumResult.keyPoints.length > 0 && (
                       <div className="rounded-xl border border-blue-800/30 bg-blue-950/20 p-3">
-                        <div className="text-[11px] font-semibold text-blue-300 mb-2">Anahtar Noktalar</div>
+                        <div className="text-[11px] font-semibold text-blue-300 mb-2">{t.tr("Anahtar Noktalar")}</div>
                         <ul className="space-y-1">
                           {sumResult.keyPoints.map((kp, i) => (
                             <li key={i} className="flex items-start gap-1.5 text-[10px] text-slate-300">
@@ -2067,7 +2069,7 @@ export default function SmartBoardPage({
                 </div>
                 {aiSuggestion.text && (
                   <p className="text-sm text-slate-300 leading-relaxed">
-                    {aiSuggestion.text}
+                    {t.tr(aiSuggestion.text)}
                   </p>
                 )}
                 {aiSuggestion.actions && Array.isArray(aiSuggestion.actions) && aiSuggestion.actions.length > 0 && (

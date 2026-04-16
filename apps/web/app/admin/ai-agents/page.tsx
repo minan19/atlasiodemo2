@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -128,20 +129,21 @@ const DEMO_LOGS: Record<string, AgentLog[]> = {
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
-function relativeTime(isoString?: string): string {
-  if (!isoString) return 'Hiç çalışmadı';
+function relativeTime(isoString?: string, tr?: (s: string) => string): string {
+  const _tr = tr ?? ((s: string) => s);
+  if (!isoString) return _tr('Hiç çalışmadı');
   const diff = Math.floor((Date.now() - new Date(isoString).getTime()) / 1000);
-  if (diff < 60) return `${diff}sn önce`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}dk önce`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}sa önce`;
-  return `${Math.floor(diff / 86400)}g önce`;
+  if (diff < 60) return `${diff}${_tr('sn önce')}`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}${_tr('dk önce')}`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}${_tr('sa önce')}`;
+  return `${Math.floor(diff / 86400)}${_tr('g önce')}`;
 }
 
-function statusLabel(status: Agent['status']): string {
+function statusLabel(status: Agent['status'], tr: (s: string) => string): string {
   switch (status) {
-    case 'ACTIVE': return 'Aktif';
-    case 'IDLE':   return 'Beklemede';
-    case 'ERROR':  return 'Hata';
+    case 'ACTIVE': return tr('Aktif');
+    case 'IDLE':   return tr('Beklemede');
+    case 'ERROR':  return tr('Hata');
   }
 }
 
@@ -246,6 +248,7 @@ interface LogPanelProps {
 }
 
 function LogPanel({ agentId, isDemo }: LogPanelProps) {
+  const t = useI18n();
   const [logs, setLogs] = useState<AgentLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -266,7 +269,7 @@ function LogPanel({ agentId, isDemo }: LogPanelProps) {
       .catch(() => {
         setLogs(DEMO_LOGS[agentId] ?? []);
         setLoading(false);
-        setError('API erişilemedi, demo verisi gösteriliyor.');
+        setError(t.tr('API erişilemedi, demo verisi gösteriliyor.'));
       });
   }, [agentId, isDemo]);
 
@@ -288,7 +291,7 @@ function LogPanel({ agentId, isDemo }: LogPanelProps) {
         <p className="mb-3 text-xs text-amber-400">{error}</p>
       )}
       {displayed.length === 0 ? (
-        <p className="text-sm text-slate-500">Henüz log kaydı bulunmuyor.</p>
+        <p className="text-sm text-slate-500">{t.tr("Henüz log kaydı bulunmuyor.")}</p>
       ) : (
         <ul className="space-y-2">
           {displayed.map((log, idx) => (
@@ -331,6 +334,7 @@ interface FeedbackFormProps {
 }
 
 function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
+  const t = useI18n();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -340,7 +344,7 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      setError('Lütfen bir puan seçin.');
+      setError(t.tr('Lütfen bir puan seçin.'));
       return;
     }
     setSubmitting(true);
@@ -360,7 +364,7 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
       });
       setSubmitted(true);
     } catch {
-      setError('Geri bildirim gönderilemedi. Lütfen tekrar deneyin.');
+      setError(t.tr('Geri bildirim gönderilemedi. Lütfen tekrar deneyin.'));
     } finally {
       setSubmitting(false);
     }
@@ -371,13 +375,13 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
       <div className="mt-4 border-t border-white/10 pt-4">
         <div className="flex flex-col items-center gap-2 py-4 text-center">
           <span className="text-3xl">✅</span>
-          <p className="font-medium text-emerald-400">Geri bildiriminiz alındı!</p>
-          <p className="text-sm text-slate-400">Teşekkür ederiz.</p>
+          <p className="font-medium text-emerald-400">{t.tr("Geri bildiriminiz alındı!")}</p>
+          <p className="text-sm text-slate-400">{t.tr("Teşekkür ederiz.")}</p>
           <button
             onClick={onClose}
             className="mt-2 rounded-lg bg-white/10 px-4 py-1.5 text-sm text-slate-300 hover:bg-white/20 transition-colors"
           >
-            Kapat
+            {t.tr("Kapat")}
           </button>
         </div>
       </div>
@@ -389,7 +393,7 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
-            Ajan performansını puanlayın
+            {t.tr("Ajan performansını puanlayın")}
           </label>
           <StarRating value={rating} onChange={setRating} />
         </div>
@@ -398,14 +402,14 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
             htmlFor={`comment-${agentId}`}
             className="mb-1.5 block text-sm font-medium text-slate-300"
           >
-            Yorum (isteğe bağlı)
+            {t.tr("Yorum (isteğe bağlı)")}
           </label>
           <textarea
             id={`comment-${agentId}`}
             rows={3}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Bu ajan hakkında görüşlerinizi paylaşın..."
+            placeholder={t.tr("Bu ajan hakkında görüşlerinizi paylaşın...")}
             className="w-full resize-none rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition-colors"
           />
         </div>
@@ -421,10 +425,10 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
             {submitting ? (
               <>
                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Gönderiliyor...
+                {t.tr("Gönderiliyor...")}
               </>
             ) : (
-              'Gönder'
+              t.tr('Gönder')
             )}
           </button>
           <button
@@ -432,7 +436,7 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
             onClick={onClose}
             className="rounded-lg bg-white/10 px-4 py-2 text-sm text-slate-300 hover:bg-white/20 transition-colors"
           >
-            İptal
+            {t.tr("İptal")}
           </button>
         </div>
       </form>
@@ -448,6 +452,7 @@ interface AgentCardProps {
 }
 
 function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
+  const t = useI18n();
   const [showLogs, setShowLogs] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const isExecuting = executingIds.has(agent.id);
@@ -480,14 +485,14 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
           <span
             className={`h-1.5 w-1.5 rounded-full ${statusDot(agent.status)} ${agent.status === 'ACTIVE' ? 'animate-pulse' : ''}`}
           />
-          {statusLabel(agent.status)}
+          {statusLabel(agent.status, t.tr)}
         </span>
       </div>
 
       {/* Success rate bar */}
       <div>
         <div className="mb-1.5 flex items-center justify-between text-xs">
-          <span className="text-slate-400">Başarı Oranı</span>
+          <span className="text-slate-400">{t.tr("Başarı Oranı")}</span>
           <span className={`font-semibold ${rateTextColor(agent.successRate)}`}>
             {agent.successRate !== undefined
               ? `${agent.successRate.toFixed(1)}%`
@@ -505,14 +510,14 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
       {/* Meta */}
       <div className="flex items-center justify-between text-xs text-slate-500">
         <span>
-          Son çalışma:{' '}
-          <span className="text-slate-300">{relativeTime(agent.lastRun)}</span>
+          {t.tr("Son çalışma:")} {' '}
+          <span className="text-slate-300">{relativeTime(agent.lastRun, t.tr)}</span>
         </span>
         <span>
           <span className="text-slate-300 font-medium">
             {agent.totalRuns?.toLocaleString('tr-TR') ?? 0}
           </span>{' '}
-          çalışma
+          {t.tr("çalışma")}
         </span>
       </div>
 
@@ -526,10 +531,10 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
           {isExecuting ? (
             <>
               <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              Çalışıyor...
+              {t.tr("Çalışıyor...")}
             </>
           ) : (
-            <>▶ Çalıştır</>
+            <>▶ {t.tr("Çalıştır")}</>
           )}
         </button>
         <button
@@ -540,7 +545,7 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
               : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
-          📋 Loglar
+          📋 {t.tr("Loglar")}
         </button>
         <button
           onClick={handleFeedbackToggle}
@@ -550,7 +555,7 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
               : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
           }`}
         >
-          ⭐ Geri Bildirim
+          ⭐ {t.tr("Geri Bildirim")}
         </button>
       </div>
 
@@ -570,6 +575,7 @@ function AgentCard({ agent, isDemo, onExecute, executingIds }: AgentCardProps) {
 /* ── Main Page ───────────────────────────────────────────────────────────── */
 
 export default function AIAgentsPage() {
+  const t = useI18n();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -686,10 +692,10 @@ export default function AIAgentsPage() {
         <div className="hero-content animate-fade-slide-up">
           <div className="mb-3 text-5xl">🤖</div>
           <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            AI Ajan Yönetimi
+            {t.tr("AI Ajan Yönetimi")}
           </h1>
           <p className="mt-2 text-base text-slate-400">
-            Otonom yapay zeka ajanlarını izle ve yönet
+            {t.tr("Otonom yapay zeka ajanlarını izle ve yönet")}
           </p>
         </div>
       </div>
@@ -700,8 +706,7 @@ export default function AIAgentsPage() {
           <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300 animate-fade-slide-up">
             <span className="text-lg">⚠️</span>
             <span>
-              API&apos;ye erişilemedi. Demo verileri gösteriliyor. Gerçek veriler için
-              API bağlantısını kontrol edin.
+              {t.tr("API'ye erişilemedi. Demo verileri gösteriliyor. Gerçek veriler için API bağlantısını kontrol edin.")}
             </span>
           </div>
         )}
@@ -718,8 +723,7 @@ export default function AIAgentsPage() {
                 >
                   <span>✅</span>
                   <span>
-                    <strong>{agent?.name ?? agentId}</strong> başlatıldı — İş
-                    ID:{' '}
+                    <strong>{agent?.name ?? agentId}</strong> {t.tr("başlatıldı")} — {t.tr("İş ID:")} {' '}
                     <code className="rounded bg-white/10 px-1 text-xs">
                       {msg.jobId}
                     </code>{' '}
@@ -734,7 +738,7 @@ export default function AIAgentsPage() {
                       })
                     }
                     className="ml-auto text-emerald-400 hover:text-white transition-colors"
-                    aria-label="Kapat"
+                    aria-label={t.tr("Kapat")}
                   >
                     ✕
                   </button>
@@ -748,7 +752,7 @@ export default function AIAgentsPage() {
         <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4 animate-fade-slide-up stagger-1">
           <div className="metric glass rounded-xl p-4">
             <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Toplam Ajan
+              {t.tr("Toplam Ajan")}
             </p>
             {loading ? (
               <div className="skeleton mt-2 h-8 w-16 rounded" />
@@ -758,7 +762,7 @@ export default function AIAgentsPage() {
           </div>
           <div className="metric glass rounded-xl p-4">
             <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Aktif
+              {t.tr("Aktif")}
             </p>
             {loading ? (
               <div className="skeleton mt-2 h-8 w-16 rounded" />
@@ -770,7 +774,7 @@ export default function AIAgentsPage() {
           </div>
           <div className="metric glass rounded-xl p-4">
             <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Başarı Oranı
+              {t.tr("Başarı Oranı")}
             </p>
             {loading ? (
               <div className="skeleton mt-2 h-8 w-20 rounded" />
@@ -784,7 +788,7 @@ export default function AIAgentsPage() {
           </div>
           <div className="metric glass rounded-xl p-4">
             <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Toplam Çalışma
+              {t.tr("Toplam Çalışma")}
             </p>
             {loading ? (
               <div className="skeleton mt-2 h-8 w-20 rounded" />
@@ -832,10 +836,10 @@ export default function AIAgentsPage() {
           <div className="flex flex-col items-center gap-4 py-20 text-center animate-fade-slide-up">
             <span className="text-6xl opacity-40">🤖</span>
             <p className="text-lg font-medium text-slate-400">
-              Henüz hiç ajan yapılandırılmamış.
+              {t.tr("Henüz hiç ajan yapılandırılmamış.")}
             </p>
             <p className="text-sm text-slate-500">
-              API üzerinden ajan ekleyerek başlayın.
+              {t.tr("API üzerinden ajan ekleyerek başlayın.")}
             </p>
           </div>
         )}

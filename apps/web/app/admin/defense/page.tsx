@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -197,6 +198,7 @@ const EVENT_TYPE_OPTIONS = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DefenseDashboardPage() {
+  const t = useI18n();
   const [events, setEvents] = useState<DefenseEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -390,15 +392,15 @@ export default function DefenseDashboardPage() {
           <div className="space-y-1">
             {isDemo && (
               <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 mb-1">
-                ⚠️ Demo modu — API bağlı değil, örnek veriler gösteriliyor
+                {t.tr("⚠️ Demo modu — API bağlı değil, örnek veriler gösteriliyor")}
               </div>
             )}
-            <div className="pill w-fit">🛡️ Güvenlik</div>
+            <div className="pill w-fit">{t.tr("🛡️ Güvenlik")}</div>
             <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
-              🛡️⚔️ Savunma Merkezi
+              {t.tr("🛡️⚔️ Savunma Merkezi")}
             </h1>
             <p className="text-sm text-slate-500 max-w-xl">
-              Hile tespiti ve güvenlik olayları yönetimi
+              {t.tr("Hile tespiti ve güvenlik olayları yönetimi")}
             </p>
           </div>
           <button
@@ -409,7 +411,7 @@ export default function DefenseDashboardPage() {
                 : 'bg-violet-600 text-white hover:bg-violet-700'
             }`}
           >
-            {showCreateForm ? '✕ İptal' : '+ Olay Oluştur'}
+            {showCreateForm ? t.tr("✕ İptal") : t.tr("+ Olay Oluştur")}
           </button>
         </div>
       </header>
@@ -418,12 +420,12 @@ export default function DefenseDashboardPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STATS.map((s, i) => (
           <div
-            key={s.label}
+            key={t.tr(s.label)}
             className={`metric rounded-2xl border p-4 shadow-sm animate-fade-slide-up stagger-${i + 1 as 1|2|3|4} ${s.bg}`}
           >
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
               <span>{s.icon}</span>
-              <span>{s.label}</span>
+              <span>{t.tr(s.label)}</span>
             </div>
             <p className={`text-3xl font-extrabold ${s.val}`}>{s.value}</p>
           </div>
@@ -435,26 +437,26 @@ export default function DefenseDashboardPage() {
         <section className="glass rounded-2xl border border-violet-200 bg-violet-50/30 p-5 animate-fade-slide-up">
           <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-500 to-indigo-500 inline-block" />
-            Yeni Olay Oluştur
+            {t.tr("Yeni Olay Oluştur")}
           </h2>
           <form onSubmit={handleCreateEvent} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Type */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-slate-600">Olay Türü</label>
+              <label className="text-xs font-semibold text-slate-600">{t.tr("Olay Türü")}</label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400"
               >
-                {EVENT_TYPE_OPTIONS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                {EVENT_TYPE_OPTIONS.map((item) => (
+                  <option key={item} value={item}>{item}</option>
                 ))}
               </select>
             </div>
 
             {/* Severity */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-slate-600">Önem Derecesi</label>
+              <label className="text-xs font-semibold text-slate-600">{t.tr("Önem Derecesi")}</label>
               <select
                 value={formSeverity}
                 onChange={(e) => setFormSeverity(e.target.value as Severity)}
@@ -468,24 +470,24 @@ export default function DefenseDashboardPage() {
 
             {/* User ID */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-slate-600">Kullanıcı ID</label>
+              <label className="text-xs font-semibold text-slate-600">{t.tr("Kullanıcı ID")}</label>
               <input
                 type="text"
                 value={formUserId}
                 onChange={(e) => setFormUserId(e.target.value)}
-                placeholder="Ör: usr_12345"
+                placeholder={t.tr("Ör: usr_12345")}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400"
               />
             </div>
 
             {/* Description — full width */}
             <div className="flex flex-col gap-1 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-600">Açıklama</label>
+              <label className="text-xs font-semibold text-slate-600">{t.tr("Açıklama")}</label>
               <textarea
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 rows={3}
-                placeholder="Olayın ayrıntılı açıklamasını girin…"
+                placeholder={t.tr("Olayın ayrıntılı açıklamasını girin…")}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
               />
             </div>
@@ -500,14 +502,14 @@ export default function DefenseDashboardPage() {
                 onClick={() => setShowCreateForm(false)}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
               >
-                İptal
+                {t.tr("İptal")}
               </button>
               <button
                 type="submit"
                 disabled={formSubmitting}
                 className="rounded-xl bg-violet-600 px-5 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60 transition-all"
               >
-                {formSubmitting ? 'Oluşturuluyor…' : 'Olay Oluştur'}
+                {formSubmitting ? t.tr("Oluşturuluyor…") : t.tr("Olay Oluştur")}
               </button>
             </div>
           </form>
@@ -519,7 +521,7 @@ export default function DefenseDashboardPage() {
 
         {/* Filter tabs */}
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-5 py-3">
-          <span className="text-sm font-semibold text-slate-600 mr-1">Filtre:</span>
+          <span className="text-sm font-semibold text-slate-600 mr-1">{t.tr("Filtre:")}</span>
           {FILTER_TABS.map((tab) => (
             <button
               key={tab.value}
@@ -530,7 +532,7 @@ export default function DefenseDashboardPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {tab.label}
+              {t.tr(tab.label)}
               {tab.value !== 'ALL' && (
                 <span
                   className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
@@ -542,7 +544,7 @@ export default function DefenseDashboardPage() {
               )}
             </button>
           ))}
-          <span className="ml-auto text-xs text-slate-400">{filtered.length} olay</span>
+          <span className="ml-auto text-xs text-slate-400">{filtered.length} {t.tr("olay")}</span>
         </div>
 
         {/* Event list */}
@@ -566,7 +568,7 @@ export default function DefenseDashboardPage() {
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center">
               <div className="text-4xl mb-3">🔍</div>
-              <p className="text-sm text-slate-500">Bu filtrede olay bulunamadı.</p>
+              <p className="text-sm text-slate-500">{t.tr("Bu filtrede olay bulunamadı.")}</p>
             </div>
           ) : (
             filtered.map((event) => {
@@ -586,7 +588,7 @@ export default function DefenseDashboardPage() {
                         {/* Severity badge */}
                         <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${sev.badge}`}>
                           <span className={`inline-block w-1.5 h-1.5 rounded-full ${sev.dot} mr-1 align-middle`} />
-                          {sev.label}
+                          {t.tr(sev.label)}
                         </span>
 
                         {/* Event type pill */}
@@ -597,7 +599,7 @@ export default function DefenseDashboardPage() {
                         {/* Resolved badge */}
                         {event.resolved && (
                           <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-                            ✓ Çözümlendi
+                            {t.tr("✓ Çözümlendi")}
                           </span>
                         )}
                       </div>
@@ -610,7 +612,7 @@ export default function DefenseDashboardPage() {
                         <span className="font-mono text-[10px] text-slate-400">{event.id}</span>
                       </div>
 
-                      <p className="text-sm text-slate-700 leading-snug">{event.description}</p>
+                      <p className="text-sm text-slate-700 leading-snug">{t.tr(event.description)}</p>
                     </div>
 
                     {/* Right: action buttons */}
@@ -665,12 +667,12 @@ export default function DefenseDashboardPage() {
                   : '✕'}
               </div>
               <h3 className="text-base font-bold text-slate-800">
-                Eylemi Onayla
+                {t.tr("Eylemi Onayla")}
               </h3>
               <p className="text-sm text-slate-500">
-                <strong className="text-slate-700">{confirm.label}</strong> eylemini{' '}
+                <strong className="text-slate-700">{t.tr(confirm.label)}</strong> {t.tr("eylemini")}{' '}
                 <span className="font-mono text-xs bg-slate-100 px-1 rounded">{confirm.eventId}</span>{' '}
-                olayı için uygulamak istediğinize emin misiniz?
+                {t.tr("olayı için uygulamak istediğinize emin misiniz?")}
               </p>
 
               <div className="flex gap-3 pt-2">
@@ -678,7 +680,7 @@ export default function DefenseDashboardPage() {
                   onClick={() => setConfirm(null)}
                   className="flex-1 rounded-xl border border-slate-200 bg-white py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
                 >
-                  İptal
+                  {t.tr("İptal")}
                 </button>
                 <button
                   onClick={() => handleAction(confirm.eventId, confirm.actionType)}
@@ -696,10 +698,10 @@ export default function DefenseDashboardPage() {
                   {actionLoading !== null ? (
                     <span className="inline-flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-full border border-white border-t-transparent animate-spin" />
-                      İşleniyor…
+                      {t.tr("İşleniyor…")}
                     </span>
                   ) : (
-                    `Evet, ${confirm.label}`
+                    `${t.tr("Evet,")} ${t.tr(confirm.label)}`
                   )}
                 </button>
               </div>

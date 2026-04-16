@@ -3,26 +3,9 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { PanelShell } from "../_components/panel-shell";
+import { useI18n } from '../_i18n/use-i18n';
 
-/* ─── Nav ─── */
-const navSections = [
-  {
-    title: "Veli",
-    items: [
-      { label: "Özet",     href: "/guardian" },
-      { label: "Ödevler",  href: "/leaderboard" },
-      { label: "Takvim",   href: "/booking" },
-      { label: "Raporlar", href: "/report-cards" },
-    ],
-  },
-  {
-    title: "İletişim",
-    items: [
-      { label: "Eğitmenler", href: "/instructor" },
-      { label: "Destek",     href: "/portal" },
-    ],
-  },
-];
+/* ─── Nav ─── (moved inside component for i18n) */
 
 /* ─── Types ─── */
 type Activity  = { id: string; label: string; detail: string; timeAgo: string; type: "lesson"|"quiz"|"assignment"|"live"|"badge"|"read"|"practice"|"exam"|"plan" };
@@ -165,6 +148,7 @@ function DonutChart({ value, size = 120 }: { value: number; size?: number }) {
 
 /* ─── Attendance Ring ─── */
 function AttendanceRing({ days, total, size = 100 }: { days: number; total: number; size?: number }) {
+  const t = useI18n();
   const pct = Math.round((days / total) * 100);
   const sw = 10, r = (size - sw) / 2, circ = 2 * Math.PI * r;
   const offset = circ - (pct / 100) * circ;
@@ -174,7 +158,7 @@ function AttendanceRing({ days, total, size = 100 }: { days: number; total: numb
       <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
         <defs>
           <linearGradient id="gAttend" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#00D4B4" /><stop offset="100%" stopColor="#10b981" />
+            <stop offset="0%" stopColor="#00B4D8" /><stop offset="100%" stopColor="#10b981" />
           </linearGradient>
         </defs>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--line)" strokeWidth={sw} />
@@ -187,7 +171,7 @@ function AttendanceRing({ days, total, size = 100 }: { days: number; total: numb
         alignItems: "center", justifyContent: "center", gap: 2,
       }}>
         <span style={{ fontSize: 18, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{pct}%</span>
-        <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 600 }}>devam</span>
+        <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 600 }}>{t.tr("devam")}</span>
       </div>
     </div>
   );
@@ -261,6 +245,25 @@ function CardHead({ title, sub }: { title: string; sub?: string }) {
 
 /* ─── Main Page ─── */
 export default function GuardianPage() {
+  const t = useI18n();
+  const navSections = [
+    {
+      title: t.tr("Veli"),
+      items: [
+        { label: t.tr("Özet"),     href: "/guardian" },
+        { label: t.tr("Ödevler"),  href: "/leaderboard" },
+        { label: t.tr("Takvim"),   href: "/booking" },
+        { label: t.tr("Raporlar"), href: "/report-cards" },
+      ],
+    },
+    {
+      title: t.tr("İletişim"),
+      items: [
+        { label: t.tr("Eğitmenler"), href: "/instructor" },
+        { label: t.tr("Destek"),     href: "/portal" },
+      ],
+    },
+  ];
   const [selectedChildId, setSelectedChildId] = useState<string>(CHILDREN[0].id);
   const [showContactModal, setShowContactModal] = useState(false);
   const [reportType, setReportType] = useState("Haftalık Özet");
@@ -273,7 +276,7 @@ export default function GuardianPage() {
   const attendPct = child.attendanceDays / child.totalDays;
 
   return (
-    <PanelShell roleLabel="Veli Paneli" userName="Aile Merkezi" userSub="Öğrencinizin gelişimini takip edin" navSections={navSections}>
+    <PanelShell roleLabel="Veli Paneli" userName="Aile Merkezi" userSub={t.tr("Öğrencinizin gelişimini takip edin")} navSections={navSections}>
       <style>{`
         @keyframes guardFadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
         @keyframes guardPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
@@ -301,13 +304,13 @@ export default function GuardianPage() {
                 <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
               </svg>
             </div>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--accent)", textTransform: "uppercase" }}>Veli Paneli</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: "var(--accent)", textTransform: "uppercase" }}>{t.tr("Veli Paneli")}</span>
           </div>
           <h1 style={{ fontSize: "clamp(18px,4vw,26px)", fontWeight: 800, color: "var(--ink)", margin: "0 0 6px", letterSpacing: "-0.03em" }}>
-            Öğrencinizin gelişimini takip edin
+            {t.guardian.title}
           </h1>
           <p style={{ fontSize: 14, color: "var(--ink-2)", margin: 0, lineHeight: 1.6 }}>
-            İlerleme, devam ve eğitmen iletişimini tek ekranda görün. Şeffaf raporlama, net plan.
+            {t.guardian.subtitle}
           </p>
         </div>
       </div>
@@ -315,7 +318,7 @@ export default function GuardianPage() {
       {/* ── Child selector ── */}
       {CHILDREN.length > 1 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>Öğrenci:</span>
+          <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>{t.tr("Öğrenci:")}</span>
           {CHILDREN.map((c) => (
             <button
               key={c.id}
@@ -334,8 +337,8 @@ export default function GuardianPage() {
               <span style={{ width: 22, height: 22, borderRadius: "50%", background: c.avatarGrad, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
                 {c.initials}
               </span>
-              {c.name}
-              <span style={{ opacity: 0.75 }}>{c.age} yaş</span>
+              {t.tr(c.name)}
+              <span style={{ opacity: 0.75 }}>{c.age} {t.tr("yaş")}</span>
             </button>
           ))}
         </div>
@@ -354,30 +357,30 @@ export default function GuardianPage() {
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: "#92400e", margin: "0 0 2px" }}>
-              {child.name} {child.lastActiveDaysAgo} gündür giriş yapmadı
+              {t.tr(child.name)} {child.lastActiveDaysAgo} {t.tr("gündür giriş yapmadı")}
             </p>
             <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>
-              Eğitmenle iletişime geçebilirsiniz.
+              {t.tr("Eğitmenle iletişime geçebilirsiniz.")}
             </p>
           </div>
           <button
             onClick={() => setShowContactModal(true)}
             style={{ fontSize: 12, fontWeight: 700, color: "#b45309", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", flexShrink: 0 }}
           >
-            Eğitmene Yaz
+            {t.tr("Eğitmene Yaz")}
           </button>
         </div>
       )}
 
       {/* ── Weekly stats ── */}
       <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: "20px 20px 16px" }}>
-        <CardHead title="Haftalık Özet" sub="Son 7 gün" />
+        <CardHead title={t.tr("Haftalık Özet")} sub={t.tr("Son 7 gün")} />
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))", gap: 12 }}>
           {[
-            { label: "Tamamlanan Ders",  value: child.weeklyStats.lessonsCompleted, sub: "bu hafta",      grad: "linear-gradient(135deg,#5B6EFF,#9B59FF)", icon: "lesson"   },
-            { label: "Harcanan Süre",    value: `${child.weeklyStats.timeSpentHours}s`, sub: "aktif",     grad: "linear-gradient(135deg,#3b82f6,#06b6d4)",  icon: "clock"    },
-            { label: "Kazanılan XP",     value: child.weeklyStats.xpEarned,         sub: "XP puanı",     grad: "linear-gradient(135deg,#f59e0b,#f97316)",  icon: "star"     },
-            { label: "Seri",             value: `${child.weeklyStats.streak} gün`,   sub: "kesintisiz",  grad: "linear-gradient(135deg,#ef4444,#f97316)",  icon: "fire"     },
+            { label: "Tamamlanan Ders",  value: child.weeklyStats.lessonsCompleted, sub: t.tr("bu hafta"),      grad: "linear-gradient(135deg,#5B6EFF,#9B59FF)", icon: "lesson"   },
+            { label: "Harcanan Süre",    value: `${child.weeklyStats.timeSpentHours}s`, sub: t.tr("aktif"),     grad: "linear-gradient(135deg,#3b82f6,#06b6d4)",  icon: "clock"    },
+            { label: "Kazanılan XP",     value: child.weeklyStats.xpEarned,         sub: t.tr("XP puanı"),     grad: "linear-gradient(135deg,#f59e0b,#f97316)",  icon: "star"     },
+            { label: "Seri",             value: `${child.weeklyStats.streak} ${t.tr("gün")}`,   sub: t.tr("kesintisiz"),  grad: "linear-gradient(135deg,#ef4444,#f97316)",  icon: "fire"     },
           ].map((s) => {
             const iconPaths: Record<string, JSX.Element> = {
               lesson: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>,
@@ -386,20 +389,20 @@ export default function GuardianPage() {
               fire: <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>,
             };
             return (
-              <div key={s.label} style={{ borderRadius: "var(--r-md)", padding: "14px 14px 12px", background: "color-mix(in srgb,var(--line) 30%,var(--panel))", border: "1px solid var(--line)" }}>
+              <div key={t.tr(s.label)} style={{ borderRadius: "var(--r-md)", padding: "14px 14px 12px", background: "color-mix(in srgb,var(--line) 30%,var(--panel))", border: "1px solid var(--line)" }}>
                 <div style={{ width: 32, height: 32, borderRadius: "var(--r-sm)", background: s.grad, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10, boxShadow: "0 4px 10px rgba(0,0,0,0.2)" }}>
                   {iconPaths[s.icon]}
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1, marginBottom: 3 }}>{s.value}</div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-2)" }}>{s.label}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-2)" }}>{t.tr(s.label)}</div>
                 <div style={{ fontSize: 10, color: "var(--muted)" }}>{s.sub}</div>
               </div>
             );
           })}
         </div>
         <div style={{ marginTop: 12, padding: "9px 14px", borderRadius: "var(--r-md)", background: "color-mix(in srgb,var(--accent-3) 8%,var(--panel))", border: "1px solid color-mix(in srgb,var(--accent-3) 25%,var(--line))", fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>
-          Bu hafta <strong>{child.weeklyStats.lessonsCompleted} ders</strong> tamamlandı —{" "}
-          <span style={{ color: "var(--accent-3)", fontWeight: 700 }}>harika ilerleme!</span>
+          {t.tr("Bu hafta")} <strong>{child.weeklyStats.lessonsCompleted} {t.tr("ders")}</strong> {t.tr("tamamlandı")} —{" "}
+          <span style={{ color: "var(--accent-3)", fontWeight: 700 }}>{t.tr("harika ilerleme!")}</span>
         </div>
       </div>
 
@@ -410,16 +413,16 @@ export default function GuardianPage() {
             <DonutChart value={child.overallCompletion} size={120} />
             <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2 }}>
               <span style={{ fontSize: 22, fontWeight: 800, color: "var(--ink)", lineHeight: 1 }}>{child.overallCompletion}%</span>
-              <span style={{ fontSize: 10, color: "var(--muted)" }}>tamamlandı</span>
+              <span style={{ fontSize: 10, color: "var(--muted)" }}>{t.tr("tamamlandı")}</span>
             </div>
           </div>
-          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)", textAlign: "center" }}>Genel İlerleme</p>
+          <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink-2)", textAlign: "center" }}>{t.tr("Genel İlerleme")}</p>
         </div>
 
         <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
-          <CardHead title="Aktif Kurslar" sub={`${child.activeCourses.length} kurs`} />
+          <CardHead title={t.tr("Aktif Kurslar")} sub={`${child.activeCourses.length} ${t.tr("kurs")}`} />
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {child.activeCourses.map((c) => <CourseProgressBar key={c.title} course={c} />)}
+            {child.activeCourses.map((c) => <CourseProgressBar key={t.tr(c.title)} course={c} />)}
           </div>
         </div>
       </div>
@@ -427,7 +430,7 @@ export default function GuardianPage() {
       {/* ── Activity + XP Chart ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, alignItems: "start" }}>
         <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
-          <CardHead title="Son Aktiviteler" sub="Son 10 işlem" />
+          <CardHead title={t.tr("Son Aktiviteler")} sub={t.tr("Son 10 işlem")} />
           <div style={{ position: "relative" }}>
             <div style={{ position: "absolute", left: 13, top: 0, bottom: 0, width: 1, background: "var(--line)" }} />
             {child.activities.map((act, i) => (
@@ -441,7 +444,7 @@ export default function GuardianPage() {
               >
                 <ActivityIcon type={act.type} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.label}</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", margin: "0 0 2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.tr(act.label)}</p>
                   <p style={{ fontSize: 11, color: "var(--muted)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.detail}</p>
                 </div>
                 <span style={{ fontSize: 10, color: "var(--muted)", flexShrink: 0, marginTop: 2, whiteSpace: "nowrap" }}>{act.timeAgo}</span>
@@ -451,13 +454,13 @@ export default function GuardianPage() {
         </div>
 
         <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
-          <CardHead title="Haftalık XP Grafiği" sub="4 hafta" />
+          <CardHead title={t.tr("Haftalık XP Grafiği")} sub="4 hafta" />
           <div style={{ width: "100%", paddingTop: 4 }}>
             <WeeklyBarChart data={child.weeklyXP} />
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
             <div style={{ width: 12, height: 12, borderRadius: 3, background: "linear-gradient(135deg,#f59e0b,#f97316)" }} />
-            <span style={{ fontSize: 11, color: "var(--muted)" }}>Bu hafta (turuncu = aktif)</span>
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>{t.tr("Bu hafta (turuncu = aktif)")}</span>
           </div>
         </div>
       </div>
@@ -465,7 +468,7 @@ export default function GuardianPage() {
       {/* ── Teacher messages + Attendance ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 0.5fr", gap: 16, alignItems: "start" }}>
         <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
-          <CardHead title="Eğitmen Mesajları" sub="Son yorumlar" />
+          <CardHead title={t.tr("Eğitmen Mesajları")} sub={t.tr("Son yorumlar")} />
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {child.teacherMessages.map((msg) => (
               <div
@@ -490,7 +493,7 @@ export default function GuardianPage() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{msg.teacher}</span>
                     <span style={{ fontSize: 10, color: "var(--muted)", flexShrink: 0 }}>{msg.time}</span>
                   </div>
-                  <p style={{ fontSize: 12, color: "var(--ink-2)", margin: 0, lineHeight: 1.55 }}>{msg.text}</p>
+                  <p style={{ fontSize: 12, color: "var(--ink-2)", margin: 0, lineHeight: 1.55 }}>{t.tr(msg.text)}</p>
                 </div>
               </div>
             ))}
@@ -499,22 +502,22 @@ export default function GuardianPage() {
 
         <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
           <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", margin: 0 }}>Devam</h2>
-            <span style={{ fontSize: 11, color: "var(--muted)" }}>Bu ay</span>
+            <h2 style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", margin: 0 }}>{t.tr("Devam")}</h2>
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>{t.tr("Bu ay")}</span>
           </div>
           <AttendanceRing days={child.attendanceDays} total={child.totalDays} size={100} />
           <div style={{ textAlign: "center" }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)", margin: "0 0 4px" }}>
-              {child.attendanceDays}/{child.totalDays} gün aktif
+              {child.attendanceDays}/{child.totalDays} {t.tr("gün aktif")}
             </p>
-            <p style={{ fontSize: 11, color: "var(--muted)", margin: "0 0 8px" }}>{child.totalDays - child.attendanceDays} gün eksik</p>
+            <p style={{ fontSize: 11, color: "var(--muted)", margin: "0 0 8px" }}>{child.totalDays - child.attendanceDays} {t.tr("gün eksik")}</p>
             <span style={{
               display: "inline-block", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: "var(--r-full)",
               background: attendPct >= 0.85 ? "rgba(34,197,94,0.12)" : attendPct >= 0.7 ? "rgba(245,158,11,0.12)" : "rgba(239,68,68,0.12)",
               border: attendPct >= 0.85 ? "1px solid rgba(34,197,94,0.3)" : attendPct >= 0.7 ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(239,68,68,0.3)",
               color: attendPct >= 0.85 ? "#22c55e" : attendPct >= 0.7 ? "#f59e0b" : "#ef4444",
             }}>
-              {attendPct >= 0.85 ? "Mükemmel" : attendPct >= 0.7 ? "Orta" : "Düşük"}
+              {attendPct >= 0.85 ? t.tr("Mükemmel") : attendPct >= 0.7 ? t.tr("Orta") : t.tr("Düşük")}
             </span>
           </div>
         </div>
@@ -524,14 +527,14 @@ export default function GuardianPage() {
       <div className="glass" style={{ borderRadius: "var(--r-xl)", padding: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
           <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", margin: "0 0 4px" }}>Eğitmenle İletişime Geç</h2>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--ink)", margin: "0 0 4px" }}>{t.tr("Eğitmenle İletişime Geç")}</h2>
             <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
-              {child.name} hakkında soru veya geri bildirim için eğitmene doğrudan yazın.
+              {t.tr(child.name)} {t.tr("hakkında soru veya geri bildirim için eğitmene doğrudan yazın.")}
             </p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <a
-              href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${child.name} hakkında`)}&body=${encodeURIComponent(`Merhaba,\n\n${child.name} ile ilgili görüşmek istiyorum.\n\nSaygılarımla,`)}`}
+              href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${t.tr(child.name)} hakkında`)}&body=${encodeURIComponent(`Merhaba,\n\n${t.tr(child.name)} ile ilgili görüşmek istiyorum.\n\nSaygılarımla,`)}`}
               style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 padding: "9px 18px", borderRadius: "var(--r-md)",
@@ -541,7 +544,7 @@ export default function GuardianPage() {
               }}
             >
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              Eğitmene Yaz
+              {t.tr("Eğitmene Yaz")}
             </a>
             <button
               onClick={() => setShowContactModal(true)}
@@ -553,7 +556,7 @@ export default function GuardianPage() {
               }}
             >
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h4"/></svg>
-              Rapor İste
+              {t.tr("Rapor İste")}
             </button>
           </div>
         </div>
@@ -575,7 +578,7 @@ export default function GuardianPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--ink)", margin: 0 }}>Rapor Talep Et</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: "var(--ink)", margin: 0 }}>{t.tr("Rapor Talep Et")}</h3>
               <button
                 onClick={() => setShowContactModal(false)}
                 style={{ width: 28, height: 28, borderRadius: "50%", border: "1px solid var(--line)", background: "var(--panel)", cursor: "pointer", color: "var(--muted)", display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -584,24 +587,24 @@ export default function GuardianPage() {
               </button>
             </div>
             <p style={{ fontSize: 13, color: "var(--ink-2)", marginBottom: 16, lineHeight: 1.6 }}>
-              {child.name} için detaylı performans raporu talebinde bulunabilirsiniz. Eğitmen 24 saat içinde geri dönecektir.
+              {t.tr(child.name)} {t.tr("için detaylı performans raporu talebinde bulunabilirsiniz. Eğitmen 24 saat içinde geri dönecektir.")}
             </p>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-2)", marginBottom: 7 }}>Rapor Türü</label>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--ink-2)", marginBottom: 7 }}>{t.tr("Rapor Türü")}</label>
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
                 style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-md)", border: "1.5px solid var(--line)", background: "color-mix(in srgb,var(--line) 20%,var(--panel))", color: "var(--ink)", fontSize: 14 }}
               >
-                <option>Haftalık Özet</option>
-                <option>Aylık Performans</option>
-                <option>Ders Bazlı Analiz</option>
-                <option>Devam Raporu</option>
+                <option>{t.tr("Haftalık Özet")}</option>
+                <option>{t.tr("Aylık Performans")}</option>
+                <option>{t.tr("Ders Bazlı Analiz")}</option>
+                <option>{t.tr("Devam Raporu")}</option>
               </select>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <a
-                href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${child.name} – ${reportType} Rapor Talebi`)}`}
+                href={`mailto:${child.instructorEmail}?subject=${encodeURIComponent(`${t.tr(child.name)} – ${reportType} Rapor Talebi`)}`}
                 onClick={() => setShowContactModal(false)}
                 style={{
                   flex: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -611,13 +614,13 @@ export default function GuardianPage() {
                 }}
               >
                 <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                Talep Gönder
+                {t.tr("Talep Gönder")}
               </a>
               <button
                 onClick={() => setShowContactModal(false)}
                 style={{ flex: 1, padding: "10px", borderRadius: "var(--r-md)", border: "1.5px solid var(--line)", background: "var(--panel)", color: "var(--ink-2)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
               >
-                İptal
+                {t.tr("İptal")}
               </button>
             </div>
           </div>

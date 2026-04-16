@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -64,6 +65,7 @@ function RiskBar({ score }: { score: number }) {
 }
 
 export default function InstructorAnalyticsPage() {
+  const t = useI18n();
   const [atRisk, setAtRisk] = useState<AtRiskStudent[]>([]);
   const [insights, setInsights] = useState<ContentInsight[]>([]);
   const [loadingRisk, setLoadingRisk] = useState(true);
@@ -102,15 +104,15 @@ export default function InstructorAnalyticsPage() {
       {/* Header */}
       <div className="glass p-6 rounded-2xl hero">
         <div className="hero-content space-y-1">
-          <div className="pill w-fit">Eğitmen Paneli</div>
-          <h1 className="text-2xl font-bold">Öğrenme Analitiği</h1>
-          <p className="text-sm text-slate-500">Risk skoru, içerik performansı ve yapay zeka önerileri</p>
+          <div className="pill w-fit">{t.roles.instructor}</div>
+          <h1 className="text-2xl font-bold">{t.instructor.analytics}</h1>
+          <p className="text-sm text-slate-500">{t.tr("Risk skoru, içerik performansı ve yapay zeka önerileri")}</p>
         </div>
       </div>
 
       {demoMode && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
-          Demo modu — gerçek veriler yüklenemedi.
+          {t.tr("Demo modu — gerçek veriler yüklenemedi.")}
         </div>
       )}
 
@@ -121,10 +123,10 @@ export default function InstructorAnalyticsPage() {
           { label: 'Yüksek Risk', value: highRisk, color: 'text-rose-700', bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200' },
           { label: 'Orta Risk', value: midRisk, color: 'text-amber-700', bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200' },
           { label: 'Ort. Risk Skoru', value: `${avgRisk}`, color: 'text-violet-700', bg: 'bg-gradient-to-br from-violet-50 to-violet-100/50 border-violet-200' },
-        ].map((s, i) => (
-          <div key={s.label} className={`rounded-xl border p-4 text-center shadow-sm animate-fade-slide-up stagger-${i + 1} ${s.bg}`}>
-            <div className={`text-2xl font-extrabold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-slate-500 mt-0.5">{s.label}</div>
+        ].map((stat, i) => (
+          <div key={t.tr(stat.label)} className={`rounded-xl border p-4 text-center shadow-sm animate-fade-slide-up stagger-${i + 1} ${stat.bg}`}>
+            <div className={`text-2xl font-extrabold ${stat.color}`}>{stat.value}</div>
+            <div className="text-xs text-slate-500 mt-0.5">{t.tr(stat.label)}</div>
           </div>
         ))}
       </div>
@@ -134,17 +136,17 @@ export default function InstructorAnalyticsPage() {
         {[
           { key: 'risk', label: `⚠ Risk Takibi (${atRisk.length})` },
           { key: 'content', label: `📊 İçerik Performansı (${insights.length})` },
-        ].map((t) => (
+        ].map((tab) => (
           <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key as 'risk' | 'content')}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as 'risk' | 'content')}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-              activeTab === t.key
+              activeTab === tab.key
                 ? 'bg-slate-900 text-white border-slate-900 shadow-md'
                 : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
             }`}
           >
-            {t.label}
+            {t.tr(tab.label)}
           </button>
         ))}
       </div>
@@ -159,17 +161,17 @@ export default function InstructorAnalyticsPage() {
               ))}
             </div>
           ) : atRisk.length === 0 ? (
-            <div className="p-10 text-center text-slate-500 text-sm">Riskli öğrenci bulunamadı.</div>
+            <div className="p-10 text-center text-slate-500 text-sm">{t.tr("Riskli öğrenci bulunamadı.")}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Öğrenci</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Öğrenci")}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Risk Skoru</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Quiz Ort.</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Son Aktivite</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Zayıf Konular</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Zayıf Konular")}</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -201,7 +203,7 @@ export default function InstructorAnalyticsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {s.weaknesses.slice(0, 3).map((w) => (
+                          {(s.weaknesses ?? []).slice(0, 3).map((w) => (
                             <span key={w} className="pill pill-xs bg-rose-50 border-rose-100 text-rose-600">{w}</span>
                           ))}
                         </div>
@@ -230,7 +232,7 @@ export default function InstructorAnalyticsPage() {
             Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-40 rounded-2xl skeleton" />)
           ) : insights.length === 0 ? (
             <div className="col-span-2 p-10 text-center glass rounded-2xl text-slate-500 text-sm">
-              İçerik verisi bulunamadı.
+              {t.tr("İçerik verisi bulunamadı.")}
             </div>
           ) : (
             insights.map((insight, idx) => (
@@ -244,7 +246,7 @@ export default function InstructorAnalyticsPage() {
                     <div className={`text-xl font-extrabold ${insight.dropoffRate > 30 ? 'text-rose-600' : insight.dropoffRate > 20 ? 'text-amber-600' : 'text-emerald-600'}`}>
                       %{insight.dropoffRate}
                     </div>
-                    <div className="text-xs text-slate-400">terk oranı</div>
+                    <div className="text-xs text-slate-400">{t.tr("terk oranı")}</div>
                   </div>
                 </div>
 
@@ -255,22 +257,22 @@ export default function InstructorAnalyticsPage() {
                   </span>
                 </div>
 
-                {insight.lowPerformanceTopics.length > 0 && (
+                {(insight.lowPerformanceTopics ?? []).length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-600 mb-1">Düşük performanslı konular:</p>
+                    <p className="text-xs font-semibold text-slate-600 mb-1">{t.tr("Düşük performanslı konular:")}</p>
                     <div className="flex flex-wrap gap-1">
-                      {insight.lowPerformanceTopics.map((t) => (
-                        <span key={t} className="pill pill-xs bg-amber-50 border-amber-100 text-amber-700">{t}</span>
+                      {(insight.lowPerformanceTopics ?? []).map((topic) => (
+                        <span key={topic} className="pill pill-xs bg-amber-50 border-amber-100 text-amber-700">{topic}</span>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {insight.suggestedRevisions.length > 0 && (
+                {(insight.suggestedRevisions ?? []).length > 0 && (
                   <div>
-                    <p className="text-xs font-semibold text-slate-600 mb-1">✦ AI Öneriler:</p>
+                    <p className="text-xs font-semibold text-slate-600 mb-1">{t.tr("✦ AI Öneriler:")}</p>
                     <ul className="space-y-1">
-                      {insight.suggestedRevisions.map((r) => (
+                      {(insight.suggestedRevisions ?? []).map((r) => (
                         <li key={r} className="text-xs text-slate-600 flex gap-1.5">
                           <span className="text-violet-400 mt-0.5">•</span>
                           {r}

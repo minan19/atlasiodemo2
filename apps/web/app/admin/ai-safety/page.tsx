@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 /* ── Config ───────────────────────────────────────────────────── */
 
@@ -229,6 +230,7 @@ function StatsSkeleton() {
 /* ── Page ─────────────────────────────────────────────────────── */
 
 export default function AiSafetyPage() {
+  const t = useI18n();
   /* stats */
   const [stats, setStats] = useState<SafetyStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -445,7 +447,7 @@ export default function AiSafetyPage() {
         {result.flags.length > 0 ? (
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-rose-600 mb-2">
-              Tespit Edilen Sorunlar
+              {t.tr("Tespit Edilen Sorunlar")}
             </p>
             <div className="flex flex-wrap gap-2">
               {result.flags.map((flag, i) => (
@@ -460,7 +462,7 @@ export default function AiSafetyPage() {
           </div>
         ) : (
           <p className="text-sm text-emerald-700">
-            Herhangi bir sorun tespit edilmedi.
+            {t.tr("Herhangi bir sorun tespit edilmedi.")}
           </p>
         )}
       </div>
@@ -519,10 +521,10 @@ export default function AiSafetyPage() {
                   d="M4 12a8 8 0 018-8v8z"
                 />
               </svg>
-              Kontrol ediliyor...
+              {t.tr("Kontrol ediliyor...")}
             </span>
           ) : (
-            'Kontrol Et'
+            t.tr("Kontrol Et")
           )}
         </button>
         {result && <CheckResultPanel result={result} />}
@@ -538,10 +540,10 @@ export default function AiSafetyPage() {
         <div className="hero-content space-y-2">
           <div className="pill w-fit">Admin Panel</div>
           <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            🛡️ AI Güvenlik Merkezi
+            {t.tr("🛡️ AI Güvenlik Merkezi")}
           </h1>
           <p className="text-sm text-slate-500 max-w-2xl">
-            İçerik moderasyonu ve PII koruması
+            {t.tr("İçerik moderasyonu ve PII koruması")}
           </p>
         </div>
       </header>
@@ -554,11 +556,11 @@ export default function AiSafetyPage() {
           <>
             {isDemo && (
               <div className="lg:col-span-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
-                ⚠ Demo verisi gösteriliyor. Gerçek veriler için API bağlantısını kontrol edin.
+                {t.tr("⚠ Demo verisi gösteriliyor. Gerçek veriler için API bağlantısını kontrol edin.")}
               </div>
             )}
             {STAT_CARDS.map((card) => (
-              <StatCard key={card.label} {...card} />
+              <StatCard key={t.tr(card.label)} {...card} />
             ))}
           </>
         )}
@@ -580,7 +582,7 @@ export default function AiSafetyPage() {
               }`}
             >
               <span>{tab.icon}</span>
-              {tab.label}
+              {t.tr(tab.label)}
             </button>
           ))}
         </div>
@@ -596,7 +598,7 @@ export default function AiSafetyPage() {
               result={inputResult}
               loading={inputLoading}
               onCheck={handleInputCheck}
-              placeholder="Kontrol edilecek metni girin... (örn: Bu içerik şiddet içeriyor mu?)"
+              placeholder={t.tr("Kontrol edilecek metni girin... (örn: Bu içerik şiddet içeriyor mu?)")}
               endpoint="/ai-safety/check-input"
             />
           )}
@@ -609,7 +611,7 @@ export default function AiSafetyPage() {
               result={outputResult}
               loading={outputLoading}
               onCheck={handleOutputCheck}
-              placeholder="Kontrol edilecek metni girin... (örn: Model çıktısı buraya yapıştırın)"
+              placeholder={t.tr("Kontrol edilecek metni girin... (örn: Model çıktısı buraya yapıştırın)")}
               endpoint="/ai-safety/check-output"
             />
           )}
@@ -622,7 +624,7 @@ export default function AiSafetyPage() {
               </div>
               <textarea
                 className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-800 placeholder:text-slate-400 resize-y min-h-[140px] focus:outline-none focus:ring-2 focus:ring-violet-300 transition"
-                placeholder="PII içerebilecek metni girin... (e-posta, telefon, TC kimlik no, kredi kartı)"
+                placeholder={t.tr("PII içerebilecek metni girin... (e-posta, telefon, TC kimlik no, kredi kartı)")}
                 value={piiText}
                 onChange={(e) => setPiiText(e.target.value)}
                 rows={5}
@@ -638,10 +640,10 @@ export default function AiSafetyPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                     </svg>
-                    Maskeleniyor...
+                    {t.tr("Maskeleniyor...")}
                   </span>
                 ) : (
-                  'Maskele'
+                  t.tr("Maskele")
                 )}
               </button>
 
@@ -651,7 +653,7 @@ export default function AiSafetyPage() {
                   {piiResult.detectedTypes.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 mb-2">
-                        Tespit Edilen PII Türleri
+                        {t.tr("Tespit Edilen PII Türleri")}
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {piiResult.detectedTypes.map((type, i) => (
@@ -670,7 +672,7 @@ export default function AiSafetyPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        Orijinal Metin
+                        {t.tr("Orijinal Metin")}
                       </p>
                       <p className="text-sm text-slate-700 whitespace-pre-wrap break-words font-mono leading-relaxed">
                         {piiText}
@@ -678,7 +680,7 @@ export default function AiSafetyPage() {
                     </div>
                     <div className="rounded-2xl border border-violet-200 bg-violet-50 p-4 space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-wide text-violet-600">
-                        Maskelenmiş Metin
+                        {t.tr("Maskelenmiş Metin")}
                       </p>
                       <p className="text-sm text-slate-700 whitespace-pre-wrap break-words font-mono leading-relaxed">
                         {piiResult.masked}
@@ -689,7 +691,7 @@ export default function AiSafetyPage() {
                   {piiResult.detectedTypes.length === 0 && (
                     <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2">
                       <span>✅</span>
-                      Metinde kişisel veri (PII) tespit edilmedi.
+                      {t.tr("Metinde kişisel veri (PII) tespit edilmedi.")}
                     </div>
                   )}
                 </div>
@@ -707,7 +709,7 @@ export default function AiSafetyPage() {
               {/* Quick select chips */}
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                  Hızlı Seçim
+                  {t.tr("Hızlı Seçim")}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {['gpt-4o', 'claude-3-5', 'llama-3'].map((m) => (
@@ -733,7 +735,7 @@ export default function AiSafetyPage() {
               <input
                 type="text"
                 className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 transition"
-                placeholder="Model ID girin... (örn: gpt-4o, claude-3-5, llama-3)"
+                placeholder={t.tr("Model ID girin... (örn: gpt-4o, claude-3-5, llama-3)")}
                 value={modelId}
                 onChange={(e) => {
                   setModelId(e.target.value);
@@ -755,10 +757,10 @@ export default function AiSafetyPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                     </svg>
-                    Onaylanıyor...
+                    {t.tr("Onaylanıyor...")}
                   </span>
                 ) : (
-                  'Onayla'
+                  t.tr("Onayla")
                 )}
               </button>
 
@@ -780,7 +782,7 @@ export default function AiSafetyPage() {
                           modelResult.approved ? 'text-emerald-700' : 'text-rose-700'
                         }`}
                       >
-                        {modelResult.approved ? 'ONAYLANDI' : 'REDDEDİLDİ'}
+                        {modelResult.approved ? t.tr("ONAYLANDI") : t.tr("REDDEDİLDİ")}
                       </p>
                       <p className="text-sm text-slate-500 mt-0.5">
                         Model: <span className="font-mono font-semibold text-slate-700">{modelId}</span>
@@ -791,7 +793,7 @@ export default function AiSafetyPage() {
                   {modelResult.issues.length > 0 && (
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-rose-600 mb-2">
-                        Tespit Edilen Sorunlar
+                        {t.tr("Tespit Edilen Sorunlar")}
                       </p>
                       <ul className="space-y-2">
                         {modelResult.issues.map((issue, i) => (
@@ -800,7 +802,7 @@ export default function AiSafetyPage() {
                             className="flex items-start gap-2 text-sm text-rose-800"
                           >
                             <span className="mt-0.5 shrink-0 text-rose-400">✗</span>
-                            {issue}
+                            {t.tr(issue)}
                           </li>
                         ))}
                       </ul>
@@ -809,7 +811,7 @@ export default function AiSafetyPage() {
 
                   {modelResult.approved && modelResult.issues.length === 0 && (
                     <p className="text-sm text-emerald-700">
-                      Bu model güvenlik politikasına uygundur ve kullanıma hazırdır.
+                      {t.tr("Bu model güvenlik politikasına uygundur ve kullanıma hazırdır.")}
                     </p>
                   )}
                 </div>

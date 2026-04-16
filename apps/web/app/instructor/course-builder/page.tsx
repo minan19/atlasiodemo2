@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -231,6 +232,7 @@ function InlineEdit({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function CourseBuilderPage() {
+  const t = useI18n();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -271,18 +273,28 @@ export default function CourseBuilderPage() {
     fetch(`${API}/courses/my`, { headers: authHeaders() })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Course[]) => {
+        let list: Course[];
         if (Array.isArray(data) && data.length > 0) {
-          setCourses(data);
+          list = data;
         } else {
-          setCourses(DEMO_COURSES);
           setDemoMode(true);
+          list = DEMO_COURSES;
+        }
+        setCourses(list);
+        // Auto-select the first course so panels render immediately
+        if (list.length > 0) {
+          setSelectedCourseId(list[0].id);
+          loadStructure(list[0].id);
         }
       })
       .catch(() => {
-        setCourses(DEMO_COURSES);
         setDemoMode(true);
+        setCourses(DEMO_COURSES);
+        setSelectedCourseId(DEMO_COURSES[0].id);
+        loadStructure(DEMO_COURSES[0].id);
       })
       .finally(() => setLoadingCourses(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Load structure on course select ────────────────────────────────────────
@@ -520,15 +532,15 @@ export default function CourseBuilderPage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div className="glass p-6 rounded-2xl hero animate-fade-slide-up">
         <div className="hero-content space-y-1">
-          <div className="pill w-fit">Eğitmen Paneli</div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">🏗️ Kurs Oluşturucu</h1>
-          <p className="text-sm text-slate-500">İçeriklerini yapılandır, sürükle-bırak ile düzenle</p>
+          <div className="pill w-fit">{t.roles.instructor}</div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">🏗️ {t.instructor.courseBuilder}</h1>
+          <p className="text-sm text-slate-500">{t.tr("İçeriklerini yapılandır, sürükle-bırak ile düzenle")}</p>
         </div>
       </div>
 
       {demoMode && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
-          Demo modu — API bağlantısı kurulamadı, örnek veriler gösteriliyor.
+          {t.tr("Demo modu — API bağlantısı kurulamadı, örnek veriler gösteriliyor.")}
         </div>
       )}
 
@@ -537,7 +549,7 @@ export default function CourseBuilderPage() {
 
         {/* ════ LEFT PANEL — Course Selector ════════════════════════════════ */}
         <aside className="glass rounded-2xl p-4 space-y-3 animate-fade-slide-up stagger-1">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">Kurslarım</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-400">{t.tr("Kurslarım")}</h2>
 
           {loadingCourses ? (
             <div className="space-y-2">
@@ -566,8 +578,8 @@ export default function CourseBuilderPage() {
                         ) : '📚'}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm text-slate-800 truncate">{c.title}</div>
-                        <span className={`pill pill-xs border text-xs mt-0.5 ${status.cls}`}>{status.label}</span>
+                        <div className="font-semibold text-sm text-slate-800 truncate">{t.tr(c.title)}</div>
+                        <span className={`pill pill-xs border text-xs mt-0.5 ${status.cls}`}>{t.tr(status.label)}</span>
                       </div>
                     </div>
                   </button>
@@ -579,15 +591,15 @@ export default function CourseBuilderPage() {
           {/* Stats for selected course */}
           {selectedCourse && !loadingStructure && modules.length > 0 && (
             <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-2 mt-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">İstatistikler</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.tr("İstatistikler")}</p>
               <div className="grid grid-cols-1 gap-1.5">
                 {[
                   { label: 'Modül sayısı', value: modules.length, icon: '📂' },
                   { label: 'Ders sayısı', value: totalLessons(modules), icon: '🎯' },
                   { label: 'Toplam süre', value: formatDuration(totalDuration(modules)), icon: '⏱' },
                 ].map((s) => (
-                  <div key={s.label} className="metric flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
-                    <span className="text-xs text-slate-500">{s.icon} {s.label}</span>
+                  <div key={t.tr(s.label)} className="metric flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
+                    <span className="text-xs text-slate-500">{s.icon} {t.tr(s.label)}</span>
                     <span className="text-xs font-bold text-slate-800">{s.value}</span>
                   </div>
                 ))}
@@ -596,7 +608,7 @@ export default function CourseBuilderPage() {
           )}
 
           {!selectedCourseId && !loadingCourses && (
-            <p className="text-xs text-slate-400 text-center pt-2">Düzenlemek için bir kurs seçin.</p>
+            <p className="text-xs text-slate-400 text-center pt-2">{t.tr("Düzenlemek için bir kurs seçin.")}</p>
           )}
         </aside>
 
@@ -605,8 +617,8 @@ export default function CourseBuilderPage() {
           {!selectedCourseId && (
             <div className="glass rounded-2xl p-10 text-center space-y-2">
               <div className="text-4xl">🏗️</div>
-              <p className="text-slate-500 font-medium">Sol panelden bir kurs seçin</p>
-              <p className="text-sm text-slate-400">Kurs yapısını buradan düzenleyebilirsiniz.</p>
+              <p className="text-slate-500 font-medium">{t.tr("Sol panelden bir kurs seçin")}</p>
+              <p className="text-sm text-slate-400">{t.tr("Kurs yapısını buradan düzenleyebilirsiniz.")}</p>
             </div>
           )}
 
@@ -621,7 +633,7 @@ export default function CourseBuilderPage() {
               {modules.length === 0 && (
                 <div className="glass rounded-2xl p-8 text-center space-y-2">
                   <div className="text-3xl">📭</div>
-                  <p className="text-slate-500 text-sm">Bu kursa henüz modül eklenmemiş.</p>
+                  <p className="text-slate-500 text-sm">{t.tr("Bu kursa henüz modül eklenmemiş.")}</p>
                 </div>
               )}
 
@@ -636,7 +648,7 @@ export default function CourseBuilderPage() {
                     {/* Module header */}
                     <div className="flex items-center gap-2 px-4 py-3 bg-slate-50/80 border-b border-slate-100">
                       {/* Drag handle (visual only) */}
-                      <span className="text-slate-300 text-lg select-none cursor-grab" title="Sürükle">⠿</span>
+                      <span className="text-slate-300 text-lg select-none cursor-grab" title={t.tr("Sürükle")}>⠿</span>
 
                       <button
                         type="button"
@@ -649,7 +661,7 @@ export default function CourseBuilderPage() {
 
                       <div className="flex-1 min-w-0">
                         <InlineEdit
-                          value={mod.title}
+                          value={t.tr(mod.title)}
                           onSave={(v) => saveModuleTitle(mod.id, v)}
                           className="font-semibold text-sm text-slate-800"
                         />
@@ -676,7 +688,7 @@ export default function CourseBuilderPage() {
                         type="button"
                         onClick={() => handleDeleteModule(mod.id, mod.title)}
                         className="text-rose-400 hover:text-rose-600 transition-colors text-xs flex-shrink-0"
-                        title="Modülü sil"
+                        title={t.tr("Modülü sil")}
                       >
                         🗑
                       </button>
@@ -687,7 +699,7 @@ export default function CourseBuilderPage() {
                       <div className="divide-y divide-slate-100">
                         {mod.lessons.length === 0 && !isAddingLesson && (
                           <div className="px-6 py-4 text-sm text-slate-400 text-center">
-                            Henüz ders yok. "Ders Ekle" ile başlayın.
+                            {t.tr("Henüz ders yok. \"Ders Ekle\" ile başlayın.")}
                           </div>
                         )}
 
@@ -714,7 +726,7 @@ export default function CourseBuilderPage() {
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <InlineEdit
-                                  value={lesson.title}
+                                  value={t.tr(lesson.title)}
                                   onSave={(v) => saveLessonTitle(mod.id, lesson.id, v)}
                                   className="text-sm text-slate-700"
                                 />
@@ -740,14 +752,14 @@ export default function CourseBuilderPage() {
                                   disabled={li === 0}
                                   onClick={() => moveLesson(mod.id, lesson.id, 'up')}
                                   className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-xs leading-none"
-                                  title="Yukarı taşı"
+                                  title={t.tr("Yukarı taşı")}
                                 >↑</button>
                                 <button
                                   type="button"
                                   disabled={li === mod.lessons.length - 1}
                                   onClick={() => moveLesson(mod.id, lesson.id, 'down')}
                                   className="text-slate-400 hover:text-slate-700 disabled:opacity-20 text-xs leading-none"
-                                  title="Aşağı taşı"
+                                  title={t.tr("Aşağı taşı")}
                                 >↓</button>
                               </div>
                             </div>
@@ -761,7 +773,7 @@ export default function CourseBuilderPage() {
 
                             <input
                               type="text"
-                              placeholder="Ders başlığı..."
+                              placeholder={t.tr("Ders başlığı...")}
                               value={newLessonTitle}
                               onChange={(e) => setNewLessonTitle(e.target.value)}
                               className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
@@ -770,18 +782,18 @@ export default function CourseBuilderPage() {
                             />
 
                             <div className="flex flex-wrap gap-1.5">
-                              {LESSON_TYPES.map((t) => (
+                              {LESSON_TYPES.map((lt) => (
                                 <LessonTypeButton
-                                  key={t}
-                                  type={t}
-                                  selected={newLessonType === t}
-                                  onClick={() => setNewLessonType(t)}
+                                  key={lt}
+                                  type={lt}
+                                  selected={newLessonType === lt}
+                                  onClick={() => setNewLessonType(lt)}
                                 />
                               ))}
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <label className="text-xs text-slate-500">Süre:</label>
+                              <label className="text-xs text-slate-500">{t.tr("Süre:")}</label>
                               <input
                                 type="number"
                                 min={1}
@@ -807,7 +819,7 @@ export default function CourseBuilderPage() {
                                 onClick={() => setAddingLessonFor(null)}
                                 className="px-4 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition-colors"
                               >
-                                İptal
+                                {t.tr("İptal")}
                               </button>
                             </div>
                           </div>
@@ -821,11 +833,11 @@ export default function CourseBuilderPage() {
               {/* Add Module */}
               {addingModule ? (
                 <div className="glass rounded-2xl border border-dashed border-violet-300 p-4 space-y-3 animate-fade-slide-up">
-                  <p className="text-sm font-semibold text-violet-700">Yeni Modül</p>
+                  <p className="text-sm font-semibold text-violet-700">{t.tr("Yeni Modül")}</p>
                   <input
                     type="text"
                     autoFocus
-                    placeholder="Modül başlığı..."
+                    placeholder={t.tr("Modül başlığı...")}
                     value={newModuleTitle}
                     onChange={(e) => setNewModuleTitle(e.target.value)}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
@@ -845,7 +857,7 @@ export default function CourseBuilderPage() {
                       onClick={() => { setAddingModule(false); setNewModuleTitle(''); }}
                       className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
                     >
-                      İptal
+                      {t.tr("İptal")}
                     </button>
                   </div>
                 </div>
@@ -855,7 +867,7 @@ export default function CourseBuilderPage() {
                   onClick={() => setAddingModule(true)}
                   className="w-full rounded-2xl border-2 border-dashed border-slate-200 py-4 text-sm font-semibold text-slate-500 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50/30 transition-all"
                 >
-                  + Yeni Modül Ekle
+                  {t.tr("+ Yeni Modül Ekle")}
                 </button>
               )}
             </>
@@ -867,16 +879,16 @@ export default function CourseBuilderPage() {
           {!selectedLesson ? (
             <div className="glass rounded-2xl p-6 text-center space-y-2 border border-dashed border-slate-200">
               <div className="text-3xl">✏️</div>
-              <p className="text-sm font-medium text-slate-600">Ders Detayı</p>
-              <p className="text-xs text-slate-400">Düzenlemek için bir ders satırına tıklayın.</p>
+              <p className="text-sm font-medium text-slate-600">{t.tr("Ders Detayı")}</p>
+              <p className="text-xs text-slate-400">{t.tr("Düzenlemek için bir ders satırına tıklayın.")}</p>
             </div>
           ) : (
             <div className="glass rounded-2xl border border-slate-200 overflow-hidden">
               {/* Panel header */}
               <div className="px-4 py-3 bg-gradient-to-r from-violet-50 to-indigo-50 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold text-violet-600 uppercase tracking-wider">Ders Detayı</p>
-                  <p className="text-xs text-slate-500 truncate max-w-[200px]">{selectedLesson.lesson.title}</p>
+                  <p className="text-xs font-semibold text-violet-600 uppercase tracking-wider">{t.tr("Ders Detayı")}</p>
+                  <p className="text-xs text-slate-500 truncate max-w-[200px]">{t.tr(selectedLesson.lesson.title)}</p>
                 </div>
                 <button
                   type="button"
@@ -889,7 +901,7 @@ export default function CourseBuilderPage() {
               <div className="p-4 space-y-4">
                 {/* Title */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Başlık</label>
+                  <label className="text-xs font-semibold text-slate-500">{t.tr("Başlık")}</label>
                   <input
                     type="text"
                     value={detailTitle}
@@ -900,14 +912,14 @@ export default function CourseBuilderPage() {
 
                 {/* Type selector */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-500">İçerik Türü</label>
+                  <label className="text-xs font-semibold text-slate-500">{t.tr("İçerik Türü")}</label>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {LESSON_TYPES.map((t) => (
+                    {LESSON_TYPES.map((lt) => (
                       <LessonTypeButton
-                        key={t}
-                        type={t}
-                        selected={detailType === t}
-                        onClick={() => setDetailType(t)}
+                        key={lt}
+                        type={lt}
+                        selected={detailType === lt}
+                        onClick={() => setDetailType(lt)}
                       />
                     ))}
                   </div>
@@ -915,7 +927,7 @@ export default function CourseBuilderPage() {
 
                 {/* Duration */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Süre (dakika)</label>
+                  <label className="text-xs font-semibold text-slate-500">{t.tr("Süre (dakika)")}</label>
                   <input
                     type="number"
                     min={1}
@@ -928,12 +940,12 @@ export default function CourseBuilderPage() {
 
                 {/* Description */}
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-500">Açıklama</label>
+                  <label className="text-xs font-semibold text-slate-500">{t.tr("Açıklama")}</label>
                   <textarea
                     rows={3}
                     value={detailDescription}
                     onChange={(e) => setDetailDescription(e.target.value)}
-                    placeholder="Ders hakkında kısa açıklama..."
+                    placeholder={t.tr("Ders hakkında kısa açıklama...")}
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 resize-none"
                   />
                 </div>
@@ -955,7 +967,7 @@ export default function CourseBuilderPage() {
                 {/* QUIZ specific */}
                 {detailType === 'QUIZ' && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500">Soru Sayısı</label>
+                    <label className="text-xs font-semibold text-slate-500">{t.tr("Soru Sayısı")}</label>
                     <input
                       type="number"
                       min={1}
@@ -970,7 +982,7 @@ export default function CourseBuilderPage() {
                 {/* LIVE specific */}
                 {detailType === 'LIVE' && (
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500">Canlı Ders Tarihi</label>
+                    <label className="text-xs font-semibold text-slate-500">{t.tr("Canlı Ders Tarihi")}</label>
                     <input
                       type="datetime-local"
                       value={detailScheduledAt}
@@ -992,7 +1004,7 @@ export default function CourseBuilderPage() {
 
                 {detailSaved && (
                   <p className="text-center text-xs text-emerald-600 font-semibold animate-fade-slide-up">
-                    Değişiklikler uygulandı.
+                    {t.tr("Değişiklikler uygulandı.")}
                   </p>
                 )}
 
@@ -1022,7 +1034,7 @@ export default function CourseBuilderPage() {
           {/* Quick stats for selected course */}
           {selectedCourseId && !loadingStructure && modules.length > 0 && (
             <div className="glass rounded-2xl p-4 mt-4 space-y-3 border border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kurs Özeti</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.tr("Kurs Özeti")}</p>
               <div className="space-y-2">
                 {[
                   { label: 'Modüller', value: modules.length, color: 'text-violet-700', bg: 'bg-violet-50' },
@@ -1032,13 +1044,13 @@ export default function CourseBuilderPage() {
                   { label: 'Okuma', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'READING').length, 0), color: 'text-emerald-700', bg: 'bg-emerald-50' },
                   { label: 'Canlı', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'LIVE').length, 0), color: 'text-rose-700', bg: 'bg-rose-50' },
                 ].map((s, i) => (
-                  <div key={s.label} className={`metric flex items-center justify-between px-3 py-2 rounded-lg ${s.bg} animate-fade-slide-up stagger-${Math.min(i + 1, 4)}`}>
-                    <span className="text-xs text-slate-600">{s.label}</span>
+                  <div key={t.tr(s.label)} className={`metric flex items-center justify-between px-3 py-2 rounded-lg ${s.bg} animate-fade-slide-up stagger-${Math.min(i + 1, 4)}`}>
+                    <span className="text-xs text-slate-600">{t.tr(s.label)}</span>
                     <span className={`text-sm font-bold ${s.color}`}>{s.value}</span>
                   </div>
                 ))}
                 <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-indigo-50">
-                  <span className="text-xs text-slate-600">Toplam Süre</span>
+                  <span className="text-xs text-slate-600">{t.tr("Toplam Süre")}</span>
                   <span className="text-sm font-bold text-indigo-700">{formatDuration(totalDuration(modules))}</span>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "../../_i18n/use-i18n";
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -34,6 +35,7 @@ function MindMapTree({ node, depth = 0 }: { node: MindMapNode; depth?: number })
 }
 
 export default function AIContentStudioPage() {
+  const t = useI18n();
   const [tab, setTab] = useState<StudioTab>("generate");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Record<string, unknown> | null>(null);
@@ -97,11 +99,11 @@ export default function AIContentStudioPage() {
       <div className="glass hero rounded-2xl border border-slate-200 p-6">
         <div className="hero-content">
           <div className="pill w-fit mb-2">
-            <span className="text-violet-600">✦</span> AI İçerik Stüdyosu
+            <span className="text-violet-600">✦</span> {t.roles.instructor}
           </div>
-          <h1 className="text-2xl font-bold">Eğitmen AI Stüdyosu</h1>
+          <h1 className="text-2xl font-bold">{t.instructor.aiStudio}</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Ders, quiz, sunum, zihin haritası ve daha fazlasını AI ile saniyeler içinde oluşturun.
+            {t.tr("Ders, quiz, sunum, zihin haritası ve daha fazlasını AI ile saniyeler içinde oluşturun.")}
           </p>
         </div>
       </div>
@@ -111,14 +113,14 @@ export default function AIContentStudioPage() {
         <div className="lg:col-span-2 space-y-4">
           {/* Tab bar */}
           <div className="glass rounded-2xl border border-slate-200 p-1.5 flex flex-wrap gap-1">
-            {TABS.map((t) => (
+            {TABS.map((tabItem) => (
               <button
-                key={t.id}
-                onClick={() => { setTab(t.id); setResult(null); setError(null); }}
+                key={tabItem.id}
+                onClick={() => { setTab(tabItem.id); setResult(null); setError(null); }}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all
-                  ${tab === t.id ? "bg-violet-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+                  ${tab === tabItem.id ? "bg-violet-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
               >
-                <span>{t.icon}</span>{t.label}
+                <span>{tabItem.icon}</span>{t.tr(tabItem.label)}
               </button>
             ))}
           </div>
@@ -130,24 +132,24 @@ export default function AIContentStudioPage() {
               <>
                 <div>
                   <label className="label-sm">Konu</label>
-                  <input className="input mt-1" placeholder="örn. Fotosentez" value={genTopic} onChange={(e) => setGenTopic(e.target.value)} />
+                  <input className="input mt-1" placeholder={t.tr("örn. Fotosentez")} value={genTopic} onChange={(e) => setGenTopic(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="label-sm">İçerik Türü</label>
+                    <label className="label-sm">{t.tr("İçerik Türü")}</label>
                     <select className="input mt-1" value={genType} onChange={(e) => setGenType(e.target.value as typeof genType)}>
                       <option value="lesson">Ders</option>
                       <option value="quiz">Quiz</option>
-                      <option value="course_outline">Kurs Planı</option>
-                      <option value="summary">Özet</option>
+                      <option value="course_outline">{t.tr("Kurs Planı")}</option>
+                      <option value="summary">{t.tr("Özet")}</option>
                     </select>
                   </div>
                   <div>
                     <label className="label-sm">Zorluk</label>
                     <select className="input mt-1" value={genDiff} onChange={(e) => setGenDiff(Number(e.target.value) as 1 | 2 | 3)}>
-                      <option value={1}>Başlangıç</option>
+                      <option value={1}>{t.tr("Başlangıç")}</option>
                       <option value={2}>Orta</option>
-                      <option value={3}>İleri</option>
+                      <option value={3}>{t.tr("İleri")}</option>
                     </select>
                   </div>
                 </div>
@@ -167,8 +169,8 @@ export default function AIContentStudioPage() {
             {tab === "expand" && (
               <>
                 <div>
-                  <label className="label-sm">Kısa Metin</label>
-                  <textarea className="input mt-1 min-h-[120px] resize-y" placeholder="Genişletmek istediğiniz metni girin…" value={expText} onChange={(e) => setExpText(e.target.value)} />
+                  <label className="label-sm">{t.tr("Kısa Metin")}</label>
+                  <textarea className="input mt-1 min-h-[120px] resize-y" placeholder={t.tr("Genişletmek istediğiniz metni girin…")} value={expText} onChange={(e) => setExpText(e.target.value)} />
                 </div>
                 <div className="flex gap-2">
                   {(["short", "medium", "long"] as const).map((l) => (
@@ -187,13 +189,13 @@ export default function AIContentStudioPage() {
               <>
                 <div>
                   <label className="label-sm">Metin</label>
-                  <textarea className="input mt-1 min-h-[120px] resize-y" placeholder="Yeniden yazmak istediğiniz metni girin…" value={rwText} onChange={(e) => setRwText(e.target.value)} />
+                  <textarea className="input mt-1 min-h-[120px] resize-y" placeholder={t.tr("Yeniden yazmak istediğiniz metni girin…")} value={rwText} onChange={(e) => setRwText(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  {(["formal", "casual", "academic", "simple"] as const).map((t) => (
-                    <button key={t} onClick={() => setRwTone(t)}
-                      className={`rounded-xl py-2 text-xs font-semibold transition-all ${rwTone === t ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-                      {t === "formal" ? "Resmi" : t === "casual" ? "Sade" : t === "academic" ? "Akademik" : "Basit"}
+                  {(["formal", "casual", "academic", "simple"] as const).map((tone) => (
+                    <button key={tone} onClick={() => setRwTone(tone)}
+                      className={`rounded-xl py-2 text-xs font-semibold transition-all ${rwTone === tone ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+                      {tone === "formal" ? "Resmi" : tone === "casual" ? "Sade" : tone === "academic" ? "Akademik" : "Basit"}
                     </button>
                   ))}
                 </div>
@@ -205,15 +207,15 @@ export default function AIContentStudioPage() {
             {tab === "bulk" && (
               <>
                 <div>
-                  <label className="label-sm">Konular (her satıra bir tane, max 10)</label>
+                  <label className="label-sm">{t.tr("Konular (her satıra bir tane, max 10)")}</label>
                   <textarea className="input mt-1 min-h-[140px] font-mono text-xs resize-y"
                     placeholder={"Fotosentez\nHücre Bölünmesi\nMitoz ve Mayoz\nDNA Yapısı"}
                     value={bulkTopics} onChange={(e) => setBulkTopics(e.target.value)} />
                 </div>
                 <div>
-                  <label className="label-sm">İçerik Türü</label>
+                  <label className="label-sm">{t.tr("İçerik Türü")}</label>
                   <select className="input mt-1" value={bulkType} onChange={(e) => setBulkType(e.target.value as typeof bulkType)}>
-                    <option value="summary">Özet</option>
+                    <option value="summary">{t.tr("Özet")}</option>
                     <option value="lesson">Ders</option>
                     <option value="quiz">Quiz</option>
                   </select>
@@ -229,7 +231,7 @@ export default function AIContentStudioPage() {
               <>
                 <div>
                   <label className="label-sm">Konu</label>
-                  <input className="input mt-1" placeholder="örn. Makine Öğrenmesi" value={pTopic} onChange={(e) => setPTopic(e.target.value)} />
+                  <input className="input mt-1" placeholder={t.tr("örn. Makine Öğrenmesi")} value={pTopic} onChange={(e) => setPTopic(e.target.value)} />
                 </div>
                 <div>
                   <label className="label-sm">Slayt Sayısı: {pSlides}</label>
@@ -244,7 +246,7 @@ export default function AIContentStudioPage() {
               <>
                 <div>
                   <label className="label-sm">Konu</label>
-                  <input className="input mt-1" placeholder="örn. Hücre Biyolojisi" value={mmTopic} onChange={(e) => setMmTopic(e.target.value)} />
+                  <input className="input mt-1" placeholder={t.tr("örn. Hücre Biyolojisi")} value={mmTopic} onChange={(e) => setMmTopic(e.target.value)} />
                 </div>
                 <div>
                   <label className="label-sm">Derinlik: {mmDepth}</label>
@@ -267,15 +269,15 @@ export default function AIContentStudioPage() {
             {!result && !loading && (
               <div className="flex h-[460px] flex-col items-center justify-center text-center">
                 <div className="text-5xl mb-4">✦</div>
-                <p className="text-slate-500 font-medium">Sol panelden bir araç seçin ve içerik oluşturun.</p>
-                <p className="text-sm text-slate-400 mt-1">Ders, quiz, sunum, özet ve daha fazlası.</p>
+                <p className="text-slate-500 font-medium">{t.tr("Sol panelden bir araç seçin ve içerik oluşturun.")}</p>
+                <p className="text-sm text-slate-400 mt-1">{t.tr("Ders, quiz, sunum, özet ve daha fazlası.")}</p>
               </div>
             )}
 
             {loading && (
               <div className="flex h-[460px] flex-col items-center justify-center gap-3">
                 <div className="h-10 w-10 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-                <p className="text-sm text-slate-500">AI içerik üretiyor…</p>
+                <p className="text-sm text-slate-500">{t.tr("AI içerik üretiyor…")}</p>
               </div>
             )}
 
@@ -283,8 +285,8 @@ export default function AIContentStudioPage() {
             {result && tab === "presentation" && pResult?.slides && (
               <div className="space-y-4">
                 <div className="rounded-2xl bg-gradient-to-br from-violet-700 to-indigo-800 p-6 text-center text-white shadow-lg">
-                  <div className="text-xl font-bold">{pResult.title}</div>
-                  <div className="text-sm text-violet-200 mt-1">{pResult.subtitle}</div>
+                  <div className="text-xl font-bold">{t.tr(pResult.title)}</div>
+                  <div className="text-sm text-violet-200 mt-1">{t.tr(pResult.subtitle)}</div>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {pResult.slides.map((_, i) => (
@@ -320,7 +322,7 @@ export default function AIContentStudioPage() {
             {/* Mind Map result */}
             {result && tab === "mindmap" && mmResult?.root && (
               <div className="overflow-x-auto">
-                <h3 className="mb-4 text-sm font-semibold text-slate-600">Zihin Haritası</h3>
+                <h3 className="mb-4 text-sm font-semibold text-slate-600">{t.tr("Zihin Haritası")}</h3>
                 <MindMapTree node={mmResult.root} />
               </div>
             )}
@@ -362,8 +364,8 @@ export default function AIContentStudioPage() {
                       )}
                       {Array.isArray(r.sections) && r.sections.map((s: { heading: string; content: string }, i: number) => (
                         <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                          <h3 className="text-sm font-bold text-slate-700 mb-1">{s.heading}</h3>
-                          <p className="text-sm text-slate-600 leading-relaxed">{s.content}</p>
+                          <h3 className="text-sm font-bold text-slate-700 mb-1">{t.tr(s.heading)}</h3>
+                          <p className="text-sm text-slate-600 leading-relaxed">{t.tr(s.content)}</p>
                         </div>
                       ))}
                       {Array.isArray(r.questions) && r.questions.map((q: { stem: string; choices: string[]; correctIndex: number; explanation: string }, i: number) => (
@@ -391,7 +393,7 @@ export default function AIContentStudioPage() {
                       {Array.isArray(r.modules) && r.modules.map((m: { title: string; lessons: string[]; estimatedHours: number }, i: number) => (
                         <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-bold text-slate-700">{m.title}</h3>
+                            <h3 className="text-sm font-bold text-slate-700">{t.tr(m.title)}</h3>
                             <span className="text-xs text-slate-500">{m.estimatedHours} saat</span>
                           </div>
                           <ul className="space-y-1">{m.lessons.map((l: string, li: number) => <li key={li} className="text-xs text-slate-600">• {l}</li>)}</ul>

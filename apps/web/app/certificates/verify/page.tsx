@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useI18n } from '../../_i18n/use-i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -144,7 +145,9 @@ function StepCard({
 
 // ─── Loading spinner ──────────────────────────────────────────────────────────
 
-function Spinner() {
+function Spinner({ dark = false }: { dark?: boolean }) {
+  const track = dark ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.35)";
+  const arc   = dark ? "rgba(0,0,0,0.75)" : "#fff";
   return (
     <svg
       width="18"
@@ -153,10 +156,10 @@ function Spinner() {
       fill="none"
       style={{ animation: "spin 0.75s linear infinite", flexShrink: 0 }}
     >
-      <circle cx="9" cy="9" r="7" stroke="rgba(255,255,255,0.35)" strokeWidth="2" />
+      <circle cx="9" cy="9" r="7" stroke={track} strokeWidth="2" />
       <path
         d="M9 2a7 7 0 0 1 7 7"
-        stroke="#fff"
+        stroke={arc}
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -167,6 +170,7 @@ function Spinner() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function VerifyContent() {
+  const t = useI18n();
   const searchParams = useSearchParams();
   const [key, setKey] = useState<string>(searchParams.get("key") ?? "");
   const [result, setResult] = useState<VerifyResult | null>(null);
@@ -250,7 +254,7 @@ function VerifyContent() {
               letterSpacing: "0.02em",
             }}
           >
-            🔐 Güvenli Sorgu
+            {t.tr("🔐 Güvenli Sorgu")}
           </div>
 
           {/* Title */}
@@ -268,7 +272,7 @@ function VerifyContent() {
               backgroundClip: "text",
             }}
           >
-            Sertifika Doğrulama Sistemi
+            {t.certificates.verifyTitle}
           </h1>
 
           {/* Description */}
@@ -281,15 +285,14 @@ function VerifyContent() {
               lineHeight: 1.7,
             }}
           >
-            QR kodu veya doğrulama anahtarı ile sertifikanın gerçekliğini anında
-            sorgulayın. Kişisel bilgi paylaşımına gerek yoktur.
+            {t.certificates.verifyDesc}
           </p>
 
           {/* Stat chips */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 4 }}>
             <StatChip label="Verilen Sertifika" value="2.4K+" />
-            <StatChip label="Doğrulama Oranı" value="99.8%" />
-            <StatChip label="Ortalama Süre" value="<1s" />
+            <StatChip label={t.tr("Doğrulama Oranı")} value="99.8%" />
+            <StatChip label={t.tr("Ortalama Süre")} value="<1s" />
           </div>
         </div>
       </header>
@@ -310,7 +313,7 @@ function VerifyContent() {
               letterSpacing: "-0.01em",
             }}
           >
-            Sertifika Anahtarı veya QR Kodu
+            {t.tr("Sertifika Anahtarı veya QR Kodu")}
           </label>
 
           {/* Input wrapper */}
@@ -345,7 +348,7 @@ function VerifyContent() {
                 borderRadius: 12,
                 width: "100%",
               }}
-              placeholder="Örn: ATLASIO-2024-XXXX veya taramak için QR kodu girin"
+              placeholder={t.certificates.verifyPh}
               value={key}
               onChange={(e) => setKey(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && doVerify(key)}
@@ -374,19 +377,21 @@ function VerifyContent() {
               letterSpacing: "-0.01em",
               borderRadius: 12,
               background: loading
-                ? "linear-gradient(135deg, #34d399, #22d3ee)"
+                ? "var(--panel)"
                 : "linear-gradient(135deg, #10b981, #06b6d4)",
+              border: loading ? "1.5px solid var(--line)" : "none",
+              color: loading ? "var(--ink-2)" : "#fff",
               opacity: !key.trim() ? 0.55 : 1,
               cursor: !key.trim() ? "not-allowed" : "pointer",
             }}
           >
             {loading ? (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                <Spinner />
-                Sorgulanıyor...
+                <Spinner dark />
+                {t.common.loading}
               </span>
             ) : (
-              "Sertifikayı Doğrula"
+              t.certificates.verifySubmit
             )}
           </button>
         </div>
@@ -451,11 +456,11 @@ function VerifyContent() {
                     letterSpacing: "0.01em",
                   }}
                 >
-                  Geçerli Sertifika
+                  {t.tr("Geçerli Sertifika")}
                 </span>
               </div>
               <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted)" }}>
-                Bu sertifika ATLASIO sistemi tarafından doğrulandı.
+                {t.tr("Bu sertifika ATLASIO sistemi tarafından doğrulandı.")}
               </p>
             </div>
           </div>
@@ -577,7 +582,7 @@ function VerifyContent() {
                 },
               ].map((item) => (
                 <div
-                  key={item.label}
+                  key={t.tr(item.label)}
                   style={{
                     padding: "14px 16px",
                     borderRadius: 12,
@@ -591,7 +596,7 @@ function VerifyContent() {
                   <span
                     style={{ fontSize: 11, color: "var(--muted)", fontWeight: 500 }}
                   >
-                    {item.label}
+                    {t.tr(item.label)}
                   </span>
                   <span
                     style={{
@@ -624,7 +629,7 @@ function VerifyContent() {
                 className="btn-link"
                 style={{ flex: 1, justifyContent: "center", minWidth: 160 }}
               >
-                ⬇️ PDF İndir
+                {t.tr("⬇️ PDF İndir")}
               </a>
             </div>
           </div>
@@ -705,7 +710,7 @@ function VerifyContent() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Doğrulama Başarısız
+              {t.tr("Doğrulama Başarısız")}
             </div>
             <p style={{ margin: 0, fontSize: 13, color: "var(--muted)", lineHeight: 1.55 }}>
               {error}
@@ -732,13 +737,13 @@ function VerifyContent() {
               color: "var(--ink)",
             }}
           >
-            Nasıl Çalışır?
+            {t.tr("Nasıl Çalışır?")}
           </h2>
           <div
             className="pill pill-sm pill-dark"
             style={{ fontSize: 11 }}
           >
-            3 adım
+            {t.tr("3 adım")}
           </div>
         </div>
         <div
@@ -751,22 +756,22 @@ function VerifyContent() {
           <StepCard
             number="1"
             icon="🔑"
-            title="Anahtarı Girin"
-            description="Sertifika üzerindeki QR kodu tarayın veya doğrulama anahtarını alana yapıştırın."
+            title={t.tr("Anahtarı Girin")}
+            description={t.tr("Sertifika üzerindeki QR kodu tarayın veya doğrulama anahtarını alana yapıştırın.")}
             delay="0ms"
           />
           <StepCard
             number="2"
             icon="⚡"
-            title="Sistem Doğrular"
-            description="ATLASIO güvenli veritabanında anahtar gerçek zamanlı olarak sorgulanır."
+            title={t.tr("Sistem Doğrular")}
+            description={t.tr("ATLASIO güvenli veritabanında anahtar gerçek zamanlı olarak sorgulanır.")}
             delay="60ms"
           />
           <StepCard
             number="3"
             icon="✅"
-            title="Sonuç Anında"
-            description="Saniyeden kısa sürede sertifikanın geçerlilik durumu ve detayları görüntülenir."
+            title={t.tr("Sonuç Anında")}
+            description={t.tr("Saniyeden kısa sürede sertifikanın geçerlilik durumu ve detayları görüntülenir.")}
             delay="120ms"
           />
         </div>

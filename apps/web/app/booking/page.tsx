@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useI18n } from '../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 
@@ -98,23 +99,24 @@ function getAuthHeaders(): Record<string, string> {
 // ── Status badge ───────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: BookingStatus }) {
+  const t = useI18n();
   if (status === 'SCHEDULED') {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-        Planlandı
+        {t.tr("Planlandı")}
       </span>
     );
   }
   if (status === 'COMPLETED') {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-        Tamamlandı
+        {t.tr("Tamamlandı")}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">
-      İptal Edildi
+      {t.tr("İptal Edildi")}
     </span>
   );
 }
@@ -122,6 +124,7 @@ function StatusBadge({ status }: { status: BookingStatus }) {
 // ── Main page ──────────────────────────────────────────────────────────────
 
 export default function BookingPage() {
+  const t = useI18n();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
@@ -174,20 +177,20 @@ export default function BookingPage() {
   // ── Actions ────────────────────────────────────────────────────────────
 
   async function handleCancel(id: string) {
-    if (!window.confirm('Bu seansı iptal etmek istediğinizden emin misiniz?')) return;
+    if (!window.confirm(t.tr('Bu seansı iptal etmek istediğinizden emin misiniz?'))) return;
     setCancelling(id);
     try {
       const res = await fetch(`${API_BASE}/booking/${id}/cancel`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
-      if (!res.ok) throw new Error('İptal edilemedi');
+      if (!res.ok) throw new Error(t.tr('İptal edilemedi'));
       // Optimistic update
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: 'CANCELLED' as BookingStatus } : b))
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'İptal işlemi başarısız');
+      setError(err instanceof Error ? err.message : t.tr('İptal işlemi başarısız'));
     } finally {
       setCancelling(null);
     }
@@ -213,7 +216,7 @@ export default function BookingPage() {
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) throw new Error('Seans oluşturulamadı');
+      if (!res.ok) throw new Error(t.tr('Seans oluşturulamadı'));
       const newBooking = (await res.json()) as Booking;
       setBookings((prev) => [newBooking, ...prev]);
       setShowForm(false);
@@ -247,10 +250,10 @@ export default function BookingPage() {
   // ── Tab config ─────────────────────────────────────────────────────────
 
   const tabs: { key: FilterTab; label: string }[] = [
-    { key: 'all', label: 'Tümü' },
-    { key: 'upcoming', label: 'Yaklaşan' },
-    { key: 'past', label: 'Geçmiş' },
-    { key: 'cancelled', label: 'İptal' },
+    { key: 'all', label: t.courses.myCoursesAll },
+    { key: 'upcoming', label: t.booking.upcomingSessions },
+    { key: 'past', label: t.booking.pastSessions },
+    { key: 'cancelled', label: t.booking.cancelBtn },
   ];
 
   // ── Render ─────────────────────────────────────────────────────────────
@@ -263,11 +266,11 @@ export default function BookingPage() {
         <div className="hero-content space-y-3 animate-fade-slide-up">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              📅 Seans Rezervasyonu
+              📅 {t.booking.title}
             </h1>
           </div>
           <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl">
-            Eğitmenlerle bire bir seans planlayın.
+            {t.booking.subtitle}
           </p>
         </div>
       </header>
@@ -301,12 +304,12 @@ export default function BookingPage() {
           },
         ].map((stat) => (
           <div
-            key={stat.label}
+            key={t.tr(stat.label)}
             className={`rounded-2xl border ${stat.bg} p-5 flex flex-col gap-1 animate-fade-slide-up ${stat.stagger}`}
           >
             <span className="text-2xl">{stat.icon}</span>
             <span className={`metric text-3xl font-bold ${stat.val}`}>{stat.value}</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{stat.label}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t.tr(stat.label)}</span>
           </div>
         ))}
       </div>
@@ -326,7 +329,7 @@ export default function BookingPage() {
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800',
               ].join(' ')}
             >
-              {tab.label}
+              {t.tr(tab.label)}
             </button>
           ))}
         </div>
@@ -342,7 +345,7 @@ export default function BookingPage() {
           ].join(' ')}
         >
           <span>{showForm ? '✕' : '+'}</span>
-          {showForm ? 'Kapat' : 'Yeni Seans Planla'}
+          {showForm ? t.booking.cancelBtn : t.booking.submit}
         </button>
       </div>
 
@@ -351,13 +354,13 @@ export default function BookingPage() {
         <section className="glass rounded-2xl border border-indigo-200 dark:border-indigo-800 p-6 animate-fade-slide-up">
           <h2 className="text-base font-bold text-slate-800 dark:text-white mb-5 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-400 to-violet-400 inline-block" />
-            Yeni Seans Planla
+            {t.booking.submit}
           </h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                  Eğitmen ID <span className="text-rose-500">*</span>
+                  {t.booking.selectInstructor} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -370,7 +373,7 @@ export default function BookingPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                  Toplantı Linki
+                  {t.tr("Toplantı Linki")}
                 </label>
                 <input
                   type="url"
@@ -382,7 +385,7 @@ export default function BookingPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                  Başlangıç <span className="text-rose-500">*</span>
+                  {t.booking.selectTime} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="datetime-local"
@@ -394,7 +397,7 @@ export default function BookingPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                  Bitiş <span className="text-rose-500">*</span>
+                  {t.tr("Bitiş")} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="datetime-local"
@@ -419,14 +422,14 @@ export default function BookingPage() {
                 {submitting && (
                   <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 )}
-                Planla
+                {t.tr("Planla")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                Vazgeç
+                {t.tr("Vazgeç")}
               </button>
             </div>
           </form>
@@ -437,7 +440,7 @@ export default function BookingPage() {
       <section className="space-y-3">
         <div className="flex items-center gap-2 text-base font-bold text-slate-800 dark:text-white">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-indigo-400 to-violet-400 inline-block" />
-          Seanslarım
+          {t.booking.upcomingSessions}
           <span className="ml-1 text-xs font-normal text-slate-500 dark:text-slate-400">
             ({filteredBookings.length})
           </span>
@@ -454,7 +457,7 @@ export default function BookingPage() {
           </>
         ) : filteredBookings.length === 0 ? (
           <div className="glass rounded-2xl border border-slate-200 dark:border-slate-700 p-10 text-center text-sm text-slate-500 dark:text-slate-400">
-            Bu filtrede seans bulunamadı.
+            {t.tr("Bu filtrede seans bulunamadı.")}
           </div>
         ) : (
           filteredBookings.map((booking) => {
@@ -492,7 +495,7 @@ export default function BookingPage() {
                     {/* Instructor pill */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="pill inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700">
-                        Eğitmen: {booking.instructorId}
+                        {t.tr("Eğitmen")}: {booking.instructorId}
                       </span>
                       <StatusBadge status={booking.status} />
                     </div>
@@ -515,7 +518,7 @@ export default function BookingPage() {
                         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
                       >
                         <span>🔗</span>
-                        Toplantıya Katıl
+                        {t.tr("Toplantıya Katıl")}
                       </a>
                     )}
                     {upcoming && (
@@ -529,7 +532,7 @@ export default function BookingPage() {
                         ) : (
                           <span>✕</span>
                         )}
-                        İptal Et
+                        {t.tr("İptal Et")}
                       </button>
                     )}
                   </div>

@@ -11,6 +11,14 @@ export class GamificationController {
 
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Get('me')
+  getMyStats(@Req() req: any) {
+    const userId = req.user.id ?? req.user.userId;
+    return this.gamification.getMyStats(userId);
+  }
+
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('leaderboard')
   getLeaderboard(@Req() req: any) {
     const tenantId = req.user.tenantId || req.tenantId || 'public';

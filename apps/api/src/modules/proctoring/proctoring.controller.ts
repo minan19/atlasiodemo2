@@ -26,4 +26,9 @@ export class ProctoringController {
   getScore(@Param('sessionId') sessionId: string) {
     return this.proctoring.getScore(sessionId);
   }
+
+  @Get('sessions/all')
+  getAllSessions() {
+    return this.proctoring.getAllSessions();
+  }
 }

@@ -19,6 +19,7 @@ import { OpsModule } from './ops/ops.module';
 import { AutomationModule } from './automation/automation.module';
 import { LtiModule } from './lti/lti.module';
 import { AiAgentsModule } from './ai-agents/ai-agents.module';
+import { AIModule } from './ai/ai.module';
 import { PerformanceModule } from './performance/performance.module';
 import { LiveModule } from './live/live.module';
 import { VolunteerContentModule } from './volunteer-content/volunteer-content.module';
@@ -83,6 +84,7 @@ import { LanguageLabModule } from './language-lab/language-lab.module';
     OpsModule,
     AutomationModule,
     LtiModule,
+    AIModule,
     AiAgentsModule,
     PerformanceModule,
     LiveModule,

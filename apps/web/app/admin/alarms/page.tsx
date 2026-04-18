@@ -3,6 +3,7 @@
 import useSWR from "swr";
 import { useState } from "react";
 import { api } from "../../api/client";
+import { useI18n } from '../../_i18n/use-i18n';
 
 type Alarm = {
   id: string;
@@ -63,6 +64,7 @@ const BADGE_LABEL: Record<Severity, string> = {
 };
 
 export default function AdminAlarmsPage() {
+  const t = useI18n();
   const [filter, setFilter] = useState<FilterTab>("all");
 
   const { data: me, error: meErr } = useSWR<Me>("/auth/me", api);
@@ -72,11 +74,11 @@ export default function AdminAlarmsPage() {
     { refreshInterval: 30000 }
   );
 
-  if (meErr) return <div className="p-4 text-red-600">Giriş yapın (admin/tech)</div>;
-  if (!me) return <div className="p-4 text-slate-500">Kimlik doğrulanıyor…</div>;
+  if (meErr) return <div className="p-4 text-red-600">{t.tr("Giriş yapın (admin/tech)")}</div>;
+  if (!me) return <div className="p-4 text-slate-500">{t.tr("Kimlik doğrulanıyor…")}</div>;
   if (me.role !== "ADMIN" && me.role !== "TECH")
-    return <div className="p-4 text-sm text-slate-600">Sadece admin/tech alarmları görebilir.</div>;
-  if (isLoading) return <div className="p-4 text-slate-500">Yükleniyor…</div>;
+    return <div className="p-4 text-sm text-slate-600">{t.tr("Sadece admin/tech alarmları görebilir.")}</div>;
+  if (isLoading) return <div className="p-4 text-slate-500">{t.tr("Yükleniyor…")}</div>;
 
   const isDemo = error || !data || data.length === 0;
   const rawAlarms: Alarm[] = isDemo ? DEMO_ALARMS : data!;
@@ -110,17 +112,17 @@ export default function AdminAlarmsPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600" />
               </span>
-              Canlı İzleme
+              {t.tr("Canlı İzleme")}
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">Güvenlik Alarm Merkezi</h1>
+          <h1 className="text-3xl font-bold text-slate-900">{t.tr("Güvenlik Alarm Merkezi")}</h1>
           <p className="text-slate-500 text-sm mt-1 max-w-2xl">
-            Platform güvenlik olaylarını gerçek zamanlı izleyin. Kritik alarmlar otomatik önceliklendirilir.
+            {t.tr("Platform güvenlik olaylarını gerçek zamanlı izleyin. Kritik alarmlar otomatik önceliklendirilir.")}
           </p>
           <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-            <span>Son güncelleme: {new Date().toLocaleTimeString("tr-TR")}</span>
+            <span>{t.tr("Son güncelleme")}: {new Date().toLocaleTimeString("tr-TR")}</span>
             <span className="text-slate-300">·</span>
-            <span>Otomatik yenileme: 30s</span>
+            <span>{t.tr("Otomatik yenileme")}: 30s</span>
           </div>
         </div>
       </header>
@@ -129,7 +131,7 @@ export default function AdminAlarmsPage() {
       {isDemo && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-sm font-medium">
           <span>⚠️</span>
-          <span>DEMO VERİ — Gerçek alarm verisi bulunamadı, örnek veriler gösteriliyor.</span>
+          <span>{t.tr("DEMO VERİ — Gerçek alarm verisi bulunamadı, örnek veriler gösteriliyor.")}</span>
         </div>
       )}
 
@@ -137,25 +139,25 @@ export default function AdminAlarmsPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="glass rounded-xl p-4 border border-rose-100 bg-rose-50/50">
           <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5">
-            <span>🔴</span> Kritik
+            <span>🔴</span> {t.tr("Kritik")}
           </p>
           <p className="text-3xl font-bold text-rose-600">{criticalCount}</p>
         </div>
         <div className="glass rounded-xl p-4 border border-amber-100 bg-amber-50/50">
           <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5">
-            <span>🟡</span> Uyarı
+            <span>🟡</span> {t.tr("Uyarı")}
           </p>
           <p className="text-3xl font-bold text-amber-600">{warningCount}</p>
         </div>
         <div className="glass rounded-xl p-4 border border-blue-100 bg-blue-50/50">
           <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5">
-            <span>🔵</span> Bilgi
+            <span>🔵</span> {t.tr("Bilgi")}
           </p>
           <p className="text-3xl font-bold text-blue-600">{infoCount}</p>
         </div>
         <div className="glass rounded-xl p-4">
           <p className="text-xs text-slate-500 mb-1 flex items-center gap-1.5">
-            <span>⚫</span> Bugün
+            <span>⚫</span> {t.tr("Bugün")}
           </p>
           <p className="text-3xl font-bold text-slate-700">{todayCount}</p>
         </div>
@@ -173,7 +175,7 @@ export default function AdminAlarmsPage() {
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
           >
-            {tab.label}
+            {t.tr(tab.label)}
             {tab.key !== "all" && (
               <span className="ml-1.5 text-xs opacity-70">
                 ({tab.key === "critical" ? criticalCount : tab.key === "warning" ? warningCount : infoCount})
@@ -188,8 +190,8 @@ export default function AdminAlarmsPage() {
         {filtered.length === 0 && (
           <div className="glass rounded-2xl border border-slate-200 p-10 flex flex-col items-center justify-center text-center gap-3">
             <span className="text-5xl">🛡️</span>
-            <h3 className="text-base font-semibold text-slate-700">Bu kategoride alarm bulunmuyor</h3>
-            <p className="text-sm text-slate-400">Sistemin güvende</p>
+            <h3 className="text-base font-semibold text-slate-700">{t.tr("Bu kategoride alarm bulunmuyor")}</h3>
+            <p className="text-sm text-slate-400">{t.tr("Sistemin güvende")}</p>
           </div>
         )}
         {filtered.map((alarm) => (
@@ -204,7 +206,7 @@ export default function AdminAlarmsPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`pill text-xs font-semibold px-2 py-0.5 rounded-full ${BADGE_CLASS[alarm.severity]}`}>
-                  {BADGE_LABEL[alarm.severity]}
+                  {t.tr(BADGE_LABEL[alarm.severity])}
                 </span>
               </div>
             </div>
@@ -220,7 +222,7 @@ export default function AdminAlarmsPage() {
             {alarm.meta && (
               <details className="mt-2 ml-8">
                 <summary className="text-xs text-slate-500 cursor-pointer select-none hover:text-slate-700">
-                  Meta verisini göster
+                  {t.tr("Meta verisini göster")}
                 </summary>
                 <pre className="mt-1 text-xs bg-slate-900 text-emerald-400 rounded-lg p-3 overflow-auto font-mono">
                   {JSON.stringify(alarm.meta, null, 2)}

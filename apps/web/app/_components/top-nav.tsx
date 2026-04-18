@@ -9,6 +9,7 @@ import { useI18n } from '../_i18n/use-i18n';
 import { api } from '../api/client';
 import { useTheme } from './theme-provider';
 import { NotificationBell } from './notification-bell';
+import { CommandPalette } from './command-palette';
 
 type CurrentUser = {
   role: string;
@@ -27,6 +28,19 @@ export function TopNav() {
   const alarmTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const t = useI18n();
   const { theme, toggle: toggleTheme } = useTheme();
+  const [cmdOpen, setCmdOpen] = useState(false);
+
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   // Giriş durumu + gerçek kullanıcı bilgisi
   useEffect(() => {
@@ -110,32 +124,53 @@ export function TopNav() {
             aria-label={t.nav.roleLabel}
             value={role}
             onChange={(e) => setRole(e.target.value as UserRole)}
-            className="rounded-lg border border-slate-300 bg-white/90 text-slate-800 px-2 py-1 text-xs shadow-sm"
+            className="nav-select"
           >
-            <option value="admin">Yönetici</option>
-            <option value="head-instructor">Baş Eğitmen</option>
-            <option value="instructor">Eğitmen</option>
-            <option value="student">Öğrenci</option>
-            <option value="guardian">Veli</option>
+            <option value="admin">{t.roles.admin}</option>
+            <option value="head-instructor">{t.roles.headInstructor}</option>
+            <option value="instructor">{t.roles.instructor}</option>
+            <option value="student">{t.roles.student}</option>
+            <option value="guardian">{t.roles.guardian}</option>
           </select>
           <select
             aria-label={t.nav.langLabel}
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white/90 text-slate-800 px-2 py-1 text-xs shadow-sm dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            className="nav-select"
           >
             <option value="tr">TR</option>
             <option value="en">EN</option>
             <option value="de">DE</option>
             <option value="ar">AR</option>
+            <option value="ru">RU</option>
           </select>
+
+          {/* Search / Command palette trigger */}
+          <button
+            onClick={() => setCmdOpen(true)}
+            className="theme-toggle"
+            aria-label={t.nav.search}
+            data-tip={t.nav.search}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.2}
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
+            </svg>
+          </button>
 
           {/* Dark mode toggle */}
           <button
             onClick={toggleTheme}
             className="theme-toggle"
-            aria-label={theme === 'dark' ? 'Açık moda geç' : 'Koyu moda geç'}
-            title={theme === 'dark' ? 'Açık mod' : 'Koyu mod'}
+            aria-label={theme === 'dark' ? t.nav.lightMode : t.nav.darkMode}
+            data-tip={theme === 'dark' ? t.nav.lightMode : t.nav.darkMode}
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -144,8 +179,8 @@ export function TopNav() {
           <Link
             href="/ai"
             className="theme-toggle"
-            aria-label="AI Mentor"
-            title="Ghost-Mentor AI"
+            aria-label={t.nav.aiMentor}
+            data-tip={t.nav.aiMentor}
           >
             🤖
           </Link>
@@ -159,9 +194,9 @@ export function TopNav() {
               {isAdmin && (
                 <Link
                   href="/admin/alarms"
-                  aria-label="Güvenlik alarmları"
+                  aria-label={t.nav.security}
                   className="relative theme-toggle"
-                  title="Güvenlik alarmları"
+                  data-tip={t.nav.security}
                 >
                   <span aria-hidden="true">🛡️</span>
                   {alarmCount > 0 && (
@@ -173,26 +208,23 @@ export function TopNav() {
               )}
               {/* Admin paneli linki */}
               {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="btn-link text-xs bg-purple-600 text-white border-purple-600 hover:bg-purple-700"
-                >
+                <Link href="/admin" className="nav-admin-btn">
                   Admin
                 </Link>
               )}
-              <Link href="/my-courses" className="btn-link text-xs hidden sm:inline-flex">Kayıtlarım</Link>
+              <Link href="/my-courses" className="btn-link text-xs hidden sm:inline-flex">{t.nav.myCourses}</Link>
               {/* User avatar + profile link */}
               <Link
                 href="/profile"
                 className="nav-user-avatar"
-                title={currentUser?.name ?? 'Profil'}
-                aria-label="Profil sayfasına git"
+                data-tip={currentUser?.name ?? t.nav.profile}
+                aria-label={t.nav.profile}
               >
                 {currentUser?.name?.[0]?.toUpperCase() ?? 'U'}
               </Link>
             </>
           ) : (
-            <Link href="/login" className="btn-link text-xs bg-slate-900 text-white border-slate-900 hover:bg-slate-800">{t.nav.login}</Link>
+            <Link href="/login" className="nav-login-btn">{t.nav.login}</Link>
           )}
         </div>
       </div>
@@ -203,28 +235,29 @@ export function TopNav() {
           onClick={handleBack}
           disabled={!canGoBack && pathname === '/'}
           className="back-btn"
-          aria-label="Bir önceki sayfaya dön"
+          aria-label={t.nav.back}
         >
           <span aria-hidden="true">←</span>
-          <span>Geri</span>
+          <span>{t.nav.back}</span>
         </button>
         <button
           type="button"
           onClick={handleForward}
           className="back-btn"
-          aria-label="Bir sonraki sayfaya git"
+          aria-label={t.nav.forward}
         >
-          <span>İleri</span>
+          <span>{t.nav.forward}</span>
           <span aria-hidden="true">→</span>
         </button>
         {breadcrumbs.map((item, idx) => (
           <span key={item.href}>
             {idx > 0 ? <span className="sep">/</span> : null}
-            <Link href={item.href}>{item.label}</Link>
+            <Link href={item.href}>{idx === 0 ? t.nav.home : item.label}</Link>
           </span>
         ))}
       </div>
 
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
     </header>
   );
 }

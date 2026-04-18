@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 const ACCESS_TOKEN = 'accessToken';
@@ -58,32 +59,34 @@ function fmtDate(iso: string) {
   });
 }
 
-function typeBadge(type: string) {
+function typeBadge(type: string, tr: (s: string) => string) {
   if (type === 'VOLUNTEER_EXTRA') {
     return (
       <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">
-        Gönüllü Ek Süre
+        {tr('Gönüllü Ek Süre')}
       </span>
     );
   }
   return (
     <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-      Bonus / Hediye
+      {tr('Bonus / Hediye')}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useI18n();
   const map: Record<string, { label: string; cls: string }> = {
     PENDING:  { label: 'Bekliyor',    cls: 'bg-amber-100 text-amber-700' },
     APPROVED: { label: 'Onaylandı',   cls: 'bg-emerald-100 text-emerald-700' },
     REJECTED: { label: 'Reddedildi',  cls: 'bg-rose-100 text-rose-700' },
   };
   const { label, cls } = map[status] ?? { label: status, cls: 'bg-slate-100 text-slate-600' };
-  return <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${cls}`}>{label}</span>;
+  return <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${cls}`}>{t.tr(label)}</span>;
 }
 
 export default function AdminApprovalsPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [items, setItems] = useState<ContentItem[]>([]);
   const [filter, setFilter] = useState<FilterStatus>('PENDING');
@@ -109,7 +112,7 @@ export default function AdminApprovalsPage() {
       const params = new URLSearchParams();
       if (filter !== 'ALL') params.set('status', filter);
       const res = await fetch(`${API_BASE}/volunteer-contents/admin?${params.toString()}`, { headers });
-      if (!res.ok) throw new Error('Veriler yüklenemedi');
+      if (!res.ok) throw new Error(t.tr('Veriler yüklenemedi'));
       const data = (await res.json()) as ContentItem[];
       if (data.length === 0 && filter === 'PENDING') {
         setIsDemo(true);
@@ -142,11 +145,11 @@ export default function AdminApprovalsPage() {
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: next }),
       });
-      if (!res.ok) throw new Error('Durum güncellenemedi');
+      if (!res.ok) throw new Error(t.tr('Durum güncellenemedi'));
       setItems((prev) => prev.map((item) => (item.id === id ? { ...item, status: next } : item)));
-      setMessage(next === 'APPROVED' ? '✓ İçerik onaylandı ve mahsuplaşmaya alındı.' : '✗ İçerik reddedildi.');
+      setMessage(next === 'APPROVED' ? t.tr('✓ İçerik onaylandı ve mahsuplaşmaya alındı.') : t.tr('✗ İçerik reddedildi.'));
     } catch (err: unknown) {
-      setError((err as Error)?.message ?? 'İşlem başarısız');
+      setError((err as Error)?.message ?? t.tr('İşlem başarısız'));
     } finally {
       setBusy(false);
     }
@@ -175,10 +178,10 @@ export default function AdminApprovalsPage() {
       {/* Hero */}
       <header className="glass p-6 rounded-2xl border border-slate-200 hero">
         <div className="hero-content space-y-2">
-          <div className="pill w-fit">İçerik Onay Merkezi</div>
-          <h1 className="text-3xl font-semibold">Onay Kuyruğu</h1>
+          <div className="pill w-fit">{t.tr("İçerik Onay Merkezi")}</div>
+          <h1 className="text-3xl font-semibold">{t.tr("Onay Kuyruğu")}</h1>
           <p className="text-sm text-slate-600 max-w-2xl">
-            Eğitmenlerden gelen gönüllü ek süre ve bonus içerik taleplerini inceleyin, onaylayın veya reddedin.
+            {t.tr("Eğitmenlerden gelen gönüllü ek süre ve bonus içerik taleplerini inceleyin, onaylayın veya reddedin.")}
           </p>
         </div>
       </header>
@@ -189,7 +192,7 @@ export default function AdminApprovalsPage() {
           <div key={i} className={`rounded-2xl border p-4 shadow-sm animate-fade-slide-up stagger-${i + 1} ${s.bg}`}>
             <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
               <span className="font-semibold">{s.icon}</span>
-              <span>{s.label}</span>
+              <span>{t.tr(s.label)}</span>
             </div>
             <p className={`text-3xl font-bold ${s.val}`}>{s.value}</p>
           </div>
@@ -210,12 +213,12 @@ export default function AdminApprovalsPage() {
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {tab.label}
+                {t.tr(tab.label)}
               </button>
             ))}
           </div>
           <button className="btn-link text-sm" onClick={load} disabled={busy}>
-            {busy ? 'Yükleniyor…' : 'Yenile'}
+            {busy ? t.tr('Yükleniyor…') : t.tr('Yenile')}
           </button>
         </div>
 
@@ -223,7 +226,7 @@ export default function AdminApprovalsPage() {
         {error   && <p className="text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
         {isDemo  && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
-            ⚠ Demo verisi gösteriliyor. Gerçek kayıtlar için API bağlantısını kontrol edin.
+            {t.tr("⚠ Demo verisi gösteriliyor. Gerçek kayıtlar için API bağlantısını kontrol edin.")}
           </div>
         )}
       </section>
@@ -232,7 +235,7 @@ export default function AdminApprovalsPage() {
       <section className="glass rounded-2xl border border-slate-200 p-4 space-y-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-violet-400 to-blue-400 inline-block" />
-          İçerik Talepleri
+          {t.tr("İçerik Talepleri")}
           <span className="pill pill-sm">{items.length}</span>
         </h2>
 
@@ -258,13 +261,13 @@ export default function AdminApprovalsPage() {
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    {typeBadge(item.contentType)}
+                    {typeBadge(item.contentType, t.tr)}
                     <StatusBadge status={item.status} />
                   </div>
-                  <p className="font-semibold text-slate-800 leading-snug">{item.title}</p>
+                  <p className="font-semibold text-slate-800 leading-snug">{t.tr(item.title)}</p>
                   <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                     <span>👤 {item.User?.name ?? item.User?.email ?? '—'}</span>
-                    {item.Course && <span>📚 {item.Course.title}</span>}
+                    {item.Course && <span>📚 {t.tr(item.Course.title)}</span>}
                     <span>📅 {fmtDate(item.submittedAt)}</span>
                     {item.suggestedAmount && (
                       <span className="font-semibold text-emerald-700">💰 {item.suggestedAmount}</span>
@@ -282,14 +285,14 @@ export default function AdminApprovalsPage() {
                       disabled={busy}
                       className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-60"
                     >
-                      Onayla
+                      {t.tr("Onayla")}
                     </button>
                     <button
                       onClick={() => handleAction(item.id, 'REJECTED')}
                       disabled={busy}
                       className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition disabled:opacity-60"
                     >
-                      Reddet
+                      {t.tr("Reddet")}
                     </button>
                   </div>
                 )}
@@ -299,11 +302,11 @@ export default function AdminApprovalsPage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-12 text-center">
             <div className="text-4xl mb-3">✓</div>
-            <p className="font-semibold text-slate-700">Bekleyen talep yok</p>
+            <p className="font-semibold text-slate-700">{t.tr("Bekleyen talep yok")}</p>
             <p className="text-sm text-slate-400 mt-1">
               {filter === 'PENDING'
-                ? 'Tüm içerik talepleri işlendi.'
-                : 'Bu filtre için kayıt bulunamadı.'}
+                ? t.tr('Tüm içerik talepleri işlendi.')
+                : t.tr('Bu filtre için kayıt bulunamadı.')}
             </p>
           </div>
         )}

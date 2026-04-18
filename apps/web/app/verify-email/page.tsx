@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useI18n } from '../_i18n/use-i18n';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
@@ -11,6 +12,7 @@ type State = 'loading' | 'success' | 'error' | 'already';
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
+  const t = useI18n();
 
   const [state, setState] = useState<State>('loading');
   const [message, setMessage] = useState('');
@@ -18,7 +20,7 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (!token) {
       setState('error');
-      setMessage('Doğrulama bağlantısı geçersiz. Lütfen e-postanızı kontrol edin.');
+      setMessage(t.auth.verifyDesc);
       return;
     }
 
@@ -29,8 +31,8 @@ function VerifyEmailContent() {
     })
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || 'Doğrulama başarısız');
-        if (data?.message?.includes('zaten')) {
+        if (!res.ok) throw new Error(data?.message || t.common.error);
+        if (data?.message?.toLowerCase().includes('already') || data?.message?.includes('zaten')) {
           setState('already');
         } else {
           setState('success');
@@ -39,8 +41,9 @@ function VerifyEmailContent() {
       })
       .catch((err) => {
         setState('error');
-        setMessage(err?.message || 'Bir hata oluştu.');
+        setMessage(err?.message || t.common.error);
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const icons: Record<State, string> = {
@@ -51,10 +54,10 @@ function VerifyEmailContent() {
   };
 
   const titles: Record<State, string> = {
-    loading: 'Doğrulanıyor…',
-    success: 'E-posta doğrulandı!',
-    error: 'Doğrulama başarısız',
-    already: 'Zaten doğrulanmış',
+    loading: t.auth.verifyLoading,
+    success: t.auth.verifySuccess,
+    error: t.common.error,
+    already: t.auth.verifySuccess,
   };
 
   return (
@@ -68,28 +71,29 @@ function VerifyEmailContent() {
             <p className="text-sm text-slate-500 mt-1">{message}</p>
           )}
           {state === 'loading' && (
-            <p className="text-sm text-slate-500 mt-1">E-postanız doğrulanıyor, lütfen bekleyin…</p>
+            <p className="text-sm text-slate-500 mt-1">{t.auth.verifyDesc}</p>
           )}
         </div>
 
         {state === 'success' && (
           <div className="space-y-3">
             <p className="text-sm text-emerald-700 bg-emerald-50 rounded-xl px-4 py-2">
-              Hesabınız aktif! Artık tüm özelliklere erişebilirsiniz.
+              {t.auth.verifySuccess}
             </p>
             <Link
               href="/courses"
-              className="btn-link inline-flex justify-center text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md px-5 py-2"
+              className="btn-link inline-flex justify-center text-sm font-semibold px-5 py-2"
+              style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
             >
-              Kurslara göz at →
+              {t.courses.catalogTitle} →
             </Link>
           </div>
         )}
 
-        {(state === 'error') && (
+        {state === 'error' && (
           <div className="space-y-3">
             <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-2">
-              {message || 'Bağlantı geçersiz veya süresi dolmuş olabilir.'}
+              {message || t.common.error}
             </p>
             <ResendButton />
           </div>
@@ -100,7 +104,7 @@ function VerifyEmailContent() {
             href="/login"
             className="inline-block text-emerald-600 hover:underline font-medium text-sm"
           >
-            Giriş yap →
+            {t.nav.login} →
           </Link>
         )}
       </div>
@@ -108,24 +112,18 @@ function VerifyEmailContent() {
   );
 }
 
-/** Doğrulama e-postasını yeniden gönder (JWT varsa kullanır) */
 function ResendButton() {
+  const t = useI18n();
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   async function resend() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token) {
-      setStatus('error');
-      return;
-    }
+    const accessToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    if (!accessToken) { setStatus('error'); return; }
     setStatus('sending');
     try {
       const res = await fetch(`${API_URL}/auth/resend-verification`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       });
       if (!res.ok) throw new Error();
       setStatus('sent');
@@ -135,15 +133,15 @@ function ResendButton() {
   }
 
   if (status === 'sent') {
-    return <p className="text-sm text-emerald-700">✓ Doğrulama e-postası yeniden gönderildi.</p>;
+    return <p className="text-sm text-emerald-700">✓ {t.auth.verifySuccess}</p>;
   }
 
   if (status === 'error') {
     return (
       <p className="text-sm text-slate-500">
-        Yeniden gönderilemedi.{' '}
+        {t.common.retry}{' '}
         <Link href="/login" className="text-emerald-600 hover:underline">
-          Giriş yaparak tekrar deneyin.
+          {t.nav.login}
         </Link>
       </p>
     );
@@ -155,7 +153,7 @@ function ResendButton() {
       disabled={status === 'sending'}
       className="btn-link text-sm font-medium border-slate-200 bg-white text-slate-700 shadow-sm px-5 py-2 disabled:opacity-60"
     >
-      {status === 'sending' ? 'Gönderiliyor…' : 'Yeniden gönder'}
+      {status === 'sending' ? t.common.loading : t.common.retry}
     </button>
   );
 }
@@ -164,7 +162,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div className="grid place-items-center min-h-[60vh]">
-        <div className="text-slate-500 text-lg">⏳ Doğrulanıyor…</div>
+        <div className="text-slate-500 text-lg">⏳</div>
       </div>
     }>
       <VerifyEmailContent />

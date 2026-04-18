@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRole, type UserRole } from "../_components/role-context";
+import { useI18n } from "../_i18n/use-i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4100";
 
@@ -21,6 +22,7 @@ function normalizeRole(raw: string): UserRole {
 export default function RegisterPage() {
   const router = useRouter();
   const { setRole } = useRole();
+  const t = useI18n();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,43 +36,43 @@ export default function RegisterPage() {
     setError(null);
 
     if (password.length < 8) {
-      setError("Şifre en az 8 karakter olmalıdır.");
+      setError(t.register.errorWeak);
       return;
     }
     if (password !== confirm) {
-      setError("Şifreler eşleşmiyor.");
+      setError(t.register.errorMismatch);
       return;
     }
 
     setLoading(true);
     try {
-      // 1. Kayıt ol
       const regRes = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim() || undefined, email, password }),
       });
       const regData = await regRes.json();
-      if (!regRes.ok) throw new Error(regData?.message || "Kayıt başarısız");
+      if (!regRes.ok) throw new Error(regData?.message || t.register.submit);
 
-      // 2. Otomatik giriş yap
       const loginRes = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
       const loginData = await loginRes.json();
-      if (!loginRes.ok) throw new Error("Kayıt başarılı, ancak otomatik giriş yapılamadı. Lütfen giriş yapın.");
+      if (!loginRes.ok) throw new Error(loginData?.message || t.common.error);
 
       localStorage.setItem("accessToken", loginData.accessToken);
       if (loginData.refreshToken) localStorage.setItem("refreshToken", loginData.refreshToken);
 
       const role = normalizeRole(loginData.user?.role ?? "STUDENT");
+      const maxAge = 60 * 60 * 24 * 7;
+      document.cookie = `atlasio_auth=1; path=/; max-age=${maxAge}; SameSite=Lax`;
+      document.cookie = `atlasio_role=${role}; path=/; max-age=${maxAge}; SameSite=Lax`;
       setRole(role);
-      // Doğrulama bildirimi göster, ardından kurslara yönlendir
       router.push("/courses?welcome=1");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Bir hata oluştu.");
+      setError(err instanceof Error ? err.message : t.common.error);
     } finally {
       setLoading(false);
     }
@@ -83,21 +85,18 @@ export default function RegisterPage() {
         <div className="hero-content space-y-4">
           <div className="pill w-fit">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Öğrenmeye başla
+            {t.register.heroPill}
           </div>
           <h1 className="text-4xl font-semibold leading-tight">
-            Atlasio'ya
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500">
-              hoş geldin.
-            </span>
+            {t.register.heroTitle}
           </h1>
           <p className="text-slate-600 text-lg max-w-xl">
-            Binlerce kurs, canlı dersler ve kişiselleştirilmiş öğrenme yolculuğu seni bekliyor.
+            {t.register.heroDesc}
           </p>
           <div className="grid grid-cols-3 gap-3 max-w-xl">
-            <Stat label="Aktif öğrenci" value="12K+" accent />
-            <Stat label="Kurs sayısı" value="380+" />
-            <Stat label="Ortalama puan" value="4.8★" />
+            <Stat label={t.register.stat1Label} value={t.register.stat1Value} accent />
+            <Stat label={t.register.stat2Label} value={t.register.stat2Value} />
+            <Stat label={t.register.stat3Label} value={t.register.stat3Value} />
           </div>
         </div>
       </div>
@@ -106,55 +105,55 @@ export default function RegisterPage() {
       <div className="glass p-7 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-2xl font-semibold">Hesap oluştur</h2>
-            <p className="text-sm text-slate-600">Ücretsiz, dakikalar içinde hazır.</p>
+            <h2 className="text-2xl font-semibold">{t.register.formTitle}</h2>
+            <p className="text-sm text-slate-600">{t.register.formSub}</p>
           </div>
           <span className="pill">2026 UI</span>
         </div>
 
         <form onSubmit={onSubmit} className="grid gap-4">
           <label className="space-y-1 text-sm">
-            <span className="text-slate-600">Ad Soyad</span>
+            <span className="text-slate-600">{t.register.name}</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Adınız (isteğe bağlı)"
+              placeholder={t.register.namePh}
               className="w-full rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
             />
           </label>
 
           <label className="space-y-1 text-sm">
-            <span className="text-slate-600">E-posta</span>
+            <span className="text-slate-600">{t.register.email}</span>
             <input
               required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="ornek@eposta.com"
+              placeholder={t.register.emailPh}
               className="w-full rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
             />
           </label>
 
           <label className="space-y-1 text-sm">
-            <span className="text-slate-600">Şifre</span>
+            <span className="text-slate-600">{t.register.password}</span>
             <input
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="En az 8 karakter"
+              placeholder={t.register.passwordPh}
               className="w-full rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
             />
           </label>
 
           <label className="space-y-1 text-sm">
-            <span className="text-slate-600">Şifre Tekrar</span>
+            <span className="text-slate-600">{t.register.confirmPassword}</span>
             <input
               required
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Şifreyi tekrar girin"
+              placeholder={t.register.confirmPh}
               className={`w-full rounded-xl border px-3 py-3 shadow-sm focus:outline-none bg-white text-slate-900 placeholder:text-slate-400 ${
                 confirm && confirm !== password
                   ? "border-red-300 focus:border-red-400"
@@ -162,30 +161,61 @@ export default function RegisterPage() {
               }`}
             />
             {confirm && confirm !== password && (
-              <span className="text-xs text-red-500">Şifreler eşleşmiyor</span>
+              <span className="text-xs text-red-500">{t.register.errorMismatch}</span>
             )}
           </label>
 
           <button
             disabled={loading}
             type="submit"
-            className="btn-link justify-center text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-xl disabled:opacity-60"
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: 12,
+              border: "none",
+              background: loading
+                ? "var(--panel)"
+                : "linear-gradient(135deg, #10b981, #06b6d4)",
+              color: loading ? "var(--ink-2)" : "#fff",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.8 : 1,
+              boxShadow: loading ? "none" : "0 4px 20px rgba(16,185,129,0.35)",
+              transition: "all 0.15s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+            }}
           >
-            {loading ? "Kayıt yapılıyor…" : "Kayıt ol"}
+            {loading && (
+              <span
+                style={{
+                  width: 16, height: 16, borderRadius: "50%",
+                  border: "2px solid var(--line-accent)",
+                  borderTopColor: "var(--accent)",
+                  animation: "spin 0.7s linear infinite",
+                  display: "inline-block",
+                }}
+              />
+            )}
+            {loading ? t.register.loading : t.register.submit}
           </button>
 
           {error ? <div className="text-sm text-red-600">{error}</div> : null}
 
           <p className="text-center text-sm text-slate-500">
-            Zaten hesabınız var mı?{" "}
+            {t.register.haveAccount}{" "}
             <Link href="/login" className="text-emerald-600 hover:underline font-medium">
-              Giriş yap
+              {t.register.loginLink}
             </Link>
           </p>
         </form>
       </div>
 
       <style jsx global>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus {

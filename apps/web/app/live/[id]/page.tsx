@@ -8,6 +8,7 @@ import { io, Socket } from "socket.io-client";
 import Link from "next/link";
 import { WhiteboardCanvas } from "../WhiteboardCanvas";
 import useSWRImmutable from "swr/immutable";
+import { useI18n } from "../../_i18n/use-i18n";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,6 +92,7 @@ function nowTime(): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LivePage() {
+  const t = useI18n();
   const params       = useParams();
   const router       = useRouter();
   const search       = useSearchParams();
@@ -255,7 +257,7 @@ export default function LivePage() {
     if (a.length === 2) {
       setCalcDisplay(`det = ${a[0][0] * a[1][1] - a[0][1] * a[1][0]}`);
     } else {
-      setCalcDisplay("det: sadece 2x2");
+      setCalcDisplay(`det: ${t.tr("sadece 2x2")}`);
     }
   };
   const matTranspose = () => {
@@ -283,21 +285,21 @@ export default function LivePage() {
         const b = q[2] === "+" ? 1 : q[2] === "-" ? -1 : parseFloat(q[2]);
         const c = parseFloat(q[3]);
         const disc = b * b - 4 * a * c;
-        if (disc < 0) { setEqResult("Gerçek kök yok (Δ < 0)"); return; }
+        if (disc < 0) { setEqResult(t.tr("Gerçek kök yok (Δ < 0)")); return; }
         const x1 = Math.round(((-b + Math.sqrt(disc)) / (2 * a)) * 1e6) / 1e6;
         const x2 = Math.round(((-b - Math.sqrt(disc)) / (2 * a)) * 1e6) / 1e6;
         setEqResult(disc === 0 ? `x = ${x1}` : `x₁ = ${x1}, x₂ = ${x2}`);
         return;
       }
-      setEqResult("Desteklenen format: ax+b=c veya ax²+bx+c=0");
-    } catch { setEqResult("Hata"); }
+      setEqResult(t.tr("Desteklenen format: ax+b=c veya ax²+bx+c=0"));
+    } catch { setEqResult(t.tr("Hata")); }
   };
 
   // Statistics calculator
   const calcStats = () => {
     try {
       const nums = statsData.split(",").map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
-      if (nums.length === 0) { setStatsResult({ hata: "Geçerli sayı yok" }); return; }
+      if (nums.length === 0) { setStatsResult({ [t.tr("hata")]: t.tr("Geçerli sayı yok") }); return; }
       const n = nums.length;
       const sum = nums.reduce((a, b) => a + b, 0);
       const mean = sum / n;
@@ -313,12 +315,12 @@ export default function LivePage() {
       const modes = Object.entries(freq).filter(([, f]) => f === maxFreq && f > 1).map(([v]) => v);
       const r = (v: number) => String(Math.round(v * 1e6) / 1e6);
       setStatsResult({
-        "N": String(n), "Toplam": r(sum), "Ortalama": r(mean),
-        "Medyan": r(median), "Mod": modes.length ? modes.join(", ") : "-",
-        "Min": r(min), "Max": r(max), "Aralık": r(max - min),
-        "Varyans": r(variance), "Std Sapma": r(stdDev),
+        "N": String(n), [t.tr("Toplam")]: r(sum), [t.tr("Ortalama")]: r(mean),
+        [t.tr("Medyan")]: r(median), [t.tr("Mod")]: modes.length ? modes.join(", ") : "-",
+        [t.tr("Min")]: r(min), [t.tr("Max")]: r(max), [t.tr("Aralık")]: r(max - min),
+        [t.tr("Varyans")]: r(variance), [t.tr("Std Sapma")]: r(stdDev),
       });
-    } catch { setStatsResult({ hata: "Hesaplama hatası" }); }
+    } catch { setStatsResult({ [t.tr("hata")]: t.tr("Hesaplama hatası") }); }
   };
 
   // ── Countdown Timer ──
@@ -641,7 +643,7 @@ export default function LivePage() {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", gap: 12, color: "var(--muted)" }}>
         <div className="loading-dots"><span /><span /><span /></div>
-        <span style={{ fontSize: 14 }}>Derse bağlanıyor…</span>
+        <span style={{ fontSize: 14 }}>{t.tr("Derse bağlanıyor…")}</span>
       </div>
     );
   }
@@ -658,7 +660,7 @@ export default function LivePage() {
             className="back-btn"
             onClick={() => router.back()}
           >
-            ← Geri
+            {t.tr("← Geri")}
           </button>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -673,9 +675,9 @@ export default function LivePage() {
               </span>
             </div>
             <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 2 }}>
-              {role && <span style={{ marginRight: 8 }}>Rol: <strong style={{ color: "var(--ink-2)" }}>{role}</strong></span>}
-              {classCode && <span style={{ marginRight: 8 }}>Kod: {classCode}</span>}
-              {targetLevel && <span>Seviye: {targetLevel}</span>}
+              {role && <span style={{ marginRight: 8 }}>{t.tr("Rol:")}: <strong style={{ color: "var(--ink-2)" }}>{role}</strong></span>}
+              {classCode && <span style={{ marginRight: 8 }}>{t.tr("Kod:")}: {classCode}</span>}
+              {targetLevel && <span>{t.tr("Seviye:")}: {targetLevel}</span>}
             </div>
           </div>
         </div>
@@ -685,7 +687,7 @@ export default function LivePage() {
           <div style={{ display: "flex", borderRadius: "var(--r-sm)", border: "1px solid var(--line)", overflow: "hidden" }}>
             {(["board", "hybrid", "camera"] as const).map((m) => {
               const icons: Record<string, string> = { board: "🖊", hybrid: "📐", camera: "🎥" };
-              const labels: Record<string, string> = { board: "Tahta", hybrid: "Hibrit", camera: "Kamera" };
+              const labels: Record<string, string> = { board: t.tr("Tahta"), hybrid: t.tr("Hibrit"), camera: t.tr("Kamera") };
               return (
                 <button
                   key={m}
@@ -707,7 +709,7 @@ export default function LivePage() {
           {/* Participant count */}
           <span className="pill pill-sm" style={{ gap: 5 }}>
             <span className="status-dot online" style={{ width: 6, height: 6 }} />
-            {participantCount} katılımcı
+            {participantCount} {t.tr("katılımcı")}
           </span>
           {/* Timer */}
           <span style={{ fontFamily: "monospace", fontSize: 14, fontWeight: 700, color: "var(--accent)", background: "var(--accent-soft)", border: "1px solid color-mix(in srgb,var(--accent) 25%,var(--line))", borderRadius: "var(--r-sm)", padding: "3px 10px" }}>
@@ -748,7 +750,7 @@ export default function LivePage() {
           )}
           {meetingUrl && (
             <Link href={meetingUrl} target="_blank" className="btn-link" style={{ fontSize: 12, padding: "6px 12px" }}>
-              🎥 Canlı Yayın
+              {t.tr("🎥 Canlı Yayın")}
             </Link>
           )}
         </div>
@@ -760,8 +762,8 @@ export default function LivePage() {
         {/* ── LEFT: Participants ── */}
         <aside className="glass" style={{ display: "flex", flexDirection: "column", overflow: "hidden", borderRadius: "var(--r-lg)" }}>
           <div style={{ padding: "12px 14px 8px", borderBottom: "1px solid var(--line)", flexShrink: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)" }}>Katılımcılar</div>
-            <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{participantCount} çevrimiçi</div>
+            <div style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)" }}>{t.tr("Katılımcılar")}</div>
+            <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{participantCount} {t.tr("çevrimiçi")}</div>
           </div>
           <div style={{ flex: 1, overflowY: "auto", padding: "8px 10px", display: "flex", flexDirection: "column", gap: 4 }}>
             {participants.map((p) => (
@@ -787,7 +789,7 @@ export default function LivePage() {
 
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.tr(p.name)}</div>
                   <div>
                     <span style={{ ...roleBadgeStyle(p.role), borderRadius: "var(--r-full)", fontSize: 9, fontWeight: 700, padding: "1px 6px", display: "inline-block", letterSpacing: "0.04em" }}>
                       {p.role}
@@ -797,10 +799,10 @@ export default function LivePage() {
 
                 {/* Mic/Cam icons */}
                 <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
-                  <span style={{ fontSize: 11, opacity: p.micOn ? 1 : 0.4 }} title={p.micOn ? "Mikrofon açık" : "Mikrofon kapalı"}>
+                  <span style={{ fontSize: 11, opacity: p.micOn ? 1 : 0.4 }} title={p.micOn ? t.tr("Mikrofon açık") : t.tr("Mikrofon kapalı")}>
                     {p.micOn ? "🎤" : "🔇"}
                   </span>
-                  <span style={{ fontSize: 11, opacity: p.camOn ? 1 : 0.4 }} title={p.camOn ? "Kamera açık" : "Kamera kapalı"}>
+                  <span style={{ fontSize: 11, opacity: p.camOn ? 1 : 0.4 }} title={p.camOn ? t.tr("Kamera açık") : t.tr("Kamera kapalı")}>
                     {p.camOn ? "📷" : "🚫"}
                   </span>
                 </div>
@@ -820,7 +822,7 @@ export default function LivePage() {
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                 }}
               >
-                <span>📋 Yoklama</span>
+                <span>{t.tr("📋 Yoklama")}</span>
                 <span style={{ fontSize: 10, color: "var(--muted)" }}>
                   {attendanceRecords.filter((r) => r.present).length}/{attendanceRecords.length} {attendanceOpen ? "▲" : "▼"}
                 </span>
@@ -838,20 +840,20 @@ export default function LivePage() {
                           color: "#fff", fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center",
                         }}
                       >{r.present ? "✓" : ""}</button>
-                      <span style={{ flex: 1, color: "var(--ink)" }}>{r.name}</span>
+                      <span style={{ flex: 1, color: "var(--ink)" }}>{t.tr(r.name)}</span>
                       <span style={{ fontSize: 9, color: "var(--muted)" }}>{r.joinTime}</span>
                     </div>
                   ))}
                   {/* Download attendance */}
                   <button
                     onClick={() => {
-                      const csv = "İsim,Katılım,Saat\n" + attendanceRecords.map((r) => `${r.name},${r.present ? "Var" : "Yok"},${r.joinTime}`).join("\n");
+                      const csv = "İsim,Katılım,Saat\n" + attendanceRecords.map((r) => `${t.tr(r.name)},${r.present ? "Var" : "Yok"},${r.joinTime}`).join("\n");
                       const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
                       a.download = `yoklama-${nowTime().replace(":", "-")}.csv`; a.click();
                     }}
                     style={{ fontSize: 10, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", textAlign: "left", fontWeight: 600, marginTop: 4 }}
                   >
-                    ⬇️ CSV indir
+                    {t.tr("⬇️ CSV indir")}
                   </button>
                 </div>
               )}
@@ -874,9 +876,9 @@ export default function LivePage() {
             }}>
               <div style={{ textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
                 <div style={{ fontSize: viewMode === "camera" ? 48 : 28, marginBottom: 6 }}>🎥</div>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>Eğitmen Kamerası</div>
+                <div style={{ fontSize: 12, fontWeight: 600 }}>{t.tr("Eğitmen Kamerası")}</div>
                 <div style={{ fontSize: 10, marginTop: 2, opacity: 0.6 }}>
-                  {isCamOn ? "Kamera açık — WebRTC bağlantısı bekleniyor" : "Kamera kapalı"}
+                  {isCamOn ? t.tr("Kamera açık — WebRTC bağlantısı bekleniyor") : t.tr("Kamera kapalı")}
                 </div>
               </div>
               {/* Participant mini-cams */}
@@ -903,7 +905,7 @@ export default function LivePage() {
             <div style={{ padding: "8px 14px", borderBottom: "1px solid var(--line)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 8 }}>
               {/* Title */}
               <div style={{ fontWeight: 700, fontSize: 13, color: "var(--ink)", display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                🖊 Akıllı Tahta
+                {t.tr("🖊 Akıllı Tahta")}
                 {isDemo && <span style={{ fontSize: 11, color: "var(--muted)", fontWeight: 400 }}>(demo)</span>}
               </div>
 
@@ -922,13 +924,13 @@ export default function LivePage() {
                       cursor: "pointer", flexShrink: 0,
                     }}
                   >
-                    {pg}. Sayfa
+                    {pg}. {t.tr("Sayfa")}
                   </button>
                 ))}
                 {canWrite && (
                   <button
                     onClick={addPage}
-                    title="Yeni sayfa ekle"
+                    title={t.tr("Yeni sayfa ekle")}
                     style={{
                       width: 24, height: 24, borderRadius: "var(--r-sm)",
                       border: "1px dashed var(--line)", background: "var(--panel)",
@@ -955,7 +957,7 @@ export default function LivePage() {
                       setTimeout(() => { win.print(); }, 300);
                     }
                   }}
-                  title="PDF olarak yazdır"
+                  title={t.tr("PDF olarak yazdır")}
                   style={{
                     padding: "3px 8px", fontSize: 10, fontWeight: 600,
                     borderRadius: "var(--r-sm)", border: "1px solid var(--line)",
@@ -970,8 +972,8 @@ export default function LivePage() {
               {/* Connection status */}
               <div style={{ fontSize: 11, color: joined ? "var(--accent)" : "var(--muted)", display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
                 {joined
-                  ? <><span className="status-dot online" style={{ width: 5, height: 5 }} /> Bağlı</>
-                  : <><div className="loading-dots"><span /><span /></div> Bağlanıyor</>
+                  ? <><span className="status-dot online" style={{ width: 5, height: 5 }} /> {t.tr("Bağlı")}</>
+                  : <><div className="loading-dots"><span /><span /></div> {t.tr("Bağlanıyor")}</>
                 }
               </div>
             </div>
@@ -989,7 +991,7 @@ export default function LivePage() {
               ) : (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 12, color: "var(--muted)" }}>
                   <div style={{ fontSize: 48, opacity: 0.25 }}>🖊</div>
-                  <div style={{ fontSize: 13 }}>Tahta {isDemo ? "demo modunda" : "bağlanıyor…"}</div>
+                  <div style={{ fontSize: 13 }}>{t.tr("Tahta")} {isDemo ? t.tr("demo modunda") : t.tr("bağlanıyor…")}</div>
                 </div>
               )}
             </div>
@@ -1003,7 +1005,7 @@ export default function LivePage() {
           {/* Tab headers */}
           <div style={{ display: "flex", borderBottom: "1px solid var(--line)", flexShrink: 0 }}>
             {(["chat", "notes", "poll", "calc"] as const).map((tab) => {
-              const labels: Record<string, string> = { chat: "💬 Sohbet", notes: "📝 Notlar", poll: "📊 Anket", calc: "🧮 Hesap" };
+              const labels: Record<string, string> = { chat: t.tr("💬 Sohbet"), notes: t.tr("📝 Notlar"), poll: t.tr("📊 Anket"), calc: t.tr("🧮 Hesap") };
               return (
                 <button
                   key={tab}
@@ -1029,7 +1031,7 @@ export default function LivePage() {
                 {messages.map((msg) =>
                   msg.isSystem ? (
                     <div key={msg.id} style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", padding: "3px 8px", background: "var(--line-2)", borderRadius: "var(--r-full)" }}>
-                      {msg.text}
+                      {t.tr(msg.text)}
                     </div>
                   ) : (
                     <div key={msg.id} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
@@ -1042,7 +1044,7 @@ export default function LivePage() {
                           <span style={{ fontSize: 10, color: "var(--muted)" }}>{msg.time}</span>
                         </div>
                         <div style={{ fontSize: 12, color: "var(--ink-2)", lineHeight: 1.5, background: "color-mix(in srgb,var(--panel) 70%,transparent)", border: "1px solid var(--line-2)", borderRadius: "0 var(--r-md) var(--r-md) var(--r-md)", padding: "6px 10px", wordBreak: "break-word" }}>
-                          {msg.text}
+                          {t.tr(msg.text)}
                         </div>
                       </div>
                     </div>
@@ -1061,7 +1063,7 @@ export default function LivePage() {
               )}
               <div style={{ padding: "8px 10px", borderTop: "1px solid var(--line)", display: "flex", gap: 6, flexShrink: 0, alignItems: "center" }}>
                 <button onClick={() => setShowEmojis((v) => !v)} style={{ fontSize: 18, background: "none", border: "none", cursor: "pointer", padding: "4px", opacity: showEmojis ? 1 : 0.6 }} title="Emoji">😊</button>
-                <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleKeyDown} placeholder="Mesaj yaz…" style={{ flex: 1, fontSize: 12, padding: "7px 10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", background: "var(--panel)", color: "var(--ink)", minWidth: 0 }} />
+                <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={handleKeyDown} placeholder={t.tr("Mesaj yaz…")} style={{ flex: 1, fontSize: 12, padding: "7px 10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", background: "var(--panel)", color: "var(--ink)", minWidth: 0 }} />
                 <button onClick={sendMessage} disabled={!chatInput.trim()} className="btn-primary" style={{ padding: "7px 12px", fontSize: 12, flexShrink: 0 }}>↑</button>
               </div>
             </>
@@ -1071,12 +1073,12 @@ export default function LivePage() {
           {rightTab === "notes" && (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: 10, gap: 8, minHeight: 0 }}>
               <div style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.5 }}>
-                Kişisel notlarınız — sadece siz görürsünüz.
+                {t.tr("Kişisel notlarınız — sadece siz görürsünüz.")}
               </div>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ders notlarını buraya yazın…"
+                placeholder={t.tr("Ders notlarını buraya yazın…")}
                 style={{
                   flex: 1, resize: "none", fontSize: 12, lineHeight: 1.6,
                   padding: "10px", borderRadius: "var(--r-md)",
@@ -1131,7 +1133,7 @@ export default function LivePage() {
                           <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: "color-mix(in srgb,var(--accent) 8%,transparent)", transition: "width 0.4s" }} />
                         )}
                         <span style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", minWidth: 16, zIndex: 1 }}>{opt.id.toUpperCase()}</span>
-                        <span style={{ fontSize: 12, color: "var(--ink)", flex: 1, zIndex: 1 }}>{opt.label}</span>
+                        <span style={{ fontSize: 12, color: "var(--ink)", flex: 1, zIndex: 1 }}>{t.tr(opt.label)}</span>
                         {myVote !== null && (
                           <span style={{ fontSize: 11, color: isWinner ? "var(--accent)" : "var(--muted)", fontWeight: 700, zIndex: 1 }}>{pct}%</span>
                         )}
@@ -1139,11 +1141,11 @@ export default function LivePage() {
                     );
                   })}
                   <div style={{ fontSize: 11, color: "var(--muted)", textAlign: "center" }}>
-                    {myVote ? `${totalVotes} oy — Teşekkürler!` : "Seçeneğe tıklayarak oy verin."}
+                    {myVote ? `${totalVotes} ${t.tr("oy")} — ${t.tr("Teşekkürler!")}` : t.tr("Seçeneğe tıklayarak oy verin.")}
                   </div>
                   {canWrite && (
                     <button className="btn-link" style={{ fontSize: 11 }} onClick={() => { setPollActive(false); setMyVote(null); setPollVotes({}); }}>
-                      🗑 Anketi kapat
+                      {t.tr("🗑 Anketi kapat")}
                     </button>
                   )}
                 </div>
@@ -1151,18 +1153,18 @@ export default function LivePage() {
                 /* Create poll (instructor) or waiting (student) */
                 canWrite ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>Yeni Anket Oluştur</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("Yeni Anket Oluştur")}</div>
                     <input
                       value={newPollQ}
                       onChange={(e) => setNewPollQ(e.target.value)}
-                      placeholder="Soru…"
+                      placeholder={t.tr("Soru…")}
                       style={{ fontSize: 12, padding: "8px 10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", background: "var(--panel)", color: "var(--ink)", outline: "none" }}
                     />
                     <textarea
                       value={newPollOpts}
                       onChange={(e) => setNewPollOpts(e.target.value)}
                       rows={4}
-                      placeholder={"Her satıra bir seçenek\nSeçenek A\nSeçenek B"}
+                      placeholder={t.tr("Her satıra bir seçenek") + "\n" + t.tr("Seçenek A") + "\n" + t.tr("Seçenek B")}
                       style={{ fontSize: 12, padding: "8px 10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", background: "var(--panel)", color: "var(--ink)", outline: "none", resize: "none", fontFamily: "inherit" }}
                     />
                     <button
@@ -1171,13 +1173,13 @@ export default function LivePage() {
                       disabled={!newPollQ.trim()}
                       onClick={launchPoll}
                     >
-                      🚀 Anketi Başlat
+                      {t.tr("🚀 Anketi Başlat")}
                     </button>
                   </div>
                 ) : (
                   <div style={{ textAlign: "center", padding: "32px 16px", color: "var(--muted)", fontSize: 12 }}>
                     <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.4 }}>📊</div>
-                    Eğitmen bir anket başlattığında burada görünecek.
+                    {t.tr("Eğitmen bir anket başlattığında burada görünecek.")}
                   </div>
                 )
               )}
@@ -1190,9 +1192,9 @@ export default function LivePage() {
               {/* Mode switch */}
               <div style={{ display: "flex", gap: 3, marginBottom: 2, flexWrap: "wrap" }}>
                 {([
-                  { k: "basic" as const, l: "Temel" }, { k: "scientific" as const, l: "Bilimsel" },
-                  { k: "graph" as const, l: "📈 Grafik" }, { k: "matrix" as const, l: "⊞ Matris" },
-                  { k: "equation" as const, l: "🔣 Denklem" }, { k: "stats" as const, l: "📊 İstatistik" },
+                  { k: "basic" as const, l: t.tr("Temel") }, { k: "scientific" as const, l: t.tr("Bilimsel") },
+                  { k: "graph" as const, l: t.tr("📈 Grafik") }, { k: "matrix" as const, l: t.tr("⊞ Matris") },
+                  { k: "equation" as const, l: t.tr("🔣 Denklem") }, { k: "stats" as const, l: t.tr("📊 İstatistik") },
                 ]).map(({ k, l }) => (
                   <button key={k} onClick={() => setCalcMode(k)} style={{
                     flex: "1 0 30%", padding: "3px 2px", fontSize: 9, fontWeight: calcMode === k ? 700 : 500,
@@ -1295,7 +1297,7 @@ export default function LivePage() {
                         border: "1px solid var(--line)", borderRadius: "var(--r-sm)",
                         background: "var(--panel)", color: "var(--ink)",
                       }} />
-                    <button onClick={drawGraph} style={{ padding: "4px 8px", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--r-sm)", cursor: "pointer" }}>Çiz</button>
+                    <button onClick={drawGraph} style={{ padding: "4px 8px", fontSize: 10, fontWeight: 700, background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--r-sm)", cursor: "pointer" }}>{t.tr("Çiz")}</button>
                   </div>
                   <canvas ref={graphCanvasRef} width={240} height={180} style={{ width: "100%", height: "auto", borderRadius: "var(--r-sm)", border: "1px solid var(--line)" }} />
                   <div style={{ fontSize: 8, color: "var(--muted)" }}>
@@ -1308,7 +1310,7 @@ export default function LivePage() {
               {calcMode === "matrix" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minHeight: 0, overflowY: "auto" }}>
                   {/* Matrix A */}
-                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)" }}>Matris A</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)" }}>{t.tr("Matris A")}</div>
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${matA[0].length}, 1fr)`, gap: 2 }}>
                     {matA.flatMap((row, ri) => row.map((cell, ci) => (
                       <input key={`a${ri}${ci}`} value={cell} onChange={(e) => {
@@ -1317,7 +1319,7 @@ export default function LivePage() {
                     )))}
                   </div>
                   {/* Matrix B */}
-                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)" }}>Matris B</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: "var(--accent)" }}>{t.tr("Matris B")}</div>
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${matB[0].length}, 1fr)`, gap: 2 }}>
                     {matB.flatMap((row, ri) => row.map((cell, ci) => (
                       <input key={`b${ri}${ci}`} value={cell} onChange={(e) => {
@@ -1337,7 +1339,7 @@ export default function LivePage() {
                   {/* Result */}
                   {matResult && (
                     <div>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: "#10b981", marginBottom: 2 }}>Sonuç</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#10b981", marginBottom: 2 }}>{t.tr("Sonuç")}</div>
                       <div style={{ display: "grid", gridTemplateColumns: `repeat(${matResult[0].length}, 1fr)`, gap: 2 }}>
                         {matResult.flatMap((row, ri) => row.map((cell, ci) => (
                           <div key={`r${ri}${ci}`} style={{ padding: "3px", fontSize: 10, fontFamily: "monospace", textAlign: "center", background: "rgba(16,185,129,0.08)", borderRadius: 3, border: "1px solid rgba(16,185,129,0.15)", color: "#10b981" }}>{cell}</div>
@@ -1359,7 +1361,7 @@ export default function LivePage() {
                       border: "1px solid var(--line)", borderRadius: "var(--r-sm)",
                       background: "var(--panel)", color: "var(--ink)", textAlign: "center",
                     }} />
-                  <button onClick={solveEquation} style={{ padding: "8px", fontSize: 12, fontWeight: 700, background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--r-sm)", cursor: "pointer" }}>Çöz</button>
+                  <button onClick={solveEquation} style={{ padding: "8px", fontSize: 12, fontWeight: 700, background: "var(--accent)", color: "#fff", border: "none", borderRadius: "var(--r-sm)", cursor: "pointer" }}>{t.tr("Çöz")}</button>
                   {eqResult && (
                     <div style={{
                       padding: "10px", borderRadius: "var(--r-sm)",
@@ -1380,7 +1382,7 @@ export default function LivePage() {
               {/* ── Statistics Calculator ── */}
               {calcMode === "stats" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minHeight: 0 }}>
-                  <div style={{ fontSize: 9, color: "var(--muted)" }}>Sayıları virgülle ayırın</div>
+                  <div style={{ fontSize: 9, color: "var(--muted)" }}>{t.tr("Sayıları virgülle ayırın")}</div>
                   <textarea value={statsData} onChange={(e) => setStatsData(e.target.value)}
                     rows={3} placeholder="10, 20, 30, 40, 50"
                     style={{ padding: "6px", fontSize: 11, fontFamily: "monospace", border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", resize: "none" }} />
@@ -1415,9 +1417,9 @@ export default function LivePage() {
             color: isMicOn ? "var(--ink)" : "#ef4444",
             background: isMicOn ? "var(--panel)" : "rgba(239,68,68,0.08)",
           }}
-          title={isMicOn ? "Mikrofonu kapat" : "Mikrofonu aç"}
+          title={isMicOn ? t.tr("Mikrofonu kapat") : t.tr("Mikrofonu aç")}
         >
-          {isMicOn ? "🎤" : "🔇"} <span style={{ fontSize: 11 }}>{isMicOn ? "Mikrofon" : "Sessiz"}</span>
+          {isMicOn ? "🎤" : "🔇"} <span style={{ fontSize: 11 }}>{isMicOn ? t.tr("Mikrofon") : t.tr("Sessiz")}</span>
         </button>
 
         {/* Camera */}
@@ -1430,9 +1432,9 @@ export default function LivePage() {
             color: isCamOn ? "var(--ink)" : "#ef4444",
             background: isCamOn ? "var(--panel)" : "rgba(239,68,68,0.08)",
           }}
-          title={isCamOn ? "Kamerayı kapat" : "Kamerayı aç"}
+          title={isCamOn ? t.tr("Kamerayı kapat") : t.tr("Kamerayı aç")}
         >
-          {isCamOn ? "📷" : "🚫"} <span style={{ fontSize: 11 }}>{isCamOn ? "Kamera" : "Kamera Kapalı"}</span>
+          {isCamOn ? "📷" : "🚫"} <span style={{ fontSize: 11 }}>{isCamOn ? t.tr("Kamera") : t.tr("Kamera Kapalı")}</span>
         </button>
 
         {/* Screen share */}
@@ -1461,9 +1463,9 @@ export default function LivePage() {
             color: isSharing ? "var(--accent-2)" : "var(--ink)",
             background: isSharing ? "var(--accent-2-soft)" : "var(--panel)",
           }}
-          title={isSharing ? "Paylaşımı durdur" : "Ekran paylaş"}
+          title={isSharing ? t.tr("Paylaşımı durdur") : t.tr("Ekran paylaş")}
         >
-          🖥️ <span style={{ fontSize: 11 }}>{isSharing ? "Paylaşılıyor" : "Ekran"}</span>
+          🖥️ <span style={{ fontSize: 11 }}>{isSharing ? t.tr("Paylaşılıyor") : t.tr("Ekran")}</span>
         </button>
 
         {/* Record */}
@@ -1477,7 +1479,7 @@ export default function LivePage() {
             background: isRecording ? "rgba(239,68,68,0.08)" : "var(--panel)",
             position: "relative",
           }}
-          title={isRecording ? "Kaydı durdur" : "Kayıt başlat"}
+          title={isRecording ? t.tr("Kaydı durdur") : t.tr("Kayıt başlat")}
         >
           <span style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             ⏺️
@@ -1491,7 +1493,7 @@ export default function LivePage() {
               }} />
             )}
           </span>
-          <span style={{ fontSize: 11 }}>{isRecording ? "Kaydediyor" : "Kayıt"}</span>
+          <span style={{ fontSize: 11 }}>{isRecording ? t.tr("Kaydediyor") : t.tr("Kayıt")}</span>
         </button>
 
         {/* Raise hand */}
@@ -1513,9 +1515,9 @@ export default function LivePage() {
               color: handRaised ? "var(--accent-3)" : "var(--ink)",
               background: handRaised ? "rgba(245,158,11,0.10)" : "var(--panel)",
             }}
-            title={handRaised ? "Eli indir" : "El kaldır"}
+            title={handRaised ? t.tr("Eli indir") : t.tr("El kaldır")}
           >
-            ✋ <span style={{ fontSize: 11 }}>{handRaised ? "El Kaldırıldı" : "El Kaldır"}</span>
+            ✋ <span style={{ fontSize: 11 }}>{handRaised ? t.tr("El Kaldırıldı") : t.tr("El Kaldır")}</span>
             {handQueue.length > 0 && (
               <span style={{
                 position: "absolute", top: -4, right: -4,
@@ -1534,7 +1536,7 @@ export default function LivePage() {
               borderRadius: "var(--r-md)", padding: 8, minWidth: 160,
               boxShadow: "0 8px 24px rgba(0,0,0,0.15)", zIndex: 50,
             }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--muted)", marginBottom: 4 }}>✋ El Kaldırma Sırası</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "var(--muted)", marginBottom: 4 }}>{t.tr("✋ El Kaldırma Sırası")}</div>
               {handQueue.map((h, i) => (
                 <div key={h.id + i} style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -1543,7 +1545,7 @@ export default function LivePage() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ fontSize: 10, fontWeight: 700, color: i === 0 ? "#f59e0b" : "var(--ink)", minWidth: 14 }}>{i + 1}.</span>
-                    <span style={{ fontSize: 10, color: "var(--ink)" }}>{h.name}</span>
+                    <span style={{ fontSize: 10, color: "var(--ink)" }}>{t.tr(h.name)}</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ fontSize: 8, color: "var(--muted)" }}>{h.time}</span>
@@ -1566,9 +1568,9 @@ export default function LivePage() {
               className="btn-link"
               onClick={() => setBreakoutOpen((v) => !v)}
               style={{ padding: "9px 14px", fontSize: 13, gap: 6, borderColor: breakoutOpen ? "var(--accent)" : "var(--line)", color: breakoutOpen ? "var(--accent)" : "var(--ink)", background: breakoutOpen ? "var(--accent-soft)" : "var(--panel)" }}
-              title="Breakout Odaları"
+              title={t.tr("Breakout Odaları")}
             >
-              🏠 <span style={{ fontSize: 11 }}>Odalar</span>
+              🏠 <span style={{ fontSize: 11 }}>{t.tr("Odalar")}</span>
             </button>
             {breakoutOpen && (
               <div style={{
@@ -1577,7 +1579,7 @@ export default function LivePage() {
                 borderRadius: "var(--r-lg)", padding: 12, boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
                 zIndex: 50, display: "flex", flexDirection: "column", gap: 8,
               }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>Breakout Odaları</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("Breakout Odaları")}</div>
                 {breakoutRooms.length === 0 ? (
                   <div style={{ display: "flex", gap: 4 }}>
                     {[2, 3, 4].map((n) => (
@@ -1585,22 +1587,22 @@ export default function LivePage() {
                         flex: 1, padding: "6px", fontSize: 11, fontWeight: 600,
                         borderRadius: "var(--r-sm)", border: "1px solid var(--line)",
                         background: "var(--panel)", color: "var(--accent)", cursor: "pointer",
-                      }}>{n} Oda</button>
+                      }}>{n} {t.tr("Oda")}</button>
                     ))}
                   </div>
                 ) : (
                   <>
                     {breakoutRooms.map((room) => (
                       <div key={room.id} style={{ padding: "6px 8px", borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "color-mix(in srgb,var(--panel) 60%,transparent)" }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)", marginBottom: 3 }}>🏠 {room.name}</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)", marginBottom: 3 }}>🏠 {t.tr(room.name)}</div>
                         <div style={{ fontSize: 10, color: "var(--muted)" }}>
-                          {room.members.length > 0 ? room.members.join(", ") : "Boş"}
+                          {room.members.length > 0 ? room.members.join(", ") : t.tr("Boş")}
                         </div>
                       </div>
                     ))}
                     <button onClick={() => { setBreakoutRooms([]); setBreakoutOpen(false); }} style={{
                       fontSize: 10, color: "#ef4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600,
-                    }}>🗑 Odaları kapat</button>
+                    }}>{t.tr("🗑 Odaları kapat")}</button>
                   </>
                 )}
               </div>
@@ -1616,64 +1618,64 @@ export default function LivePage() {
               borderColor: aiTab === "summary" ? "rgba(139,92,246,0.4)" : "var(--line)",
               color: aiTab === "summary" ? "#8b5cf6" : "var(--ink)",
               background: aiTab === "summary" ? "rgba(139,92,246,0.08)" : "var(--panel)",
-            }} title="AI Ders Özeti">
-              🤖 <span style={{ fontSize: 11 }}>Özet</span>
+            }} title={t.tr("AI Ders Özeti")}>
+              🤖 <span style={{ fontSize: 11 }}>{t.tr("Özet")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowAnalytics(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showAnalytics ? "rgba(16,185,129,0.4)" : "var(--line)",
               color: showAnalytics ? "#10b981" : "var(--ink)",
               background: showAnalytics ? "rgba(16,185,129,0.08)" : "var(--panel)",
-            }} title="Öğrenci Analitiği">
-              📊 <span style={{ fontSize: 11 }}>Analitik</span>
+            }} title={t.tr("Öğrenci Analitiği")}>
+              📊 <span style={{ fontSize: 11 }}>{t.tr("Analitik")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowGamification(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showGamification ? "rgba(245,158,11,0.4)" : "var(--line)",
               color: showGamification ? "#f59e0b" : "var(--ink)",
               background: showGamification ? "rgba(245,158,11,0.08)" : "var(--panel)",
-            }} title="Oyunlaştırma">
-              🏆 <span style={{ fontSize: 11 }}>Puan</span>
+            }} title={t.tr("Oyunlaştırma")}>
+              🏆 <span style={{ fontSize: 11 }}>{t.tr("Puan")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowListeningLab(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showListeningLab ? "rgba(59,130,246,0.4)" : "var(--line)",
               color: showListeningLab ? "#3b82f6" : "var(--ink)",
               background: showListeningLab ? "rgba(59,130,246,0.08)" : "var(--panel)",
-            }} title="Dinleme Laboratuvarı">
-              🎧 <span style={{ fontSize: 11 }}>Dinleme</span>
+            }} title={t.tr("Dinleme Laboratuvarı")}>
+              🎧 <span style={{ fontSize: 11 }}>{t.tr("Dinleme")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowSpeaking(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showSpeaking ? "rgba(16,185,129,0.4)" : "var(--line)",
               color: showSpeaking ? "#10b981" : "var(--ink)",
               background: showSpeaking ? "rgba(16,185,129,0.08)" : "var(--panel)",
-            }} title="Konuşma Analizi">
-              🎤 <span style={{ fontSize: 11 }}>Konuşma</span>
+            }} title={t.tr("Konuşma Analizi")}>
+              🎤 <span style={{ fontSize: 11 }}>{t.tr("Konuşma")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowReading(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showReading ? "rgba(234,179,8,0.4)" : "var(--line)",
               color: showReading ? "#eab308" : "var(--ink)",
               background: showReading ? "rgba(234,179,8,0.08)" : "var(--panel)",
-            }} title="Okuma Araçları">
-              📖 <span style={{ fontSize: 11 }}>Okuma</span>
+            }} title={t.tr("Okuma Araçları")}>
+              📖 <span style={{ fontSize: 11 }}>{t.tr("Okuma")}</span>
             </button>
             <button className="btn-link" onClick={() => setShowWriting(true)} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: showWriting ? "rgba(168,85,247,0.4)" : "var(--line)",
               color: showWriting ? "#a855f7" : "var(--ink)",
               background: showWriting ? "rgba(168,85,247,0.08)" : "var(--panel)",
-            }} title="Yazma Analizi">
-              ✍️ <span style={{ fontSize: 11 }}>Yazma</span>
+            }} title={t.tr("Yazma Analizi")}>
+              ✍️ <span style={{ fontSize: 11 }}>{t.tr("Yazma")}</span>
             </button>
             <button className="btn-link" onClick={generateAiQuiz} style={{
               padding: "9px 14px", fontSize: 13, gap: 6,
               borderColor: aiTab === "quiz" ? "rgba(139,92,246,0.4)" : "var(--line)",
               color: aiTab === "quiz" ? "#8b5cf6" : "var(--ink)",
               background: aiTab === "quiz" ? "rgba(139,92,246,0.08)" : "var(--panel)",
-            }} title="AI Soru Üretici">
-              🧠 <span style={{ fontSize: 11 }}>Soru</span>
+            }} title={t.tr("AI Soru Üretici")}>
+              🧠 <span style={{ fontSize: 11 }}>{t.tr("Soru")}</span>
             </button>
           </>
         )}
@@ -1686,23 +1688,23 @@ export default function LivePage() {
           borderColor: showLms ? "rgba(59,130,246,0.4)" : "var(--line)",
           color: showLms ? "#3b82f6" : "var(--ink)",
           background: showLms ? "rgba(59,130,246,0.08)" : "var(--panel)",
-        }} title="Öğrenme Yönetim Sistemi">
-          📚 <span style={{ fontSize: 11 }}>LMS</span>
+        }} title={t.tr("Öğrenme Yönetim Sistemi")}>
+          📚 <span style={{ fontSize: 11 }}>{t.tr("LMS")}</span>
         </button>
         <button className="btn-link" onClick={() => setShowCloud(true)} style={{
           padding: "9px 14px", fontSize: 13, gap: 6,
           borderColor: showCloud ? "rgba(99,102,241,0.4)" : "var(--line)",
           color: showCloud ? "#6366f1" : "var(--ink)",
           background: showCloud ? "rgba(99,102,241,0.08)" : "var(--panel)",
-        }} title="Bulut Depolama & Arşiv">
-          ☁️ <span style={{ fontSize: 11 }}>Bulut</span>
+        }} title={t.tr("Bulut Depolama & Arşiv")}>
+          ☁️ <span style={{ fontSize: 11 }}>{t.tr("Bulut")}</span>
         </button>
         <button className="btn-link" onClick={() => setShowXR(true)} style={{
           padding: "9px 14px", fontSize: 13, gap: 6,
           borderColor: showXR ? "rgba(139,92,246,0.4)" : "var(--line)",
           color: showXR ? "#8b5cf6" : "var(--ink)",
           background: showXR ? "rgba(139,92,246,0.08)" : "var(--panel)",
-        }} title="3D Simülasyon">
+        }} title={t.tr("3D Simülasyon")}>
           🔬 <span style={{ fontSize: 11 }}>3D</span>
         </button>
         <button className="btn-link" onClick={() => setShowIoT(true)} style={{
@@ -1710,16 +1712,16 @@ export default function LivePage() {
           borderColor: showIoT ? "rgba(16,185,129,0.4)" : "var(--line)",
           color: showIoT ? "#10b981" : "var(--ink)",
           background: showIoT ? "rgba(16,185,129,0.08)" : "var(--panel)",
-        }} title="IoT Sınıf Kontrol">
-          🏠 <span style={{ fontSize: 11 }}>IoT</span>
+        }} title={t.tr("IoT Sınıf Kontrol")}>
+          🏠 <span style={{ fontSize: 11 }}>{t.tr("IoT")}</span>
         </button>
         <button className="btn-link" onClick={() => setShowTranslation(true)} style={{
           padding: "9px 14px", fontSize: 13, gap: 6,
           borderColor: showTranslation ? "rgba(234,179,8,0.4)" : "var(--line)",
           color: showTranslation ? "#eab308" : "var(--ink)",
           background: showTranslation ? "rgba(234,179,8,0.08)" : "var(--panel)",
-        }} title="Çeviri & Altyazı">
-          🌐 <span style={{ fontSize: 11 }}>Çeviri</span>
+        }} title={t.tr("Çeviri & Altyazı")}>
+          🌐 <span style={{ fontSize: 11 }}>{t.tr("Çeviri")}</span>
         </button>
         <button className="btn-link" onClick={async () => {
           if (isRecordingScreen) {
@@ -1749,8 +1751,8 @@ export default function LivePage() {
           color: isRecordingScreen ? "#ef4444" : "var(--ink)",
           background: isRecordingScreen ? "rgba(239,68,68,0.1)" : "var(--panel)",
           animation: isRecordingScreen ? "pulse 1.5s infinite" : undefined,
-        }} title="Ekran Kaydı">
-          {isRecordingScreen ? "⏹" : "⏺"} <span style={{ fontSize: 11 }}>{isRecordingScreen ? "Durdur" : "Kayıt"}</span>
+        }} title={t.tr("Ekran Kaydı")}>
+          {isRecordingScreen ? "⏹" : "⏺"} <span style={{ fontSize: 11 }}>{isRecordingScreen ? t.tr("Durdur") : t.tr("Kayıt")}</span>
         </button>
 
         <div style={{ width: 1, height: 32, background: "var(--line)", margin: "0 4px", flexShrink: 0 }} />
@@ -1768,9 +1770,9 @@ export default function LivePage() {
           }}
           onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(239,68,68,0.4)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 16px rgba(239,68,68,0.3)"; }}
-          title="Dersten ayrıl"
+          title={t.tr("Dersten ayrıl")}
         >
-          📴 Ayrıl
+          {t.tr("📴 Ayrıl")}
         </button>
       </footer>
 
@@ -1792,7 +1794,7 @@ export default function LivePage() {
           >
             <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>
-                {aiTab === "summary" ? "🤖 AI Ders Özeti" : "🧠 AI Soru Üretici"}
+                {aiTab === "summary" ? t.tr("🤖 AI Ders Özeti") : t.tr("🧠 AI Soru Üretici")}
               </div>
               <button onClick={() => setAiTab(null)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
@@ -1800,7 +1802,7 @@ export default function LivePage() {
               {aiLoading ? (
                 <div style={{ textAlign: "center", padding: "40px 0", color: "var(--muted)" }}>
                   <div style={{ fontSize: 32, marginBottom: 8, animation: "statusPulse 1s ease-in-out infinite" }}>🤖</div>
-                  <div style={{ fontSize: 13 }}>AI işliyor…</div>
+                  <div style={{ fontSize: 13 }}>{t.tr("AI işliyor…")}</div>
                 </div>
               ) : aiTab === "summary" ? (
                 <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7, color: "var(--ink-2)" }}>
@@ -1841,7 +1843,7 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowAnalytics(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: 560, maxHeight: "75vh", background: "var(--panel)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", boxShadow: "0 24px 64px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>📊 Öğrenci Analitik Paneli</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("📊 Öğrenci Analitik Paneli")}</div>
               <button onClick={() => setShowAnalytics(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
@@ -1853,9 +1855,9 @@ export default function LivePage() {
                   { label: "Ort. Quiz Puanı", value: `${Math.round(analyticsData.reduce((a, s) => a + s.quizScore, 0) / Math.max(analyticsData.length, 1))}`, color: "#8b5cf6" },
                   { label: "Toplam Mesaj", value: `${analyticsData.reduce((a, s) => a + s.chatCount, 0)}`, color: "#f59e0b" },
                 ].map((stat) => (
-                  <div key={stat.label} style={{ padding: "10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", textAlign: "center" }}>
+                  <div key={t.tr(stat.label)} style={{ padding: "10px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", textAlign: "center" }}>
                     <div style={{ fontSize: 20, fontWeight: 800, color: stat.color }}>{stat.value}</div>
-                    <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>{stat.label}</div>
+                    <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>{t.tr(stat.label)}</div>
                   </div>
                 ))}
               </div>
@@ -1863,11 +1865,11 @@ export default function LivePage() {
               {/* Student table */}
               <div style={{ fontSize: 11 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 60px 60px 60px 50px 50px", gap: 4, padding: "6px 8px", background: "var(--line-2)", borderRadius: "var(--r-sm)", fontWeight: 700, color: "var(--muted)", marginBottom: 4 }}>
-                  <span>Öğrenci</span><span>Katılım</span><span>Dikkat</span><span>Quiz</span><span>Chat</span><span>El</span>
+                  <span>{t.tr("Öğrenci")}</span><span>{t.tr("Katılım")}</span><span>{t.tr("Dikkat")}</span><span>{t.tr("Quiz")}</span><span>{t.tr("Chat")}</span><span>{t.tr("El")}</span>
                 </div>
                 {analyticsData.map((s) => (
                   <div key={s.id} style={{ display: "grid", gridTemplateColumns: "1fr 60px 60px 60px 50px 50px", gap: 4, padding: "6px 8px", borderBottom: "1px solid var(--line-2)", alignItems: "center" }}>
-                    <span style={{ fontWeight: 600, color: "var(--ink)" }}>{s.name}</span>
+                    <span style={{ fontWeight: 600, color: "var(--ink)" }}>{t.tr(s.name)}</span>
                     <span>
                       <div style={{ height: 4, borderRadius: 2, background: "var(--line-2)" }}>
                         <div style={{ height: "100%", width: `${s.participation}%`, background: "#10b981", borderRadius: 2 }} />
@@ -1896,14 +1898,14 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowGamification(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: 480, maxHeight: "75vh", background: "var(--panel)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", boxShadow: "0 24px 64px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🏆 Oyunlaştırma — Liderlik Tablosu</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🏆 Oyunlaştırma — Liderlik Tablosu")}</div>
               <button onClick={() => setShowGamification(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
 
               {/* Leaderboard */}
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>🥇 Puan Sıralaması</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>{t.tr("🥇 Puan Sıralaması")}</div>
                 {DEMO_PARTICIPANTS
                   .filter((p) => p.role === "STUDENT")
                   .sort((a, b) => (studentPoints[b.id] ?? 0) - (studentPoints[a.id] ?? 0))
@@ -1918,7 +1920,7 @@ export default function LivePage() {
                         {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
                       </span>
                       <div className="avatar avatar-sm" style={{ background: p.avatarColor, color: "#fff", fontSize: 10 }}>{p.initials}</div>
-                      <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{p.name}</span>
+                      <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{t.tr(p.name)}</span>
                       <span style={{ fontSize: 14, fontWeight: 800, color: "#f59e0b" }}>{studentPoints[p.id] ?? 0}</span>
                       {canWrite && (
                         <button onClick={() => awardPoint(p.id, 10)} style={{
@@ -1943,8 +1945,8 @@ export default function LivePage() {
                       background: "color-mix(in srgb,var(--panel) 60%,transparent)",
                     }}>
                       <div style={{ fontSize: 24, marginBottom: 4 }}>{b.icon}</div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--ink)" }}>{b.label}</div>
-                      <div style={{ fontSize: 8, color: "var(--muted)", marginTop: 2 }}>{b.desc}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--ink)" }}>{t.tr(b.label)}</div>
+                      <div style={{ fontSize: 8, color: "var(--muted)", marginTop: 2 }}>{t.tr(b.desc)}</div>
                     </div>
                   ))}
                 </div>
@@ -1959,15 +1961,15 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowListeningLab(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: 440, background: "var(--panel)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", boxShadow: "0 24px 64px rgba(0,0,0,0.25)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🎧 Dinleme Laboratuvarı</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🎧 Dinleme Laboratuvarı")}</div>
               <button onClick={() => setShowListeningLab(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
 
               {/* Audio player mock */}
               <div style={{ padding: "16px", borderRadius: "var(--r-md)", background: "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9))", color: "#fff" }}>
-                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>🎵 Ders Kaydı — Bölüm 1</div>
-                <div style={{ fontSize: 10, opacity: 0.6, marginBottom: 12 }}>İngilizce — Dinleme Alıştırması</div>
+                <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{t.tr("🎵 Ders Kaydı — Bölüm 1")}</div>
+                <div style={{ fontSize: 10, opacity: 0.6, marginBottom: 12 }}>{t.tr("İngilizce — Dinleme Alıştırması")}</div>
 
                 {/* Progress bar */}
                 <div
@@ -1997,7 +1999,7 @@ export default function LivePage() {
 
               {/* Speed control */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 11, color: "var(--muted)", minWidth: 40 }}>Hız:</span>
+                <span style={{ fontSize: 11, color: "var(--muted)", minWidth: 40 }}>{t.tr("Hız:")}</span>
                 <div style={{ display: "flex", gap: 3 }}>
                   {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => (
                     <button key={s} onClick={() => setAudioSpeed(s)} style={{
@@ -2013,19 +2015,19 @@ export default function LivePage() {
 
               {/* Repeat section */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", background: "color-mix(in srgb,var(--panel) 60%,transparent)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>🔁 Tekrar Bölümü (A-B)</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>{t.tr("🔁 Tekrar Bölümü (A-B)")}</div>
                 <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.5 }}>
-                  Belirli bir bölümü tekrar dinlemek için başlangıç ve bitiş noktası seçin.
-                  Bu özellik audio kaynağı bağlandığında aktif olacaktır.
+                  {t.tr("Belirli bir bölümü tekrar dinlemek için başlangıç ve bitiş noktası seçin.")}
+                  {t.tr("Bu özellik audio kaynağı bağlandığında aktif olacaktır.")}
                 </div>
               </div>
 
               {/* Listening exercise placeholder */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid rgba(59,130,246,0.2)", background: "rgba(59,130,246,0.04)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6", marginBottom: 4 }}>📝 Dinleme Alıştırması</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#3b82f6", marginBottom: 4 }}>{t.tr("📝 Dinleme Alıştırması")}</div>
                 <div style={{ fontSize: 10, color: "var(--muted)", lineHeight: 1.5 }}>
-                  Boşluk doldurma, çoktan seçmeli ve transkript takibi alıştırmaları
-                  eğitmen tarafından yüklendiğinde burada görünecektir.
+                  {t.tr("Boşluk doldurma, çoktan seçmeli ve transkript takibi alıştırmaları")}
+                  {t.tr("eğitmen tarafından yüklendiğinde burada görünecektir.")}
                 </div>
               </div>
             </div>
@@ -2038,13 +2040,13 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowSpeaking(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(420px,90vw)", maxHeight: "80vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🎤 Konuşma Analizi</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🎤 Konuşma Analizi")}</div>
               <button onClick={() => setShowSpeaking(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
               {/* Target text */}
               <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", marginBottom: 4 }}>Hedef Metin</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", marginBottom: 4 }}>{t.tr("Hedef Metin")}</div>
                 <textarea value={spkText} onChange={(e) => setSpkText(e.target.value)} rows={3}
                   style={{ width: "100%", padding: "8px", fontSize: 12, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", resize: "none", fontFamily: "inherit" }} />
               </div>
@@ -2075,7 +2077,7 @@ export default function LivePage() {
                   animation: spkRecording ? "pulse 1.5s infinite" : undefined,
                 }}
               >
-                {spkRecording ? "⏹ Kaydı Durdur" : "🎙 Kaydet ve Analiz Et"}
+                {spkRecording ? t.tr("⏹ Kaydı Durdur") : t.tr("🎙 Kaydet ve Analiz Et")}
               </button>
               {/* Score */}
               {spkScore !== null && (
@@ -2088,7 +2090,7 @@ export default function LivePage() {
                     color: spkScore >= 90 ? "#10b981" : spkScore >= 75 ? "#eab308" : "#ef4444",
                   }}>{spkScore}</div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)" }}>
-                    Telaffuz Puanı: {spkScore >= 90 ? "Mükemmel" : spkScore >= 75 ? "İyi" : "Geliştirilebilir"}
+                    {t.tr("Telaffuz Puanı:")}: {spkScore >= 90 ? t.tr("Mükemmel") : spkScore >= 75 ? t.tr("İyi") : t.tr("Geliştirilebilir")}
                   </div>
                 </div>
               )}
@@ -2103,7 +2105,7 @@ export default function LivePage() {
                 </div>
               )}
               <div style={{ padding: "8px 10px", borderRadius: "var(--r-sm)", background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.15)", fontSize: 10, color: "var(--muted)" }}>
-                ℹ️ Mikrofon erişimi gereklidir. Web Speech API veya harici AI servisi bağlandığında gerçek telaffuz analizi yapılacaktır.
+                {t.tr("ℹ️ Mikrofon erişimi gereklidir. Web Speech API veya harici AI servisi bağlandığında gerçek telaffuz analizi yapılacaktır.")}
               </div>
             </div>
           </div>
@@ -2115,7 +2117,7 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowReading(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(460px,90vw)", maxHeight: "80vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>📖 Okuma Araçları</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("📖 Okuma Araçları")}</div>
               <button onClick={() => { setShowReading(false); setReadHighlight(-1); }} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
@@ -2124,7 +2126,7 @@ export default function LivePage() {
                 style={{ width: "100%", padding: "10px", fontSize: 13, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", resize: "vertical", fontFamily: "inherit", lineHeight: 1.7 }} />
               {/* Speed control */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 10, color: "var(--muted)" }}>Hız:</span>
+                <span style={{ fontSize: 10, color: "var(--muted)" }}>{t.tr("Hız:")}</span>
                 {[0.5, 0.75, 1, 1.25, 1.5].map((s) => (
                   <button key={s} onClick={() => setReadSpeed(s)} style={{
                     padding: "3px 8px", fontSize: 10, fontWeight: readSpeed === s ? 700 : 500,
@@ -2150,10 +2152,10 @@ export default function LivePage() {
                   speechSynthesis.cancel();
                   speechSynthesis.speak(utterance);
                 }} style={{ flex: 1, padding: "10px", fontSize: 13, fontWeight: 700, border: "none", borderRadius: "var(--r-md)", cursor: "pointer", background: "linear-gradient(135deg,#eab308,#f59e0b)", color: "#fff" }}>
-                  🔊 Sesli Oku
+                  {t.tr("🔊 Sesli Oku")}
                 </button>
                 <button onClick={() => { speechSynthesis.cancel(); setReadHighlight(-1); }} style={{ padding: "10px 16px", fontSize: 13, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-md)", cursor: "pointer", background: "var(--panel)", color: "var(--muted)" }}>
-                  ⏹ Dur
+                  {t.tr("⏹ Dur")}
                 </button>
               </div>
               {/* Highlighted text */}
@@ -2170,10 +2172,10 @@ export default function LivePage() {
               {/* Word stats */}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {[
-                  { l: "Kelime", v: String(readText.split(/\s+/).filter(Boolean).length) },
-                  { l: "Karakter", v: String(readText.length) },
-                  { l: "Cümle", v: String(readText.split(/[.!?]+/).filter(Boolean).length) },
-                  { l: "Tahmini süre", v: `${Math.ceil(readText.split(/\s+/).filter(Boolean).length / (150 * readSpeed))} dk` },
+                  { l: t.tr("Kelime"), v: String(readText.split(/\s+/).filter(Boolean).length) },
+                  { l: t.tr("Karakter"), v: String(readText.length) },
+                  { l: t.tr("Cümle"), v: String(readText.split(/[.!?]+/).filter(Boolean).length) },
+                  { l: t.tr("Tahmini süre"), v: `${Math.ceil(readText.split(/\s+/).filter(Boolean).length / (150 * readSpeed))} dk` },
                 ].map(({ l, v }) => (
                   <div key={l} style={{ padding: "6px 10px", borderRadius: "var(--r-sm)", background: "rgba(234,179,8,0.06)", border: "1px solid rgba(234,179,8,0.1)", fontSize: 10 }}>
                     <span style={{ color: "var(--muted)" }}>{l}: </span>
@@ -2191,15 +2193,15 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowLms(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(520px,90vw)", maxHeight: "85vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>📚 Öğrenme Yönetim Sistemi</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("📚 Öğrenme Yönetim Sistemi")}</div>
               <button onClick={() => setShowLms(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             {/* LMS tabs */}
             <div style={{ display: "flex", borderBottom: "1px solid var(--line)" }}>
               {([
-                { k: "assignments" as const, l: "📝 Ödevler" },
-                { k: "grades" as const, l: "📊 Notlar" },
-                { k: "progress" as const, l: "📈 İlerleme" },
+                { k: "assignments" as const, l: t.tr("📝 Ödevler") },
+                { k: "grades" as const, l: t.tr("📊 Notlar") },
+                { k: "progress" as const, l: t.tr("📈 İlerleme") },
               ]).map(({ k, l }) => (
                 <button key={k} onClick={() => setLmsTab(k)} style={{
                   flex: 1, padding: "8px", fontSize: 11, fontWeight: lmsTab === k ? 700 : 500,
@@ -2213,32 +2215,32 @@ export default function LivePage() {
               {lmsTab === "assignments" && assignments.map((a) => (
                 <div key={a.id} style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{a.title}</div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>Teslim: {a.due}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "var(--ink)" }}>{t.tr(a.title)}</div>
+                    <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{t.tr("Teslim:")}: {a.due}</div>
                   </div>
                   <div style={{
                     padding: "3px 8px", borderRadius: 20, fontSize: 9, fontWeight: 700,
                     background: a.status === "graded" ? "rgba(16,185,129,0.1)" : a.status === "submitted" ? "rgba(59,130,246,0.1)" : "rgba(234,179,8,0.1)",
                     color: a.status === "graded" ? "#10b981" : a.status === "submitted" ? "#3b82f6" : "#eab308",
                   }}>
-                    {a.status === "graded" ? `✅ ${a.grade}` : a.status === "submitted" ? "📤 Teslim edildi" : "⏳ Bekliyor"}
+                    {a.status === "graded" ? `✅ ${a.grade}` : a.status === "submitted" ? t.tr("📤 Teslim edildi") : t.tr("⏳ Bekliyor")}
                   </div>
                 </div>
               ))}
               {lmsTab === "grades" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 4, fontSize: 10, fontWeight: 700, color: "var(--muted)", padding: "4px 8px" }}>
-                    <div>Ödev</div><div style={{ textAlign: "center" }}>Not</div><div style={{ textAlign: "center" }}>Durum</div>
+                    <div>{t.tr("Ödev")}</div><div style={{ textAlign: "center" }}>{t.tr("Not")}</div><div style={{ textAlign: "center" }}>{t.tr("Durum")}</div>
                   </div>
                   {assignments.filter((a) => a.grade !== null).map((a) => (
                     <div key={a.id} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 4, padding: "8px", borderRadius: "var(--r-sm)", border: "1px solid var(--line)", alignItems: "center" }}>
-                      <div style={{ fontSize: 11, color: "var(--ink)" }}>{a.title}</div>
+                      <div style={{ fontSize: 11, color: "var(--ink)" }}>{t.tr(a.title)}</div>
                       <div style={{ textAlign: "center", fontSize: 14, fontWeight: 900, color: (a.grade ?? 0) >= 85 ? "#10b981" : (a.grade ?? 0) >= 70 ? "#eab308" : "#ef4444" }}>{a.grade}</div>
                       <div style={{ textAlign: "center", fontSize: 10, color: "var(--muted)" }}>{(a.grade ?? 0) >= 85 ? "A" : (a.grade ?? 0) >= 70 ? "B" : "C"}</div>
                     </div>
                   ))}
                   <div style={{ padding: "10px", borderRadius: "var(--r-md)", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.1)", textAlign: "center" }}>
-                    <div style={{ fontSize: 10, color: "var(--muted)" }}>Genel Ortalama</div>
+                    <div style={{ fontSize: 10, color: "var(--muted)" }}>{t.tr("Genel Ortalama")}</div>
                     <div style={{ fontSize: 22, fontWeight: 900, color: "#10b981" }}>
                       {Math.round(assignments.filter((a) => a.grade !== null).reduce((s, a) => s + (a.grade ?? 0), 0) / Math.max(1, assignments.filter((a) => a.grade !== null).length))}
                     </div>
@@ -2249,12 +2251,12 @@ export default function LivePage() {
                 <div key={p.subject} style={{ padding: "8px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--line)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)" }}>{p.subject}</span>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: p.grade >= 80 ? "#10b981" : p.grade >= 60 ? "#eab308" : "#ef4444" }}>Not: {p.grade}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: p.grade >= 80 ? "#10b981" : p.grade >= 60 ? "#eab308" : "#ef4444" }}>{t.tr("Not:")}: {p.grade}</span>
                   </div>
                   <div style={{ height: 6, borderRadius: 3, background: "var(--line)", overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${p.progress}%`, borderRadius: 3, background: p.progress >= 70 ? "linear-gradient(90deg,#10b981,#059669)" : p.progress >= 40 ? "linear-gradient(90deg,#eab308,#f59e0b)" : "linear-gradient(90deg,#ef4444,#dc2626)", transition: "width 0.5s" }} />
                   </div>
-                  <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>İlerleme: %{p.progress}</div>
+                  <div style={{ fontSize: 9, color: "var(--muted)", marginTop: 2 }}>{t.tr("İlerleme:")}: %{p.progress}</div>
                 </div>
               ))}
             </div>
@@ -2267,17 +2269,17 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowXR(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(500px,90vw)", maxHeight: "85vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🔬 3D/XR Simülasyon</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🔬 3D/XR Simülasyon")}</div>
               <button onClick={() => setShowXR(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
               {/* Scene selector */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
                 {([
-                  { k: "solar" as const, l: "☀️ Güneş Sistemi", d: "Gezegenlerin yörüngelerini keşfedin" },
-                  { k: "cell" as const, l: "🧬 Hücre Yapısı", d: "Hayvan/Bitki hücresini inceleyin" },
-                  { k: "molecule" as const, l: "⚛️ Molekül", d: "H₂O, CO₂, DNA yapıları" },
-                  { k: "volcano" as const, l: "🌋 Volkan", d: "Volkanik patlama simülasyonu" },
+                  { k: "solar" as const, l: t.tr("☀️ Güneş Sistemi"), d: t.tr("Gezegenlerin yörüngelerini keşfedin") },
+                  { k: "cell" as const, l: t.tr("🧬 Hücre Yapısı"), d: t.tr("Hayvan/Bitki hücresini inceleyin") },
+                  { k: "molecule" as const, l: t.tr("⚛️ Molekül"), d: t.tr("H₂O, CO₂, DNA yapıları") },
+                  { k: "volcano" as const, l: t.tr("🌋 Volkan"), d: t.tr("Volkanik patlama simülasyonu") },
                 ]).map(({ k, l, d }) => (
                   <button key={k} onClick={() => setXrScene(k)} style={{
                     padding: "12px", borderRadius: "var(--r-md)", border: `1.5px solid ${xrScene === k ? "var(--accent)" : "var(--line)"}`,
@@ -2301,15 +2303,15 @@ export default function LivePage() {
                   {xrScene === "solar" ? "🪐" : xrScene === "cell" ? "🧬" : xrScene === "molecule" ? "⚛️" : "🌋"}
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>
-                  {xrScene === "solar" ? "Güneş Sistemi Modeli" : xrScene === "cell" ? "Hücre 3D Modeli" : xrScene === "molecule" ? "Molekül Yapısı" : "Volkan Kesiti"}
+                  {xrScene === "solar" ? t.tr("Güneş Sistemi Modeli") : xrScene === "cell" ? t.tr("Hücre 3D Modeli") : xrScene === "molecule" ? t.tr("Molekül Yapısı") : t.tr("Volkan Kesiti")}
                 </div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>
-                  Three.js / WebXR entegrasyonu bağlandığında 3D model burada render edilecek
+                  {t.tr("Three.js / WebXR entegrasyonu bağlandığında 3D model burada render edilecek")}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                <button style={{ flex: 1, padding: "8px", fontSize: 11, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}>🔄 Döndür</button>
-                <button style={{ flex: 1, padding: "8px", fontSize: 11, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}>🔍 Yakınlaş</button>
+                <button style={{ flex: 1, padding: "8px", fontSize: 11, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}>{t.tr("🔄 Döndür")}</button>
+                <button style={{ flex: 1, padding: "8px", fontSize: 11, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}>{t.tr("🔍 Yakınlaş")}</button>
                 <button style={{ flex: 1, padding: "8px", fontSize: 11, fontWeight: 700, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", cursor: "pointer" }}>🥽 VR Modu</button>
               </div>
             </div>
@@ -2322,14 +2324,14 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowIoT(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(420px,90vw)", maxHeight: "80vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🏠 IoT Sınıf Kontrol</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🏠 IoT Sınıf Kontrol")}</div>
               <button onClick={() => setShowIoT(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14, overflowY: "auto" }}>
               {/* Lights */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>💡 Aydınlatma</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("💡 Aydınlatma")}</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)" }}>%{iotLights}</span>
                 </div>
                 <input type="range" min={0} max={100} value={iotLights} onChange={(e) => setIotLights(Number(e.target.value))} style={{ width: "100%", accentColor: "#eab308" }} />
@@ -2337,7 +2339,7 @@ export default function LivePage() {
               {/* Temperature */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>🌡️ Sıcaklık</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🌡️ Sıcaklık")}</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: iotTemp > 25 ? "#ef4444" : iotTemp < 18 ? "#3b82f6" : "#10b981" }}>{iotTemp}°C</span>
                 </div>
                 <input type="range" min={16} max={30} value={iotTemp} onChange={(e) => setIotTemp(Number(e.target.value))} style={{ width: "100%", accentColor: "#10b981" }} />
@@ -2345,32 +2347,32 @@ export default function LivePage() {
               {/* Air Quality */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>🍃 Hava Kalitesi</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🍃 Hava Kalitesi")}</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: iotAirQuality >= 80 ? "#10b981" : iotAirQuality >= 50 ? "#eab308" : "#ef4444" }}>
-                    %{iotAirQuality} — {iotAirQuality >= 80 ? "İyi" : iotAirQuality >= 50 ? "Orta" : "Kötü"}
+                    %{iotAirQuality} — {iotAirQuality >= 80 ? t.tr("İyi") : iotAirQuality >= 50 ? t.tr("Orta") : t.tr("Kötü")}
                   </span>
                 </div>
               </div>
               {/* Projector */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>📽️ Projektör</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("📽️ Projektör")}</span>
                 <button onClick={() => setIotProjector(!iotProjector)} style={{
                   padding: "4px 12px", fontSize: 10, fontWeight: 700, borderRadius: 20,
                   border: "none", cursor: "pointer",
                   background: iotProjector ? "linear-gradient(135deg,#10b981,#059669)" : "var(--line)",
                   color: iotProjector ? "#fff" : "var(--muted)",
-                }}>{iotProjector ? "Açık" : "Kapalı"}</button>
+                }}>{iotProjector ? t.tr("Açık") : t.tr("Kapalı")}</button>
               </div>
               {/* Blinds */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>🪟 Panjurlar</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🪟 Panjurlar")}</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)" }}>%{iotBlinds}</span>
                 </div>
                 <input type="range" min={0} max={100} value={iotBlinds} onChange={(e) => setIotBlinds(Number(e.target.value))} style={{ width: "100%", accentColor: "#3b82f6" }} />
               </div>
               <div style={{ padding: "8px 10px", borderRadius: "var(--r-sm)", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.15)", fontSize: 10, color: "var(--muted)" }}>
-                ℹ️ IoT cihaz bağlantıları MQTT/WebSocket üzerinden kurulduğunda gerçek kontrol aktif olacaktır.
+                {t.tr("ℹ️ IoT cihaz bağlantıları MQTT/WebSocket üzerinden kurulduğunda gerçek kontrol aktif olacaktır.")}
               </div>
             </div>
           </div>
@@ -2382,15 +2384,15 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowCloud(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(520px,90vw)", maxHeight: "85vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>☁️ Bulut Depolama & Arşiv</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("☁️ Bulut Depolama & Arşiv")}</div>
               <button onClick={() => setShowCloud(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             {/* Tabs */}
             <div style={{ display: "flex", borderBottom: "1px solid var(--line)" }}>
               {([
-                { k: "files" as const, l: "📁 Dosyalar" },
-                { k: "archive" as const, l: "📼 Ders Arşivi" },
-                { k: "sync" as const, l: "🔄 Senkronizasyon" },
+                { k: "files" as const, l: t.tr("📁 Dosyalar") },
+                { k: "archive" as const, l: t.tr("📼 Ders Arşivi") },
+                { k: "sync" as const, l: t.tr("🔄 Senkronizasyon") },
               ]).map(({ k, l }) => (
                 <button key={k} onClick={() => setCloudTab(k)} style={{
                   flex: 1, padding: "8px", fontSize: 11, fontWeight: cloudTab === k ? 700 : 500,
@@ -2405,7 +2407,7 @@ export default function LivePage() {
                 <>
                   {/* Upload button */}
                   <button style={{ padding: "10px", fontSize: 12, fontWeight: 700, border: "2px dashed var(--line)", borderRadius: "var(--r-md)", background: "transparent", color: "var(--muted)", cursor: "pointer", textAlign: "center" }}>
-                    📤 Dosya Yükle (sürükle-bırak veya tıkla)
+                    {t.tr("📤 Dosya Yükle (sürükle-bırak veya tıkla)")}
                   </button>
                   {/* File list */}
                   {cloudFiles.map((f) => (
@@ -2415,18 +2417,18 @@ export default function LivePage() {
                           {f.type === "pdf" ? "📄" : f.type === "video" ? "🎬" : f.type === "pptx" ? "📊" : "📝"}
                         </span>
                         <div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)" }}>{f.name}</div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink)" }}>{t.tr(f.name)}</div>
                           <div style={{ fontSize: 9, color: "var(--muted)" }}>{f.size} • {f.date}</div>
                         </div>
                       </div>
                       <div style={{ display: "flex", gap: 4 }}>
-                        <button style={{ padding: "3px 8px", fontSize: 9, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 4, color: "#6366f1", cursor: "pointer", fontWeight: 600 }}>📥 İndir</button>
+                        <button style={{ padding: "3px 8px", fontSize: 9, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 4, color: "#6366f1", cursor: "pointer", fontWeight: 600 }}>{t.tr("📥 İndir")}</button>
                         <button style={{ padding: "3px 8px", fontSize: 9, background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 4, color: "#ef4444", cursor: "pointer", fontWeight: 600 }}>🗑</button>
                       </div>
                     </div>
                   ))}
                   <div style={{ textAlign: "center", fontSize: 10, color: "var(--muted)", padding: 8 }}>
-                    Toplam: {cloudFiles.length} dosya • Kullanılan alan: 54.6 MB / 5 GB
+                    {t.tr("Toplam:")}: {cloudFiles.length} {t.tr("dosya")} • {t.tr("Kullanılan alan:")} 54.6 MB / 5 GB
                   </div>
                 </>
               )}
@@ -2434,11 +2436,11 @@ export default function LivePage() {
                 <div key={l.id} style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>📼 {l.title}</div>
-                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{l.date} • {l.duration} • {l.participants} katılımcı</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink)" }}>📼 {t.tr(l.title)}</div>
+                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{l.date} • {l.duration} • {l.participants} {t.tr("katılımcı")}</div>
                     </div>
                     <div style={{ display: "flex", gap: 4 }}>
-                      <button style={{ padding: "4px 10px", fontSize: 9, fontWeight: 700, background: "#6366f1", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}>▶ İzle</button>
+                      <button style={{ padding: "4px 10px", fontSize: 9, fontWeight: 700, background: "#6366f1", color: "#fff", border: "none", borderRadius: 4, cursor: "pointer" }}>{t.tr("▶ İzle")}</button>
                       <button style={{ padding: "4px 10px", fontSize: 9, fontWeight: 600, background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 4, color: "var(--muted)", cursor: "pointer" }}>📥</button>
                     </div>
                   </div>
@@ -2447,13 +2449,13 @@ export default function LivePage() {
               {cloudTab === "sync" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center", padding: 20 }}>
                   <div style={{ fontSize: 40 }}>🔄</div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>Senkronizasyon Durumu</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)" }}>{t.tr("Senkronizasyon Durumu")}</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
                     {[
-                      { l: "Tahta Verileri", s: "Güncel", c: "#10b981" },
-                      { l: "Sohbet Geçmişi", s: "Güncel", c: "#10b981" },
-                      { l: "Anket Sonuçları", s: "Güncel", c: "#10b981" },
-                      { l: "Ders Kaydı", s: isRecordingScreen ? "Kaydediliyor..." : "Bekliyor", c: isRecordingScreen ? "#eab308" : "var(--muted)" },
+                      { l: t.tr("Tahta Verileri"), s: t.tr("Güncel"), c: "#10b981" },
+                      { l: t.tr("Sohbet Geçmişi"), s: t.tr("Güncel"), c: "#10b981" },
+                      { l: t.tr("Anket Sonuçları"), s: t.tr("Güncel"), c: "#10b981" },
+                      { l: t.tr("Ders Kaydı"), s: isRecordingScreen ? t.tr("Kaydediliyor...") : t.tr("Bekliyor"), c: isRecordingScreen ? "#eab308" : "var(--muted)" },
                     ].map(({ l, s, c }) => (
                       <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "6px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--line)" }}>
                         <span style={{ fontSize: 11, color: "var(--ink)" }}>{l}</span>
@@ -2461,7 +2463,7 @@ export default function LivePage() {
                       </div>
                     ))}
                   </div>
-                  <button style={{ padding: "8px 24px", fontSize: 11, fontWeight: 700, background: "#6366f1", color: "#fff", border: "none", borderRadius: "var(--r-md)", cursor: "pointer", marginTop: 8 }}>🔄 Şimdi Senkronize Et</button>
+                  <button style={{ padding: "8px 24px", fontSize: 11, fontWeight: 700, background: "#6366f1", color: "#fff", border: "none", borderRadius: "var(--r-md)", cursor: "pointer", marginTop: 8 }}>{t.tr("🔄 Şimdi Senkronize Et")}</button>
                 </div>
               )}
             </div>
@@ -2474,7 +2476,7 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowTranslation(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(440px,90vw)", maxHeight: "80vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>🌐 Çeviri & Altyazı</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🌐 Çeviri & Altyazı")}</div>
               <button onClick={() => setShowTranslation(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
@@ -2497,13 +2499,13 @@ export default function LivePage() {
               </div>
               {/* Input */}
               <textarea value={transText} onChange={(e) => setTransText(e.target.value)} rows={4}
-                placeholder="Çevrilecek metni girin..."
+                placeholder={t.tr("Çevrilecek metni girin...")}
                 style={{ width: "100%", padding: "10px", fontSize: 12, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", resize: "none", fontFamily: "inherit" }} />
               <button onClick={() => {
                 // Placeholder translation (will use real API when integrated)
                 setTransResult(`[${transLang.toUpperCase()}] ${transText}\n\n(Gerçek çeviri API bağlantısı kurulduğunda otomatik çevrilecektir)`);
               }} style={{ padding: "10px", fontSize: 12, fontWeight: 700, border: "none", borderRadius: "var(--r-md)", cursor: "pointer", background: "linear-gradient(135deg,#eab308,#f59e0b)", color: "#fff" }}>
-                🌐 Çevir
+                {t.tr("🌐 Çevir")}
               </button>
               {/* Result */}
               {transResult && (
@@ -2514,11 +2516,11 @@ export default function LivePage() {
               {/* Live subtitles toggle */}
               <div style={{ padding: "10px 12px", borderRadius: "var(--r-md)", border: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)" }}>🎙️ Canlı Altyazı</div>
-                  <div style={{ fontSize: 9, color: "var(--muted)" }}>Konuşmayı gerçek zamanlı çevir</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--ink)" }}>{t.tr("🎙️ Canlı Altyazı")}</div>
+                  <div style={{ fontSize: 9, color: "var(--muted)" }}>{t.tr("Konuşmayı gerçek zamanlı çevir")}</div>
                 </div>
                 <div style={{ padding: "4px 10px", borderRadius: 20, background: "var(--line)", fontSize: 9, fontWeight: 600, color: "var(--muted)" }}>
-                  Yakında
+                  {t.tr("Yakında")}
                 </div>
               </div>
             </div>
@@ -2531,12 +2533,12 @@ export default function LivePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowWriting(false)}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "min(460px,90vw)", maxHeight: "80vh", background: "var(--panel)", borderRadius: "var(--r-lg)", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 16px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px", borderBottom: "1px solid var(--line)" }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>✍️ Yazma Analizi</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)" }}>{t.tr("✍️ Yazma Analizi")}</div>
               <button onClick={() => setShowWriting(false)} style={{ background: "none", border: "none", fontSize: 16, cursor: "pointer", color: "var(--muted)" }}>✕</button>
             </div>
             <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, overflowY: "auto" }}>
               <textarea value={writeText} onChange={(e) => setWriteText(e.target.value)} rows={8}
-                placeholder="Yazınızı buraya girin..."
+                placeholder={t.tr("Yazınızı buraya girin...")}
                 style={{ width: "100%", padding: "12px", fontSize: 13, border: "1px solid var(--line)", borderRadius: "var(--r-sm)", background: "var(--panel)", color: "var(--ink)", resize: "vertical", fontFamily: "inherit", lineHeight: 1.7 }} />
               <button onClick={() => {
                 const words = writeText.split(/\s+/).filter(Boolean);
@@ -2551,18 +2553,18 @@ export default function LivePage() {
                 const unique = new Set(words.map((w) => w.toLowerCase()));
                 const richness = words.length > 0 ? ((unique.size / words.length) * 100).toFixed(0) : "0";
                 setWriteStats({
-                  "Kelime": String(words.length),
-                  "Karakter": String(chars),
-                  "Cümle": String(sentences.length),
-                  "Paragraf": String(paragraphs.length),
-                  "Ort. Kelime Uzunluğu": avgWordLen,
-                  "Ort. Cümle Uzunluğu": `${avgSentLen} kelime`,
-                  "Kelime Zenginliği": `%${richness}`,
-                  "Okunabilirlik": `${readability}/100`,
-                  "Tahmini Okuma": `${Math.ceil(words.length / 200)} dk`,
+                  [t.tr("Kelime")]: String(words.length),
+                  [t.tr("Karakter")]: String(chars),
+                  [t.tr("Cümle")]: String(sentences.length),
+                  [t.tr("Paragraf")]: String(paragraphs.length),
+                  [t.tr("Ort. Kelime Uzunluğu")]: avgWordLen,
+                  [t.tr("Ort. Cümle Uzunluğu")]: `${avgSentLen} ${t.tr("kelime")}`,
+                  [t.tr("Kelime Zenginliği")]: `%${richness}`,
+                  [t.tr("Okunabilirlik")]: `${readability}/100`,
+                  [t.tr("Tahmini Okuma")]: `${Math.ceil(words.length / 200)} dk`,
                 });
               }} style={{ padding: "10px", fontSize: 13, fontWeight: 700, border: "none", borderRadius: "var(--r-md)", cursor: "pointer", background: "linear-gradient(135deg,#a855f7,#7c3aed)", color: "#fff" }}>
-                📊 Analiz Et
+                {t.tr("📊 Analiz Et")}
               </button>
               {Object.keys(writeStats).length > 0 && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
@@ -2575,7 +2577,7 @@ export default function LivePage() {
                 </div>
               )}
               <div style={{ padding: "8px 10px", borderRadius: "var(--r-sm)", background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.15)", fontSize: 10, color: "var(--muted)" }}>
-                ℹ️ AI yazma analizi (dilbilgisi kontrolü, stil önerileri, kelime hazinesi değerlendirmesi) harici AI servisi bağlandığında aktif olacaktır.
+                {t.tr("ℹ️ AI yazma analizi (dilbilgisi kontrolü, stil önerileri, kelime hazinesi değerlendirmesi) harici AI servisi bağlandığında aktif olacaktır.")}
               </div>
             </div>
           </div>

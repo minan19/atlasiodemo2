@@ -420,7 +420,7 @@ export class WhiteboardService {
         sessionId,
         type: 'AI_ASSIST',
         layerId: 'default',
-        payload: { prompt, context, suggestion: result.suggestion, actions: result.actions } as Prisma.InputJsonValue,
+        payload: { prompt, context, suggestion: result.suggestion, actions: result.actions } as unknown as Prisma.InputJsonValue,
         userId,
       },
     });
@@ -543,5 +543,103 @@ export class WhiteboardService {
     out.write(']}');
     out.end();
     return out.pipe(gzip);
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Magic Switch — Whiteboard içeriğini ders dokümanına dönüştür
+  // ──────────────────────────────────────────────────────────────────────────
+  async summarizeToDocument(sessionId: string, language: 'tr' | 'en' = 'tr'): Promise<{
+    title: string;
+    introduction: string;
+    sections: { heading: string; content: string }[];
+    keyPoints: string[];
+    raw?: string;
+  }> {
+    const actions = await this.prisma.whiteboardAction.findMany({
+      where: { sessionId, reverted: false },
+      orderBy: { createdAt: 'asc' },
+      take: 500,
+    });
+
+    // TEXT eylemlerinden içerik çıkar
+    const textItems = actions
+      .filter((a: any) => a.type === 'TEXT' && (a.payload as any)?.text)
+      .map((a: any) => String((a.payload as any).text).trim())
+      .filter(Boolean);
+
+    const rawText = textItems.join('\n');
+    const apiKey = process.env.OPENAI_API_KEY;
+    const isTr = language === 'tr';
+
+    if (apiKey && rawText.length > 10) {
+      const langLabel = isTr ? 'Turkish' : 'English';
+      const prompt = `Convert the following whiteboard notes into a structured educational document in ${langLabel}. Return JSON: { title, introduction, sections: [{ heading, content }], keyPoints: string[] }.\n\nNotes:\n${rawText.slice(0, 3000)}`;
+      try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 1500, response_format: { type: 'json_object' } }),
+        });
+        const json = await res.json() as any;
+        const parsed = JSON.parse(json.choices?.[0]?.message?.content ?? '{}');
+        return { ...parsed, raw: rawText };
+      } catch { /* fall through */ }
+    }
+
+    // Mock fallback
+    return {
+      title: isTr ? 'Tahta Ders Özeti' : 'Whiteboard Session Summary',
+      introduction: isTr
+        ? `Bu belge, tahta oturumunda oluşturulan içeriklerin yapılandırılmış özetidir. Toplam ${actions.length} eylem ve ${textItems.length} metin öğesi bulunmaktadır.`
+        : `This document is a structured summary of content created during the whiteboard session. Total: ${actions.length} actions and ${textItems.length} text items.`,
+      sections: textItems.slice(0, 6).map((t: string, i: number) => ({
+        heading: isTr ? `Bölüm ${i + 1}` : `Section ${i + 1}`,
+        content: t,
+      })),
+      keyPoints: textItems.slice(0, 5),
+      raw: rawText,
+    };
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // AI Brainstorm Sticky Notes — Konu için beyin fırtınası fikirleri üret
+  // ──────────────────────────────────────────────────────────────────────────
+  async generateStickyNotes(sessionId: string, topic: string, count = 6, language: 'tr' | 'en' = 'tr'): Promise<{
+    notes: Array<{ id: string; text: string; color: string }>;
+  }> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    const isTr = language === 'tr';
+    const langLabel = isTr ? 'Turkish' : 'English';
+
+    const COLORS = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fecaca', '#e9d5ff', '#fed7aa'];
+    let ideas: string[] = [];
+
+    if (apiKey) {
+      const prompt = `Generate ${count} short, creative brainstorming ideas or key points for the topic "${topic}" in ${langLabel}. Return JSON: { ideas: string[] }. Each idea should be 5-12 words max.`;
+      try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({ model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 400, response_format: { type: 'json_object' } }),
+        });
+        const json = await res.json() as any;
+        const parsed = JSON.parse(json.choices?.[0]?.message?.content ?? '{}');
+        ideas = parsed.ideas ?? [];
+      } catch { /* fall through */ }
+    }
+
+    if (ideas.length === 0) {
+      ideas = isTr
+        ? [`${topic} temel kavramları`, `${topic} uygulamaları`, `${topic} avantajları`, `${topic} zorlukları`, `${topic} örnekleri`, `${topic} gelecek trendleri`]
+        : [`Core concepts of ${topic}`, `Applications of ${topic}`, `Benefits of ${topic}`, `Challenges in ${topic}`, `Examples of ${topic}`, `Future trends in ${topic}`];
+    }
+
+    const notes = ideas.slice(0, count).map((text, i) => ({
+      id: `sticky-${Date.now()}-${i}`,
+      text,
+      color: COLORS[i % COLORS.length],
+    }));
+
+    return { notes };
   }
 }

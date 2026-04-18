@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 const ACCESS_TOKEN_KEY = 'accessToken';
@@ -57,6 +58,7 @@ function dateLabel(value: string) {
 }
 
 export default function AdminPaymentsPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [instructors, setInstructors] = useState<Instructor[]>([]);
   const [selectedInstructorId, setSelectedInstructorId] = useState<string | null>(null);
@@ -231,7 +233,7 @@ export default function AdminPaymentsPage() {
   if (!token) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white p-6">
-        <p className="text-sm text-slate-600">Admin olarak giriş yapıp ardından tekrar deneyin.</p>
+        <p className="text-sm text-slate-600">{t.tr("Admin olarak giriş yapıp ardından tekrar deneyin.")}</p>
       </div>
     );
   }
@@ -240,10 +242,10 @@ export default function AdminPaymentsPage() {
     <main className="space-y-6">
       <header className="glass p-6 rounded-2xl border border-slate-200 hero">
         <div className="hero-content space-y-2">
-          <div className="pill w-fit">Finans Merkezi</div>
-          <h1 className="text-3xl font-semibold">Eğitmen Ödeme Merkezi</h1>
+          <div className="pill w-fit">{t.tr("Finans Merkezi")}</div>
+          <h1 className="text-3xl font-semibold">{t.tr("Eğitmen Ödeme Merkezi")}</h1>
           <p className="text-sm text-slate-600 max-w-3xl">
-            Hak edişleri görüntüleyin, manuel ödeme durumlarını kaydedin ve kurumsal raporlama için yeni kayıtlar oluşturun.
+            {t.tr("Hak edişleri görüntüleyin, manuel ödeme durumlarını kaydedin ve kurumsal raporlama için yeni kayıtlar oluşturun.")}
           </p>
         </div>
       </header>
@@ -255,7 +257,7 @@ export default function AdminPaymentsPage() {
             onChange={(event) => setSelectedInstructorId(event.target.value)}
             value={selectedInstructorId ?? ''}
           >
-            <option value="">Eğitmen seç</option>
+            <option value="">{t.tr("Eğitmen seç")}</option>
             {instructors.map((instructor) => (
               <option key={instructor.id} value={instructor.id}>
                 {instructor.name ?? instructor.email}
@@ -270,15 +272,15 @@ export default function AdminPaymentsPage() {
                 onClick={() => setRangeDays(days)}
                 disabled={busy}
               >
-                Son {days} gün
+                {t.tr("Son")} {days} {t.tr("gün")}
               </button>
             ))}
           </div>
           <button className="btn-link" onClick={() => selectedInstructorId && refresh(selectedInstructorId)} disabled={busy}>
-            Yenile
+            {t.tr("Yenile")}
           </button>
           <button className="btn-link" onClick={handleGenerate} disabled={!selectedInstructorId || busy}>
-            Hak ediş oluştur
+            {t.tr("Hak ediş oluştur")}
           </button>
         </div>
         {message ? <p className="text-xs text-emerald-600">{message}</p> : null}
@@ -286,18 +288,18 @@ export default function AdminPaymentsPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <MetricCard label="Hak ediş" value={summary ? formatCurrency(summary.payoutAmount) : '—'} idx={0} />
-        <MetricCard label="Toplam gelir" value={summary ? formatCurrency(summary.courseRevenue) : '—'} idx={1} />
-        <MetricCard label="Tamamlanan" value={summary ? `${summary.completedEnrollments} adet` : '—'} idx={2} />
+        <MetricCard label={t.tr("Hak ediş")} value={summary ? formatCurrency(summary.payoutAmount) : '—'} idx={0} />
+        <MetricCard label={t.tr("Toplam gelir")} value={summary ? formatCurrency(summary.courseRevenue) : '—'} idx={1} />
+        <MetricCard label={t.tr("Tamamlanan")} value={summary ? `${summary.completedEnrollments} ${t.tr("adet")}` : '—'} idx={2} />
       </section>
 
       <section className="glass rounded-2xl border border-slate-200 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-400 inline-block" />
-            Ek süre / bonus talepleri
+            {t.tr("Ek süre / bonus talepleri")}
           </h2>
-          <span className="pill text-xs">Yönetici onayı ile kesinleşir</span>
+          <span className="pill text-xs">{t.tr("Yönetici onayı ile kesinleşir")}</span>
         </div>
         <div className="mt-4 space-y-3">
           {approvalLoading ? (
@@ -316,22 +318,22 @@ export default function AdminPaymentsPage() {
                 <div className="space-y-1">
                   <div className="text-sm text-slate-500">{item.instructor} · {item.kind}</div>
                   <div className="font-semibold">{item.detail}</div>
-                  <div className="text-xs text-slate-500">Talep: {item.requestedBy} · Kod: {item.id}</div>
+                  <div className="text-xs text-slate-500">{t.tr("Talep")}: {item.requestedBy} · {t.tr("Kod")}: {item.id}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold">{item.suggestedAmount}</span>
-                  <StatusBadge status={item.status} />
+                  <StatusBadge status={item.status} tr={t.tr} />
                   {item.status === "PENDING" ? (
                     <div className="flex gap-2">
-                      <button className="btn-link" onClick={() => handleApproval(item.id, "APPROVED")}>Onayla</button>
-                      <button className="btn-link text-rose-700 border-rose-200" onClick={() => handleApproval(item.id, "REJECTED")}>Reddet</button>
+                      <button className="btn-link" onClick={() => handleApproval(item.id, "APPROVED")}>{t.tr("Onayla")}</button>
+                      <button className="btn-link text-rose-700 border-rose-200" onClick={() => handleApproval(item.id, "REJECTED")}>{t.tr("Reddet")}</button>
                     </div>
                   ) : null}
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-slate-500">Bekleyen onay yok.</p>
+            <p className="text-sm text-slate-500">{t.tr("Bekleyen onay yok.")}</p>
           )}
         </div>
       </section>
@@ -340,7 +342,7 @@ export default function AdminPaymentsPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
-            {instructors.find((item) => item.id === selectedInstructorId)?.name ?? 'Seçili eğitmen'}
+            {instructors.find((item) => item.id === selectedInstructorId)?.name ?? t.tr('Seçili eğitmen')}
           </h2>
           <span className="pill text-xs">{range.start} – {range.end}</span>
         </div>
@@ -354,21 +356,21 @@ export default function AdminPaymentsPage() {
                   </div>
                   <div className="text-lg font-semibold">{formatCurrency(row.amount)}</div>
                   <div className="text-xs text-slate-500">
-                    Tamamlanan: {row.completedEnrollments}, İadeler: {row.refundCount}
+                    {t.tr("Tamamlanan")}: {row.completedEnrollments}, {t.tr("İadeler")}: {row.refundCount}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <StatusBadge status={row.status} />
+                  <StatusBadge status={row.status} tr={t.tr} />
                   {row.status === 'PENDING' ? (
                     <button className="btn-link" onClick={() => handleMarkPaid(row.id)} disabled={busy}>
-                      Ödendi olarak işaretle
+                      {t.tr("Ödendi olarak işaretle")}
                     </button>
                   ) : null}
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-slate-500">Kayıt bulunamadı.</p>
+            <p className="text-sm text-slate-500">{t.tr("Kayıt bulunamadı.")}</p>
           )}
         </div>
       </section>
@@ -395,13 +397,14 @@ function MetricCard({ label, value, idx = 0 }: { label: string; value: string; i
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, tr }: { status: string; tr?: (s: string) => string }) {
+  const translate = tr ?? ((s: string) => s);
   const config: Record<string, { label: string; tone: string }> = {
-    PENDING: { label: 'Bekliyor', tone: 'bg-yellow-100 text-yellow-700' },
-    PAID: { label: 'Ödendi', tone: 'bg-emerald-100 text-emerald-700' },
-    CANCELLED: { label: 'İptal', tone: 'bg-rose-100 text-rose-700' },
-    APPROVED: { label: 'Onaylandı', tone: 'bg-emerald-100 text-emerald-700' },
-    REJECTED: { label: 'Reddedildi', tone: 'bg-rose-100 text-rose-700' },
+    PENDING: { label: translate('Bekliyor'), tone: 'bg-yellow-100 text-yellow-700' },
+    PAID: { label: translate('Ödendi'), tone: 'bg-emerald-100 text-emerald-700' },
+    CANCELLED: { label: translate('İptal'), tone: 'bg-rose-100 text-rose-700' },
+    APPROVED: { label: translate('Onaylandı'), tone: 'bg-emerald-100 text-emerald-700' },
+    REJECTED: { label: translate('Reddedildi'), tone: 'bg-rose-100 text-rose-700' },
   };
   const badge = config[status] ?? { label: status, tone: 'bg-slate-100 text-slate-600' };
   return <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.tone}`}>{badge.label}</span>;

@@ -5,6 +5,7 @@ import { EmailVerifyBanner } from './_components/email-verify-banner';
 import { RoleProvider } from './_components/role-context';
 import { LangDirEffect } from "./_components/lang-dir-effect";
 import { ThemeProvider } from "./_components/theme-provider";
+import GhostMentorWidget from "./_components/ghost-mentor-widget";
 
 const headingFont = Space_Grotesk({
   subsets: ['latin', 'latin-ext'],
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <EmailVerifyBanner />
               <main className="content-shell animate-fade-slide-up">{children}</main>
             </div>
+            <GhostMentorWidget />
           </RoleProvider>
         </ThemeProvider>
       </body>

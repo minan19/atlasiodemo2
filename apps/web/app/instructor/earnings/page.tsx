@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 const ACCESS_TOKEN_KEY = 'accessToken';
@@ -45,6 +46,22 @@ function dateLabel(value: string) {
   return new Date(value).toLocaleDateString('tr-TR');
 }
 
+const DEMO_SUMMARY: Summary = {
+  instructorId: 'demo',
+  periodStart: '2026-03-06',
+  periodEnd: '2026-04-04',
+  completedEnrollments: 20,
+  refundCount: 2,
+  courseRevenue: '8000',
+  refundImpact: '-400',
+  baseFee: '1500',
+  perEnrollmentFee: '50',
+  revenueShare: '0.2',
+  perEnrollmentTotal: '1000',
+  revenueShareTotal: '1600',
+  payoutAmount: '5300',
+};
+
 const DEMO_HISTORY: PaymentRecord[] = [
   {
     id: 'demo-1',
@@ -73,6 +90,7 @@ const DEMO_HISTORY: PaymentRecord[] = [
 ];
 
 export default function InstructorEarningsPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [summary, setSummary] = useState<Summary | null>(null);
   const [history, setHistory] = useState<PaymentRecord[]>([]);
@@ -133,23 +151,24 @@ export default function InstructorEarningsPage() {
   if (!token) {
     return (
       <div className="glass space-y-4 rounded-2xl p-6">
-        <p className="text-slate-600 dark:text-slate-400">Önce giriş yapmanız gerekiyor.</p>
+        <p className="text-slate-600 dark:text-slate-400">{t.tr("Önce giriş yapmanız gerekiyor.")}</p>
         <Link href="/login" className="btn-link">
-          Giriş yap
+          {t.tr("Giriş yap")}
         </Link>
       </div>
     );
   }
 
-  const payout = summary ? Number(summary.payoutAmount) : 0;
-  const barWidth = (val: string) => {
-    if (!payout || payout === 0) return '0%';
-    const pct = Math.min(100, Math.max(0, (Number(val) / payout) * 100));
-    return `${pct.toFixed(1)}%`;
-  };
-
   const isDemo = history.length === 0 && summary === null;
   const displayHistory = isDemo ? DEMO_HISTORY : history;
+  const displaySummary = summary ?? (isDemo ? DEMO_SUMMARY : null);
+
+  const payout = displaySummary ? Number(displaySummary.payoutAmount) : 0;
+  const barWidth = (val: string) => {
+    if (!payout || payout === 0) return '0%';
+    const pct = Math.min(100, Math.max(0, (Math.abs(Number(val)) / payout) * 100));
+    return `${pct.toFixed(1)}%`;
+  };
 
   return (
     <main className="space-y-6">
@@ -159,14 +178,14 @@ export default function InstructorEarningsPage() {
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Hakediş Panosu
+                {t.instructor.earnings}
               </h1>
               <span className="pill bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                Eğitmen Finans
+                {t.roles.instructor}
               </span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-lg">
-              Otomatik hesaplanan hak edişleri, tamamlanan eğitimler ve toplam gelirler burada toplanıyor.
+              {t.tr("Otomatik hesaplanan hak edişleri, tamamlanan eğitimler ve toplam gelirler burada toplanıyor.")}
             </p>
             <p className="text-xs font-medium text-slate-600 dark:text-slate-300 pt-1">
               {dateLabel(range.start)} – {dateLabel(range.end)}
@@ -207,50 +226,50 @@ export default function InstructorEarningsPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <MetricCard
           icon="💰"
-          label="Hak ediş"
-          value={summary ? formatCurrency(summary.payoutAmount) : '—'}
+          label={t.tr("Hak ediş")}
+          value={displaySummary ? formatCurrency(displaySummary.payoutAmount) : '—'}
           gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
           trendColor="text-emerald-600 dark:text-emerald-400"
-          trendLabel={summary ? `${summary.completedEnrollments} tamamlanan` : 'veri bekleniyor'}
+          trendLabel={displaySummary ? `${displaySummary.completedEnrollments} tamamlanan` : 'veri bekleniyor'}
         />
         <MetricCard
           icon="📈"
           label="Toplam Gelir"
-          value={summary ? formatCurrency(summary.courseRevenue) : '—'}
+          value={displaySummary ? formatCurrency(displaySummary.courseRevenue) : '—'}
           gradient="from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20"
           trendColor="text-blue-600 dark:text-blue-400"
-          trendLabel={summary ? `${summary.refundCount} iade` : 'veri bekleniyor'}
+          trendLabel={displaySummary ? `${displaySummary.refundCount} iade` : 'veri bekleniyor'}
         />
         <MetricCard
           icon="🎓"
           label="Tamamlanan"
-          value={summary ? `${summary.completedEnrollments} kişi` : '—'}
+          value={displaySummary ? `${displaySummary.completedEnrollments} kişi` : '—'}
           gradient="from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20"
           trendColor="text-violet-600 dark:text-violet-400"
-          trendLabel={summary ? `dönem: ${rangeDays} gün` : 'veri bekleniyor'}
+          trendLabel={displaySummary ? `dönem: ${rangeDays} gün` : 'veri bekleniyor'}
         />
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
         {/* Revenue Breakdown */}
         <div className="glass rounded-2xl p-5 space-y-4">
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Gelir Bileşenleri</p>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t.tr("Gelir Bileşenleri")}</p>
           <div className="space-y-3">
             {[
-              { label: 'Sabit Ücret', val: summary?.baseFee ?? '0' },
-              { label: 'Kişi Başı', val: summary?.perEnrollmentTotal ?? '0' },
-              { label: 'Paylaşım', val: summary?.revenueShareTotal ?? '0' },
-              { label: 'İade Etkisi', val: summary?.refundImpact ?? '0' },
+              { label: 'Sabit Ücret', val: displaySummary?.baseFee ?? '0' },
+              { label: 'Kişi Başı', val: displaySummary?.perEnrollmentTotal ?? '0' },
+              { label: 'Paylaşım', val: displaySummary?.revenueShareTotal ?? '0' },
+              { label: 'İade Etkisi', val: displaySummary?.refundImpact ?? '0' },
             ].map(({ label, val }) => (
               <div key={label} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500 dark:text-slate-400">{label}</span>
-                  <strong className="text-slate-800 dark:text-slate-100">{summary ? formatCurrency(val) : '—'}</strong>
+                  <strong className="text-slate-800 dark:text-slate-100">{displaySummary ? formatCurrency(val) : '—'}</strong>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                   <div
                     className="h-1.5 rounded-full bg-emerald-400 dark:bg-emerald-500 transition-all duration-500"
-                    style={{ width: summary ? barWidth(val) : '0%' }}
+                    style={{ width: displaySummary ? barWidth(val) : '0%' }}
                   />
                 </div>
               </div>
@@ -260,16 +279,16 @@ export default function InstructorEarningsPage() {
 
         {/* Earnings Info */}
         <div className="glass rounded-2xl p-5 space-y-3">
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Özet</p>
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{t.tr("Özet")}</p>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            {summary
-              ? `Temel ücret + ${summary.completedEnrollments} tamamlanan eğitim üzerinden hesaplanır. İade edilenler toplamdan düşülür. Seçili dönem: ${dateLabel(range.start)} – ${dateLabel(range.end)}.`
+            {displaySummary
+              ? `Temel ücret + ${displaySummary.completedEnrollments} tamamlanan eğitim üzerinden hesaplanır. İade edilenler toplamdan düşülür. Seçili dönem: ${dateLabel(range.start)} – ${dateLabel(range.end)}.`
               : 'Dönem seçip "Yenile" düğmesine tıklayarak gelir bilgilerinizi görüntüleyebilirsiniz.'}
           </p>
-          {summary && (
+          {displaySummary && (
             <div className="mt-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
-              <div>Kişi başı ücret: {formatCurrency(summary.perEnrollmentFee)}</div>
-              <div>Gelir paylaşım oranı: %{(Number(summary.revenueShare) * 100).toFixed(0)}</div>
+              <div>Kişi başı ücret: {formatCurrency(displaySummary.perEnrollmentFee)}</div>
+              <div>Gelir paylaşım oranı: %{(Number(displaySummary.revenueShare) * 100).toFixed(0)}</div>
             </div>
           )}
         </div>
@@ -279,8 +298,8 @@ export default function InstructorEarningsPage() {
       <section className="glass rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <p className="text-base font-semibold text-slate-800 dark:text-slate-100">Hak Ediş Geçmişi</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Son 6 kayıt</p>
+            <p className="text-base font-semibold text-slate-800 dark:text-slate-100">{t.tr("Hak Ediş Geçmişi")}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{t.tr("Son 6 kayıt")}</p>
           </div>
           <span className="pill bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 text-xs">
             {dateLabel(range.start)} – {dateLabel(range.end)}
@@ -289,7 +308,7 @@ export default function InstructorEarningsPage() {
 
         {isDemo && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 px-4 py-2 text-xs text-amber-700 dark:text-amber-300">
-            Demo verisi gösteriliyor. Gerçek kayıtlar için API bağlantısını kontrol edin.
+            {t.tr("Demo verisi gösteriliyor. Gerçek kayıtlar için API bağlantısını kontrol edin.")}
           </div>
         )}
 
@@ -332,9 +351,9 @@ export default function InstructorEarningsPage() {
             ))
           ) : (
             <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-6 py-8 text-center">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Henüz kayıt yok.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t.tr("Henüz kayıt yok.")}</p>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                Tamamlanan eğitimler sonrası hak ediş kayıtları burada görünür.
+                {t.tr("Tamamlanan eğitimler sonrası hak ediş kayıtları burada görünür.")}
               </p>
             </div>
           )}

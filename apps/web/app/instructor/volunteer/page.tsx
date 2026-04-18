@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 const ACCESS_TOKEN = 'accessToken';
@@ -33,6 +34,7 @@ type ValueScore = {
 };
 
 export default function InstructorVolunteerPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [courses, setCourses] = useState<Course[]>([]);
   const [contents, setContents] = useState<VolunteerContent[]>([]);
@@ -112,7 +114,7 @@ export default function InstructorVolunteerPage() {
   };
 
   if (!token) {
-    return <p className="text-sm text-slate-600">Eğitmen rolündeki hesabınla giriş yapman gerekiyor.</p>;
+    return <p className="text-sm text-slate-600">{t.tr("Eğitmen rolündeki hesabınla giriş yapman gerekiyor.")}</p>;
   }
 
   const scoreNum = score ? Number(score.summary.score) : 0;
@@ -126,11 +128,11 @@ export default function InstructorVolunteerPage() {
           <div>
             <div className="mb-3 flex items-center gap-2">
               <span className="pill bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1">
-                Değer Sistemi
+                {t.roles.instructor}
               </span>
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              Gönüllü İçerik Katkısı
+              {t.instructor.volunteer}
             </h1>
             <p className="mt-2 max-w-lg text-sm text-slate-500 leading-relaxed">
               İstediğin zaman ek dersler ve dokümanlar paylaş; platform kaliteni sayısallaştırarak
@@ -138,7 +140,7 @@ export default function InstructorVolunteerPage() {
             </p>
           </div>
           <Link href="/instructor" className="btn-link shrink-0 text-sm">
-            ← Panele dön
+            {t.tr("← Panele dön")}
           </Link>
         </div>
       </header>
@@ -149,7 +151,7 @@ export default function InstructorVolunteerPage() {
           <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-violet-400 inline-block" />
-              Eğitmen Değer Skoru
+              {t.tr("Eğitmen Değer Skoru")}
             </h2>
             {score.record ? (
               <span className="text-xs text-slate-400">
@@ -195,7 +197,7 @@ export default function InstructorVolunteerPage() {
 
             {/* Stat chips */}
             <div className="flex flex-wrap gap-3">
-              <ValueCard label="Onaylı Katkı" value={`${score.summary.approvedCount}`} unit="içerik" color="emerald" />
+              <ValueCard label={t.tr("Onaylı Katkı")} value={`${score.summary.approvedCount}`} unit={t.tr("içerik")} color="emerald" />
               <ValueCard label="Geri Bildirim" value={`${score.summary.feedbackCount}`} unit="yorum" color="violet" />
               <ValueCard label="Ortalama Puan" value={Number(score.summary.averageRating).toFixed(1)} unit="/ 5" color="amber" />
             </div>
@@ -204,7 +206,7 @@ export default function InstructorVolunteerPage() {
           {/* Progress bar */}
           <div className="mt-6">
             <div className="mb-1 flex justify-between text-xs text-slate-400">
-              <span>İlerleme</span>
+              <span>{t.tr("İlerleme")}</span>
               <span>{scoreNum.toFixed(1)} / 10</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
@@ -224,26 +226,26 @@ export default function InstructorVolunteerPage() {
       <section className="glass rounded-3xl p-6">
         <h2 className="mb-5 text-lg font-bold text-slate-900 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-blue-400 to-cyan-400 inline-block" />
-          Yeni Katkı Ekle
+          {t.tr("Yeni Katkı Ekle")}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-            placeholder="Başlık *"
-            value={form.title}
+            placeholder={t.tr("Başlık *")}
+            value={t.tr(form.title)}
             onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
             required
           />
           <textarea
             className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-            placeholder="Açıklama"
-            value={form.description}
+            placeholder={t.tr("Açıklama")}
+            value={t.tr(form.description)}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
             rows={3}
           />
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <input
-              placeholder="İçerik türü (örn. Ek video)"
+              placeholder={t.tr("İçerik türü (örn. Ek video)")}
               className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
               value={form.contentType}
               onChange={(e) => setForm((prev) => ({ ...prev, contentType: e.target.value }))}
@@ -264,10 +266,10 @@ export default function InstructorVolunteerPage() {
               value={form.courseId}
               onChange={(e) => setForm((prev) => ({ ...prev, courseId: e.target.value }))}
             >
-              <option value="">Kurs seçme</option>
+              <option value="">{t.tr("Kurs seçme")}</option>
               {courses.map((course) => (
                 <option key={course.id} value={course.id}>
-                  {course.title}
+                  {t.tr(course.title)}
                 </option>
               ))}
             </select>
@@ -299,7 +301,7 @@ export default function InstructorVolunteerPage() {
       <section className="glass rounded-3xl p-6">
         <h2 className="mb-5 text-lg font-bold text-slate-900 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-orange-400 inline-block" />
-          Katkılarım
+          {t.tr("Katkılarım")}
           <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-sm font-semibold text-slate-500">
             {contents.length}
           </span>
@@ -320,7 +322,7 @@ export default function InstructorVolunteerPage() {
         ) : (
           <div className="flex flex-col items-center gap-2 py-12 text-slate-400">
             <span className="text-4xl">📤</span>
-            <p className="text-sm">Henüz gönüllü içerik yok.</p>
+            <p className="text-sm">{t.tr("Henüz gönüllü içerik yok.")}</p>
           </div>
         )}
       </section>

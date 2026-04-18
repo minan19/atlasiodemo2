@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
@@ -36,6 +37,7 @@ export default function PaymentSuccessPage() {
 }
 
 function PaymentSuccessInner() {
+  const t = useI18n();
   const params = useSearchParams();
   const pid = params.get("pid");
   const { data } = useSWR(pid ? `payment-${pid}` : null, () => fetchPayment(pid!));
@@ -49,8 +51,8 @@ function PaymentSuccessInner() {
       delay: Math.random() * 1.2,
     }));
     setConfetti(particles);
-    const t = setTimeout(() => setConfetti([]), 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setConfetti([]), 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -73,25 +75,25 @@ function PaymentSuccessInner() {
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Ödeme Başarılı!</h1>
+          <h1 className="text-3xl font-bold text-slate-900">{t.payments.successTitle}</h1>
           <p className="text-slate-500 mt-2 text-sm">
-            Satın alma işleminiz tamamlandı. Erişiminiz birkaç saniye içinde aktifleşecek.
+            {t.payments.successDesc}
           </p>
         </div>
 
         {data && (
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 space-y-2 text-left">
-            <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wide">İşlem Özeti</div>
+            <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wide">{t.tr("İşlem Özeti")}</div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">İşlem No</span>
+              <span className="text-slate-600">{t.tr("İşlem No")}</span>
               <span className="font-mono text-slate-800 text-xs">{data.id.slice(0, 12)}…</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">Tutar</span>
+              <span className="text-slate-600">{t.tr("Tutar")}</span>
               <span className="font-semibold text-emerald-700">{data.amount} {data.currency}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">Durum</span>
+              <span className="text-slate-600">{t.tr("Durum")}</span>
               <span className="pill text-xs bg-emerald-50 border-emerald-200 text-emerald-700">✓ {data.status}</span>
             </div>
           </div>
@@ -100,21 +102,22 @@ function PaymentSuccessInner() {
         <div className="grid grid-cols-2 gap-3">
           <Link
             href="/my-courses"
-            className="btn-link justify-center text-sm font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg"
+            className="btn-link justify-center text-sm font-semibold"
+            style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
           >
-            📚 Kurslarıma Git
+            {t.tr("📚 Kurslarıma Git")}
           </Link>
           <Link
             href="/courses"
             className="btn-link justify-center text-sm font-medium border-slate-200 bg-white text-slate-700"
           >
-            Diğer Kurslar
+            {t.tr("Diğer Kurslar")}
           </Link>
         </div>
 
         <p className="text-xs text-slate-400">
-          Fatura e-postanıza gönderildi. Sorularınız için{" "}
-          <Link href="/portal" className="text-emerald-600 hover:underline">destek merkezi</Link>ne başvurun.
+          {t.tr("Fatura e-postanıza gönderildi. Sorularınız için")}{" "}
+          <Link href="/portal" className="text-emerald-600 hover:underline">{t.tr("destek merkezi")}</Link>{t.tr("ne başvurun.")}
         </p>
       </div>
     </div>

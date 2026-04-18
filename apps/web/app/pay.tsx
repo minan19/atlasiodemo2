@@ -89,7 +89,8 @@ export default function PayDemoPage() {
         <button
           onClick={handleCheckout}
           disabled={busy}
-          className="btn-link w-full justify-center font-semibold border-emerald-500 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg disabled:opacity-60"
+          className="btn-link w-full justify-center font-semibold disabled:opacity-60"
+          style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
         >
           {busy ? "🔄 Yönlendiriliyor…" : "💳 Checkout'a Git"}
         </button>

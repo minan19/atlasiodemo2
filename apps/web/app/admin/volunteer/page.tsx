@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../../_i18n/use-i18n';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4100';
 const ACCESS_TOKEN = 'accessToken';
@@ -56,6 +57,7 @@ function getInitials(name: string | undefined, email: string): string {
 }
 
 export default function AdminVolunteerPage() {
+  const t = useI18n();
   const [token, setToken] = useState('');
   const [contents, setContents] = useState<VolunteerContent[]>([]);
   const [filter, setFilter] = useState<string>('PENDING');
@@ -78,10 +80,10 @@ export default function AdminVolunteerPage() {
       const params = new URLSearchParams();
       if (filter) params.set('status', filter);
       const res = await fetch(`${API_BASE}/volunteer-contents/admin?${params.toString()}`, { headers });
-      if (!res.ok) throw new Error('Veri yüklenemedi');
+      if (!res.ok) throw new Error(t.tr('Veri yüklenemedi'));
       setContents(await res.json());
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'İşlem başarısız');
+      setError(err instanceof Error ? err.message : t.tr('İşlem başarısız'));
     } finally {
       setBusy(false);
     }
@@ -103,18 +105,18 @@ export default function AdminVolunteerPage() {
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error('Durum güncellenemedi');
-      setMessage('Durum güncellendi.');
+      if (!res.ok) throw new Error(t.tr('Durum güncellenemedi'));
+      setMessage(t.tr('Durum güncellendi.'));
       load();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'İşlem başarısız');
+      setError(err instanceof Error ? err.message : t.tr('İşlem başarısız'));
     } finally {
       setBusy(false);
     }
   };
 
   if (!token) {
-    return <p className="text-sm text-slate-600">Admin rolündeki hesabınla giriş yapman gerekiyor.</p>;
+    return <p className="text-sm text-slate-600">{t.tr("Admin rolündeki hesabınla giriş yapman gerekiyor.")}</p>;
   }
 
   const isDemo = contents.length === 0 && !busy;
@@ -136,10 +138,10 @@ export default function AdminVolunteerPage() {
       <div className="glass rounded-2xl p-6 hero">
         <div className="hero-content flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <div className="pill w-fit">Admin Onay Merkezi</div>
-            <h1 className="text-2xl font-bold">İçerik <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-blue-500">Denetimi</span></h1>
+            <div className="pill w-fit">{t.tr("Admin Onay Merkezi")}</div>
+            <h1 className="text-2xl font-bold">{t.tr("İçerik")} <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-blue-500">Denetimi</span></h1>
             <p className="text-sm text-slate-500">
-              Eğitmenlerin sunduğu bonus içerikleri onaylayın, reddedin veya incelemeye alın.
+              {t.tr("Eğitmenlerin sunduğu bonus içerikleri onaylayın, reddedin veya incelemeye alın.")}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -150,7 +152,7 @@ export default function AdminVolunteerPage() {
             >
               {STATUS_OPTIONS.map((key) => (
                 <option key={key} value={key}>
-                  {STATUS_LABELS[key] ?? key}
+                  {t.tr(STATUS_LABELS[key] ?? key)}
                 </option>
               ))}
             </select>
@@ -159,7 +161,7 @@ export default function AdminVolunteerPage() {
               className="btn-link rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               disabled={busy}
             >
-              Yenile
+              {t.tr("Yenile")}
             </button>
           </div>
         </div>
@@ -169,15 +171,15 @@ export default function AdminVolunteerPage() {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/50 p-4 text-center">
           <p className="text-2xl font-bold text-amber-700">{pendingCount}</p>
-          <p className="text-xs text-slate-500 mt-1">⏳ İnceleme</p>
+          <p className="text-xs text-slate-500 mt-1">{t.tr("⏳ İnceleme")}</p>
         </div>
         <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 text-center">
           <p className="text-2xl font-bold text-emerald-700">{approvedCount}</p>
-          <p className="text-xs text-slate-500 mt-1">✅ Onaylı</p>
+          <p className="text-xs text-slate-500 mt-1">{t.tr("✅ Onaylı")}</p>
         </div>
         <div className="rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100/50 p-4 text-center">
           <p className="text-2xl font-bold text-rose-700">{rejectedCount}</p>
-          <p className="text-xs text-slate-500 mt-1">❌ Reddedildi</p>
+          <p className="text-xs text-slate-500 mt-1">❌ {t.tr("Reddedildi")}</p>
         </div>
       </div>
 
@@ -193,7 +195,7 @@ export default function AdminVolunteerPage() {
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
-            {STATUS_LABELS[key] ?? key}
+            {t.tr(STATUS_LABELS[key] ?? key)}
           </button>
         ))}
       </div>
@@ -214,7 +216,7 @@ export default function AdminVolunteerPage() {
       {isDemo && (
         <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           <span className="font-bold text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">DEMO</span>
-          <span>API'ye bağlanılamadı. Örnek veriler gösteriliyor.</span>
+          <span>{t.tr("API'ye bağlanılamadı. Örnek veriler gösteriliyor.")}</span>
         </div>
       )}
 
@@ -241,7 +243,7 @@ export default function AdminVolunteerPage() {
         ) : displayContents.length === 0 ? (
           <div className="glass rounded-2xl p-12 text-center">
             <p className="text-4xl mb-4">📋</p>
-            <p className="text-sm text-slate-500 font-medium">Bu filtreyle içerik bulunamadı.</p>
+            <p className="text-sm text-slate-500 font-medium">{t.tr("Bu filtreyle içerik bulunamadı.")}</p>
           </div>
         ) : (
           displayContents.map((item) => (
@@ -258,7 +260,7 @@ export default function AdminVolunteerPage() {
                     </p>
                     {item.course?.title && (
                       <span className="inline-block mt-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium">
-                        {item.course.title}
+                        {t.tr(item.course.title)}
                       </span>
                     )}
                   </div>
@@ -267,15 +269,15 @@ export default function AdminVolunteerPage() {
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(item.status)}`}
                 >
-                  {STATUS_LABELS[item.status] ?? item.status}
+                  {t.tr(STATUS_LABELS[item.status] ?? item.status)}
                 </span>
               </div>
 
               {/* Body */}
               <div className="mt-3">
-                <h2 className="text-base font-bold text-slate-900">{item.title}</h2>
+                <h2 className="text-base font-bold text-slate-900">{t.tr(item.title)}</h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  Gönderildi: {new Date(item.submittedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {t.tr("Gönderildi")}: {new Date(item.submittedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
               </div>
 
@@ -294,21 +296,21 @@ export default function AdminVolunteerPage() {
                   disabled={busy}
                   onClick={() => handleStatusChange(item.id, 'APPROVED')}
                 >
-                  ✅ Onayla
+                  ✅ {t.tr("Onayla")}
                 </button>
                 <button
                   className="flex items-center gap-1.5 rounded-xl bg-rose-500 px-4 py-2 text-sm font-medium text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
                   disabled={busy}
                   onClick={() => handleStatusChange(item.id, 'REJECTED')}
                 >
-                  ❌ Reddet
+                  ❌ {t.tr("Reddet")}
                 </button>
                 <button
                   className="flex items-center gap-1.5 rounded-xl bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300 disabled:opacity-50 transition-colors"
                   disabled={busy}
                   onClick={() => handleStatusChange(item.id, 'PENDING')}
                 >
-                  🔄 İncele
+                  {t.tr("🔄 İncele")}
                 </button>
               </div>
             </div>

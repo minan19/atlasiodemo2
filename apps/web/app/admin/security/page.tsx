@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { api } from '../../api/client';
+import { useI18n } from '../../_i18n/use-i18n';
 
 type Alarm = {
   id: string;
@@ -79,6 +80,7 @@ function relTime(iso: string): string {
 type FilterTab = 'all' | Severity;
 
 export default function AdminSecurityPage() {
+  const t = useI18n();
   const [alarmFilter, setAlarmFilter] = useState<FilterTab>('all');
 
   const { data: alarmData, isLoading: alarmLoading, mutate: reloadAlarms } = useSWR<Alarm[]>(
@@ -130,10 +132,10 @@ export default function AdminSecurityPage() {
       {/* Hero */}
       <header className="glass p-6 rounded-2xl border border-slate-200 hero">
         <div className="hero-content space-y-2">
-          <div className="pill w-fit">Güvenlik Merkezi</div>
-          <h1 className="text-3xl font-semibold">Güvenlik & Denetim</h1>
+          <div className="pill w-fit">{t.tr("Güvenlik Merkezi")}</div>
+          <h1 className="text-3xl font-semibold">{t.tr("Güvenlik & Denetim")}</h1>
           <p className="text-sm text-slate-600 max-w-2xl">
-            Platform güvenlik alarmları, kimlik doğrulama olayları ve denetim kayıtlarını gerçek zamanlı izleyin.
+            {t.tr("Platform güvenlik alarmları, kimlik doğrulama olayları ve denetim kayıtlarını gerçek zamanlı izleyin.")}
           </p>
         </div>
       </header>
@@ -144,7 +146,7 @@ export default function AdminSecurityPage() {
           <div key={i} className={`rounded-2xl border p-4 shadow-sm animate-fade-slide-up stagger-${i + 1} ${s.bg}`}>
             <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
               <span>{s.icon}</span>
-              <span>{s.label}</span>
+              <span>{t.tr(s.label)}</span>
             </div>
             <p className={`text-3xl font-bold ${s.val}`}>{s.value}</p>
           </div>
@@ -156,7 +158,7 @@ export default function AdminSecurityPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
             <span className="w-1 h-5 rounded-full bg-gradient-to-b from-rose-400 to-orange-400 inline-block" />
-            Güvenlik Alarmları
+            {t.tr("Güvenlik Alarmları")}
             {criticalCount > 0 && (
               <span className="ml-1 rounded-full bg-rose-500 px-2 py-0.5 text-xs font-bold text-white">
                 {criticalCount}
@@ -164,7 +166,7 @@ export default function AdminSecurityPage() {
             )}
           </h2>
           <button className="btn-link text-sm" onClick={() => reloadAlarms()}>
-            Yenile
+            {t.tr("Yenile")}
           </button>
         </div>
 
@@ -180,14 +182,14 @@ export default function AdminSecurityPage() {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {tab.label}
+              {t.tr(tab.label)}
             </button>
           ))}
         </div>
 
         {isAlarmDemo && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
-            ⚠ Demo verisi gösteriliyor. Gerçek alarmlar için API bağlantısını kontrol edin.
+            {t.tr("⚠ Demo verisi gösteriliyor. Gerçek alarmlar için API bağlantısını kontrol edin.")}
           </div>
         )}
 
@@ -214,7 +216,7 @@ export default function AdminSecurityPage() {
                     <span className="text-xl mt-0.5 shrink-0">{alarm.icon}</span>
                     <div className="space-y-0.5 min-w-0">
                       <p className="font-semibold text-slate-800 text-sm leading-snug">{alarm.action}</p>
-                      <p className="text-xs text-slate-400">{alarm.label} · {relTime(alarm.createdAt)}</p>
+                      <p className="text-xs text-slate-400">{t.tr(alarm.label)} · {relTime(alarm.createdAt)}</p>
                       {alarm.meta && (
                         <p className="text-xs text-slate-500 font-mono break-all">
                           {Object.entries(alarm.meta).map(([k, v]) => `${k}: ${v}`).join(' | ')}
@@ -223,14 +225,14 @@ export default function AdminSecurityPage() {
                     </div>
                   </div>
                   <span className={`rounded-full px-3 py-0.5 text-xs font-semibold shrink-0 ${s.badge}`}>
-                    {SEVERITY_LABELS[alarm.severity]}
+                    {t.tr(SEVERITY_LABELS[alarm.severity])}
                   </span>
                 </div>
               );
             })
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center">
-              <p className="text-sm text-slate-500">Bu kategoride alarm yok.</p>
+              <p className="text-sm text-slate-500">{t.tr("Bu kategoride alarm yok.")}</p>
             </div>
           )}
         </div>
@@ -240,13 +242,13 @@ export default function AdminSecurityPage() {
       <section className="glass rounded-2xl border border-slate-200 p-4 space-y-4">
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
           <span className="w-1 h-5 rounded-full bg-gradient-to-b from-slate-400 to-slate-600 inline-block" />
-          Denetim Kaydı
+          {t.tr("Denetim Kaydı")}
           <span className="pill pill-sm">Son 20</span>
         </h2>
 
         {isAuditDemo && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
-            ⚠ Demo verisi gösteriliyor.
+            {t.tr("⚠ Demo verisi gösteriliyor.")}
           </div>
         )}
 
@@ -261,10 +263,10 @@ export default function AdminSecurityPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-slate-400 border-b border-slate-100">
-                  <th className="pb-2 pr-4 font-semibold">Eylem</th>
-                  <th className="pb-2 pr-4 font-semibold">Varlık</th>
-                  <th className="pb-2 pr-4 font-semibold">Kullanıcı</th>
-                  <th className="pb-2 font-semibold">Zaman</th>
+                  <th className="pb-2 pr-4 font-semibold">{t.tr("Eylem")}</th>
+                  <th className="pb-2 pr-4 font-semibold">{t.tr("Varlık")}</th>
+                  <th className="pb-2 pr-4 font-semibold">{t.tr("Kullanıcı")}</th>
+                  <th className="pb-2 font-semibold">{t.tr("Zaman")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">

@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProctoringHooks from "../../_components/proctoring/ProctoringHooks";
+import { useTrackEvent } from "../../_hooks/use-track-event";
+import { useI18n } from "../../_i18n/use-i18n";
 
 type Choice = { id: string; text: string; isCorrect?: boolean };
 
@@ -83,6 +85,8 @@ const DIFFICULTY_LABELS: Record<number, { label: string; color: string; stars: n
 };
 
 export default function AdaptiveExamPage() {
+  const t = useI18n();
+  const track = useTrackEvent();
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState<Question | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -158,7 +162,8 @@ export default function AdaptiveExamPage() {
     const wasCorrect = correct ?? false;
 
     setLastResult(wasCorrect ? "correct" : "wrong");
-    setFeedback(wasCorrect ? "✅ Doğru!" : `❌ Yanlış — Doğru: ${question.choices.find(c => c.id === question.correctChoiceId)?.text ?? "?"}`);
+    setFeedback(wasCorrect ? `✅ ${t.tr("Doğru!")}` : `❌ ${t.tr("Yanlış")} — ${t.tr("Doğru")}: ${question.choices.find(c => c.id === question.correctChoiceId)?.text ?? "?"}`);
+    track('QUIZ_ANSWERED', { quizId: question.id, correct: wasCorrect, durationSeconds: timer });
     setStats((s) => ({
       correct: s.correct + (wasCorrect ? 1 : 0),
       total: s.total + 1,
@@ -219,16 +224,25 @@ export default function AdaptiveExamPage() {
 
   return (
     <main className="space-y-5">
+      {/* Proctoring — headless, runs silently during exam */}
+      {sessionId && (
+        <ProctoringHooks
+          sessionId={sessionId}
+          enabled={!demoMode}
+          onAlert={(msg) => console.warn("[Proctoring]", msg)}
+        />
+      )}
+
       {/* Header */}
       <header className="glass p-5 rounded-2xl border border-slate-200 hero">
         <div className="hero-content flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="pill w-fit">
               <span className="status-dot online" />
-              Adaptif Deneme {demoMode && <span className="ml-1 text-amber-600">(Demo)</span>}
+              {t.exams.adaptiveTitle} {demoMode && <span className="ml-1 text-amber-600">({t.common.demoMode})</span>}
             </div>
-            <h1 className="text-2xl font-bold">Akıllı Quiz</h1>
-            <p className="text-sm text-slate-500">Zorluk dinamik ayarlanır · Zayıf konulara odaklanır</p>
+            <h1 className="text-2xl font-bold">{t.adaptiveQuiz.title}</h1>
+            <p className="text-sm text-slate-500">{t.adaptiveQuiz.subtitle}</p>
           </div>
 
           {/* Score stats */}
@@ -243,16 +257,16 @@ export default function AdaptiveExamPage() {
               <div className={`text-2xl font-extrabold ${pct >= 70 ? "text-emerald-600" : pct >= 40 ? "text-amber-600" : "text-rose-600"}`}>
                 {pct}%
               </div>
-              <div className="text-[10px] text-slate-500">Doğruluk</div>
+              <div className="text-[10px] text-slate-500">{t.tr("Doğruluk")}</div>
             </div>
             <div className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 px-4 py-2.5 text-center">
               <div className="text-2xl font-extrabold text-blue-700">{stats.total}</div>
-              <div className="text-[10px] text-slate-500">Soru</div>
+              <div className="text-[10px] text-slate-500">{t.tr("Soru")}</div>
             </div>
             {stats.streak >= 2 && (
               <div className="glass rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-center">
                 <div className="text-2xl font-extrabold text-amber-600">🔥{stats.streak}</div>
-                <div className="text-[10px] text-amber-600">Seri</div>
+                <div className="text-[10px] text-amber-600">{t.tr("Seri")}</div>
               </div>
             )}
           </div>
@@ -261,7 +275,7 @@ export default function AdaptiveExamPage() {
         {/* Progress history dots */}
         {history.length > 0 && (
           <div className="hero-content mt-3 flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-slate-400 mr-1">Geçmiş:</span>
+            <span className="text-[10px] text-slate-400 mr-1">{t.adaptiveQuiz.questionsCount}:</span>
             {history.map((correct, i) => (
               <div
                 key={i}
@@ -281,7 +295,7 @@ export default function AdaptiveExamPage() {
         {/* Difficulty + timer bar */}
         <div className="flex items-center justify-between gap-3">
           <div className={`pill pill-sm border ${diff.color}`}>
-            {"★".repeat(diff.stars)}{"☆".repeat(3 - diff.stars)} {diff.label}
+            {"★".repeat(diff.stars)}{"☆".repeat(3 - diff.stars)} {t.tr(diff.label)}
           </div>
           {question && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -341,7 +355,7 @@ export default function AdaptiveExamPage() {
                     }`}>
                       {letter}
                     </span>
-                    <span className="text-sm leading-tight">{c.text}</span>
+                    <span className="text-sm leading-tight">{t.tr(c.text)}</span>
                   </button>
                 );
               })}
@@ -367,18 +381,18 @@ export default function AdaptiveExamPage() {
       {/* Bottom controls */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-xs text-slate-400 font-mono">
-          {demoMode ? "Demo modu • API bağlı değil" : `Oturum: ${sessionId?.slice(0, 12) ?? "—"}`}
+          {demoMode ? t.common.demoMode : `${t.tr("Oturum")}: ${sessionId?.slice(0, 12) ?? "—"}`}
         </div>
         <div className="flex gap-2">
           <button className="btn-link text-sm" onClick={() => window.history.back()}>
-            ← Geri
+            ← {t.common.back}
           </button>
           <button
             className="btn-link text-sm border-emerald-400 text-emerald-700 bg-emerald-50/60"
             onClick={start}
             disabled={loading}
           >
-            {loading ? "Yükleniyor…" : "🔄 Yeniden Başlat"}
+            {loading ? t.common.loading : `🔄 ${t.adaptiveQuiz.retryBtn}`}
           </button>
         </div>
       </div>

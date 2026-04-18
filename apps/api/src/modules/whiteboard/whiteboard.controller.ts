@@ -220,4 +220,45 @@ export class WhiteboardController {
     const revokedBy = req?.user?.id ?? req?.user?.userId;
     return this.whiteboard.revokeWrite(sessionId, dto.targetUserId, revokedBy);
   }
+
+  // ── Magic Switch — Whiteboard → Lesson Document ──────────────────────────
+  @Post(':sessionId/summarize')
+  @ApiOperation({ summary: 'Magic Switch — convert whiteboard content to structured lesson document' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { language: { type: 'string', enum: ['tr', 'en'], default: 'tr' } },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Structured lesson document returned' })
+  summarize(
+    @Param('sessionId') sessionId: string,
+    @Body('language') language: 'tr' | 'en' = 'tr',
+  ) {
+    return this.whiteboard.summarizeToDocument(sessionId, language);
+  }
+
+  // ── AI Brainstorm Sticky Notes ───────────────────────────────────────────
+  @Post(':sessionId/sticky-notes')
+  @ApiOperation({ summary: 'AI Brainstorm — generate sticky note ideas for a topic' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['topic'],
+      properties: {
+        topic: { type: 'string', example: 'Photosynthesis' },
+        count: { type: 'number', default: 6, minimum: 2, maximum: 12 },
+        language: { type: 'string', enum: ['tr', 'en'], default: 'tr' },
+      },
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Sticky note ideas returned' })
+  stickyNotes(
+    @Param('sessionId') sessionId: string,
+    @Body('topic') topic: string,
+    @Body('count') count = 6,
+    @Body('language') language: 'tr' | 'en' = 'tr',
+  ) {
+    return this.whiteboard.generateStickyNotes(sessionId, topic, count, language);
+  }
 }

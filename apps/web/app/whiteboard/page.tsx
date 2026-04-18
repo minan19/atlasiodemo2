@@ -470,7 +470,7 @@ export default function WhiteboardPage() {
 
         {/* Right panel toggles — Sınıf */}
         <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
-          <span style={{ fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.15)", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 2 }}>SINIF</span>
+          <span style={{ fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.15)", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 2 }}>{t.tr("SINIF")}</span>
           {([
             { id: "chat"         as RightPanel, icon: <Ic.Chat />,     color: "#22d3ee", label: "Sohbet" },
             { id: "participants" as RightPanel, icon: <Ic.Users />,    color: "#34d399", label: "Katılımcılar" },
@@ -495,10 +495,10 @@ export default function WhiteboardPage() {
         <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
           <span style={{ fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.15)", letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 2 }}>AI</span>
           {([
-            { id: "ai"         as RightPanel, icon: <Ic.AI />,     color: "#5B6EFF", label: "AI Asistan" },
-            { id: "brainstorm" as RightPanel, icon: <Ic.Bulb />,   color: "#9B59FF", label: "Beyin Fırtınası" },
-            { id: "magic"      as RightPanel, icon: <Ic.Magic />,  color: "#00B4D8", label: "Sihirli Dönüştür" },
-            { id: "layers"     as RightPanel, icon: <Ic.Layers />, color: "#FFB347", label: "Katmanlar" },
+            { id: "ai"         as RightPanel, icon: <Ic.AI />,     color: "#5B6EFF", label: t.tr("AI Asistan") },
+            { id: "brainstorm" as RightPanel, icon: <Ic.Bulb />,   color: "#9B59FF", label: t.tr("Beyin Fırtınası") },
+            { id: "magic"      as RightPanel, icon: <Ic.Magic />,  color: "#00B4D8", label: t.tr("Sihirli Dönüştür") },
+            { id: "layers"     as RightPanel, icon: <Ic.Layers />, color: "#FFB347", label: t.tr("Katmanlar") },
           ] as { id: RightPanel; icon: React.ReactNode; color: string; label: string }[]).map((b) => (
             <HBtn
               key={String(b.id)}
@@ -561,7 +561,7 @@ export default function WhiteboardPage() {
         background: "rgba(6,8,18,0.95)",
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
-        <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>RENK</span>
+        <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>{t.tr("RENK")}</span>
         <div
           onClick={() => document.getElementById("wb-color-input")?.click()}
           style={{ width: 18, height: 18, borderRadius: "50%", background: color, border: "2px solid rgba(255,255,255,0.3)", cursor: "pointer", flexShrink: 0, boxShadow: `0 0 8px ${color}66` }}
@@ -571,7 +571,7 @@ export default function WhiteboardPage() {
           <button key={c} onClick={() => pickColor(c)} style={{ width: 16, height: 16, borderRadius: "50%", border: color === c ? "2px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.1)", background: c, cursor: "pointer", flexShrink: 0, transform: color === c ? "scale(1.25)" : "scale(1)", transition: "transform 0.1s" }} />
         ))}
         <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)", margin: "0 4px" }} />
-        <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>KALINLIK</span>
+        <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>{t.tr("KALINLIK")}</span>
         {STROKE_WIDTHS.map(w => (
           <button key={w} onClick={() => pickWidth(w)} style={{
             height: 28, minWidth: 32, borderRadius: 6, border: "none", cursor: "pointer",
@@ -612,7 +612,7 @@ export default function WhiteboardPage() {
                 </button>
               ))}
               <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.08)" }} />
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>Opacity:</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>{t.tr("Opacity")}:</span>
               {[100,75,50,25].map(op => (
                 <button key={op} onClick={() => {}} style={{ height: 22, padding: "0 7px", borderRadius: 5, border: "none", cursor: "pointer", fontSize: 10, fontWeight: 700, background: op === 100 ? "rgba(91,110,255,0.15)" : "transparent", color: op === 100 ? "#a5b4fc" : "rgba(255,255,255,0.3)" }}>{op}%</button>
               ))}
@@ -943,7 +943,7 @@ export default function WhiteboardPage() {
           {/* AI FAB — bottom right */}
           <button
             onClick={() => toggleRight("ai")}
-            title="AI Asistan"
+            title={t.tr("AI Asistan")}
             style={{
               position: "absolute", bottom: 14, right: 14, zIndex: 10,
               width: 48, height: 48, borderRadius: "50%", border: "none", cursor: "pointer",
@@ -975,7 +975,7 @@ export default function WhiteboardPage() {
               padding: "16px 18px", borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0,
             }}>
               <span style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.85)", display: "flex", alignItems: "center", gap: 8 }}>
-                {rightPanel === "ai"         && <><GlowDot color="#5B6EFF"/><span style={{ color: "#818cf8", width: 16, height: 16, display: "flex" }}><Ic.AI /></span>AI Asistan</>}
+                {rightPanel === "ai"         && <><GlowDot color="#5B6EFF"/><span style={{ color: "#818cf8", width: 16, height: 16, display: "flex" }}><Ic.AI /></span>{t.tr("AI Asistan")}</>}
                 {rightPanel === "brainstorm" && <><GlowDot color="#9B59FF"/><span style={{ color: "#c084fc", width: 16, height: 16, display: "flex" }}><Ic.Bulb /></span>{t.tr("Beyin Fırtınası")}</>}
                 {rightPanel === "magic"      && <><GlowDot color="#00B4D8"/><span style={{ color: "#67e8f9", width: 16, height: 16, display: "flex" }}><Ic.Magic /></span>{t.tr("Sihirli Dönüştür")}</>}
                 {rightPanel === "layers"     && <><GlowDot color="#FFB347"/><span style={{ color: "#fbbf24", width: 16, height: 16, display: "flex" }}><Ic.Layers /></span>{t.tr("Katmanlar")}</>}

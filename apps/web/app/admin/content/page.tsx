@@ -35,6 +35,7 @@ const DEMO_CONTENT: ContentItem[] = [
 
 const TYPE_ICONS: Record<ContentType, string> = { video: "🎬", pdf: "📄", presentation: "📊", quiz: "🧩", document: "📝", scorm: "📦" };
 const TYPE_LABELS: Record<ContentType, string> = { video: "Video", pdf: "PDF", presentation: "Sunum", quiz: "Sınav", document: "Doküman", scorm: "SCORM" };
+const STATUS_LABELS: Record<ContentStatus, string> = { active: "Aktif", draft: "Taslak", processing: "İşleniyor…", archived: "Arşiv" };
 const TYPE_COLORS: Record<ContentType, string> = {
   video: "#5B6EFF", pdf: "#ef4444", presentation: "#f59e0b",
   quiz: "#a855f7", document: "#22c55e", scorm: "#06b6d4",
@@ -45,13 +46,12 @@ function Badge({ text, color }: { text: string; color: string }) {
   return <span style={{ padding: "2px 8px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: `${color}18`, color, border: `1px solid ${color}30` }}>{text}</span>;
 }
 
-function StatusDot({ status }: { status: ContentStatus }) {
+function StatusDot({ status, tr }: { status: ContentStatus; tr: (s: string) => string }) {
   const cfg = { active: "#22c55e", draft: "#94a3b8", processing: "#f59e0b", archived: "#6b7280" }[status];
-  const label = { active: "Aktif", draft: "Taslak", processing: "İşleniyor…", archived: "Arşiv" }[status];
   return (
     <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: cfg, fontWeight: 700 }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg, animation: status === "processing" ? "pulse 1.2s infinite" : "none" }} />
-      {label}
+      {tr(STATUS_LABELS[status])}
     </span>
   );
 }
@@ -137,7 +137,7 @@ export default function ContentManagementPage() {
           color: "#fff", fontSize: 14, fontWeight: 800,
           boxShadow: "0 4px 20px rgba(91,110,255,0.35)",
         }}>
-          <span>+</span> İçerik Yükle
+          <span>+</span> {t.tr("İçerik Yükle")}
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export default function ContentManagementPage() {
           {uploading ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
               <div style={{ fontSize: 32 }}>⬆️</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: c.text }}>Yükleniyor… {uploadProgress}%</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: c.text }}>{t.tr("Yükleniyor…")} {uploadProgress}%</div>
               <div style={{ width: 280, height: 6, background: "var(--line)", borderRadius: 99, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${uploadProgress}%`, background: `linear-gradient(90deg,${c.accent},#00B4D8)`, borderRadius: 99, transition: "width 0.1s" }} />
               </div>
@@ -174,7 +174,7 @@ export default function ContentManagementPage() {
               <div style={{ fontSize: 48 }}>☁️</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: c.text }}>{t.tr("Dosyaları buraya sürükleyin")}</div>
               <div style={{ fontSize: 13, color: c.muted }}>{t.tr("veya bilgisayarınızdan seçin")}</div>
-              <div style={{ fontSize: 11, color: c.muted }}>MP4, PDF, PPTX, DOCX, ZIP (SCORM) — Maks. 5 GB</div>
+              <div style={{ fontSize: 11, color: c.muted }}>{t.tr("MP4, PDF, PPTX, DOCX, ZIP (SCORM) — Maks. 5 GB")}</div>
               <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
                 <button onClick={simulateUpload} style={{
                   padding: "10px 24px", borderRadius: 10, border: "none", cursor: "pointer",
@@ -199,12 +199,12 @@ export default function ContentManagementPage() {
         />
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value as any)} style={{ padding: "9px 12px", borderRadius: 10, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 13, cursor: "pointer" }}>
           <option value="all">{t.tr("Tüm Tipler")}</option>
-          {(["video","pdf","presentation","quiz","document","scorm"] as ContentType[]).map(t => <option key={t} value={t}>{TYPE_LABELS[t]}</option>)}
+          {(["video","pdf","presentation","quiz","document","scorm"] as ContentType[]).map(ct => <option key={ct} value={ct}>{t.tr(TYPE_LABELS[ct])}</option>)}
         </select>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} style={{ padding: "9px 12px", borderRadius: 10, border: `1px solid ${c.border}`, background: c.bg, color: c.text, fontSize: 13, cursor: "pointer" }}>
           <option value="all">{t.tr("Tüm Durumlar")}</option>
-          <option value="active">Aktif</option>
-          <option value="draft">Taslak</option>
+          <option value="active">{t.tr("Aktif")}</option>
+          <option value="draft">{t.tr("Taslak")}</option>
           <option value="processing">{t.tr("İşleniyor")}</option>
           <option value="archived">{t.tr("Arşiv")}</option>
         </select>
@@ -220,9 +220,9 @@ export default function ContentManagementPage() {
       {/* Bulk actions */}
       {selectedIds.size > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", background: c.accentBg, borderRadius: 10, border: `1px solid rgba(91,110,255,0.3)` }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#a5b4fc" }}>{selectedIds.size} seçildi</span>
-          <button style={{ padding: "5px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(34,197,94,0.15)", color: "#4ade80", fontSize: 12, fontWeight: 700 }}>Aktif Et</button>
-          <button style={{ padding: "5px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(245,158,11,0.15)", color: "#fbbf24", fontSize: 12, fontWeight: 700 }}>Kursa Ata</button>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#a5b4fc" }}>{selectedIds.size} {t.tr("seçildi")}</span>
+          <button style={{ padding: "5px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(34,197,94,0.15)", color: "#4ade80", fontSize: 12, fontWeight: 700 }}>{t.tr("Aktif Et")}</button>
+          <button style={{ padding: "5px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(245,158,11,0.15)", color: "#fbbf24", fontSize: 12, fontWeight: 700 }}>{t.tr("Kursa Ata")}</button>
           <button style={{ padding: "5px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: "rgba(239,68,68,0.15)", color: "#f87171", fontSize: 12, fontWeight: 700 }}>{t.tr("Arşivle")}</button>
           <button onClick={() => setSelectedIds(new Set())} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: c.muted, fontSize: 16 }}>×</button>
         </div>
@@ -237,7 +237,7 @@ export default function ContentManagementPage() {
                 <th style={{ width: 36, padding: "12px 16px" }}>
                   <input type="checkbox" onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(i => i.id)) : new Set())} />
                 </th>
-                {["İçerik", "Tür", "Boyut", "Durum", "Görüntüleme", "Kurslar", "AI", ""].map(h => (
+                {[t.tr("İçerik"), t.tr("Tür"), t.tr("Boyut"), t.tr("Durum"), t.tr("Görüntüleme"), t.tr("Kurslar"), "AI", ""].map(h => (
                   <th key={h} style={{ padding: "12px 14px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "var(--ink-2)", textTransform: "uppercase", letterSpacing: "0.06em", borderBottom: `1px solid ${c.border}`, whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -260,10 +260,10 @@ export default function ContentManagementPage() {
                     </div>
                   </td>
                   <td style={{ padding: "14px 14px" }}>
-                    <Badge text={TYPE_LABELS[item.type]} color={TYPE_COLORS[item.type]} />
+                    <Badge text={t.tr(TYPE_LABELS[item.type])} color={TYPE_COLORS[item.type]} />
                   </td>
                   <td style={{ padding: "14px 14px", fontSize: 12, color: c.muted }}>{item.size}</td>
-                  <td style={{ padding: "14px 14px" }}><StatusDot status={item.status} /></td>
+                  <td style={{ padding: "14px 14px" }}><StatusDot status={item.status} tr={t.tr} /></td>
                   <td style={{ padding: "14px 14px", fontSize: 13, fontWeight: 700, color: c.text }}>{item.views.toLocaleString("tr-TR")}</td>
                   <td style={{ padding: "14px 14px", fontSize: 11, color: c.muted }}>
                     {item.assignedCourses.length > 0 ? item.assignedCourses.join(", ") : <span style={{ color: "var(--ink-2)" }}>—</span>}
@@ -276,7 +276,7 @@ export default function ContentManagementPage() {
                         padding: "3px 10px", borderRadius: 99, border: "1px solid rgba(91,110,255,0.3)", background: "rgba(91,110,255,0.08)", color: "#a5b4fc",
                         cursor: aiProcessingId === item.id ? "not-allowed" : "pointer", fontSize: 11, fontWeight: 700,
                       }}>
-                        {aiProcessingId === item.id ? "⏳ İşleniyor…" : "AI İşle"}
+                        {aiProcessingId === item.id ? t.tr("⏳ İşleniyor…") : t.tr("AI İşle")}
                       </button>
                     )}
                   </td>
@@ -284,7 +284,7 @@ export default function ContentManagementPage() {
                     <div style={{ display: "flex", gap: 6 }}>
                       <button title={t.tr("Önizle")} style={{ padding: "4px 8px", borderRadius: 7, border: `1px solid ${c.border}`, background: "transparent", color: c.muted, cursor: "pointer", fontSize: 12 }}>👁</button>
                       <button title={t.tr("Düzenle")} style={{ padding: "4px 8px", borderRadius: 7, border: `1px solid ${c.border}`, background: "transparent", color: c.muted, cursor: "pointer", fontSize: 12 }}>✏️</button>
-                      <button title="Kursa Ata" style={{ padding: "4px 8px", borderRadius: 7, border: `1px solid ${c.border}`, background: "transparent", color: c.muted, cursor: "pointer", fontSize: 12 }}>📎</button>
+                      <button title={t.tr("Kursa Ata")} style={{ padding: "4px 8px", borderRadius: 7, border: `1px solid ${c.border}`, background: "transparent", color: c.muted, cursor: "pointer", fontSize: 12 }}>📎</button>
                     </div>
                   </td>
                 </tr>
@@ -309,8 +309,8 @@ export default function ContentManagementPage() {
               <div style={{ padding: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: c.text, marginBottom: 6, lineHeight: 1.4 }}>{t.tr(item.title)}</div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <Badge text={TYPE_LABELS[item.type]} color={TYPE_COLORS[item.type]} />
-                  <StatusDot status={item.status} />
+                  <Badge text={t.tr(TYPE_LABELS[item.type])} color={TYPE_COLORS[item.type]} />
+                  <StatusDot status={item.status} tr={t.tr} />
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, fontSize: 11, color: c.muted }}>
                   <span>👁 {item.views.toLocaleString("tr-TR")}</span>

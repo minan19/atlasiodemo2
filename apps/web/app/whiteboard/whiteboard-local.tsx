@@ -1,6 +1,7 @@
 "use client";
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { useI18n } from "../_i18n/use-i18n";
 
 type Point = { x: number; y: number };
 export type WhiteboardTool =
@@ -81,6 +82,7 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
   },
   ref,
 ) {
+  const t = useI18n();
   const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const canvasRef = useRef<any>(null);
   const fabricRef = useRef<FabricType | null>(null);
@@ -1633,7 +1635,7 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
           Objeler: {objectCount}
         </div>
         {!ready && !loadError ? (
-          <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontSize: 12, color: "#64748b", background: "rgba(255,255,255,0.7)" }}>Yükleniyor…</div>
+          <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontSize: 12, color: "#64748b", background: "rgba(255,255,255,0.7)" }}>{t.tr("Yükleniyor…")}</div>
         ) : null}
         {loadError ? (
           <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontSize: 12, color: "#e11d48", background: "rgba(255,255,255,0.82)" }}>
@@ -1682,11 +1684,11 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
                 padding: "5px 12px", fontSize: 12, borderRadius: "var(--r-md)",
                 border: "1.5px solid var(--line)", background: "transparent",
                 color: "var(--muted)", cursor: "pointer",
-              }}>İptal</button>
+              }}>{t.tr("İptal")}</button>
               <button onClick={submitMath} style={{
                 padding: "5px 14px", fontSize: 12, fontWeight: 700, borderRadius: "var(--r-md)",
                 border: "none", background: "var(--accent)", color: "#fff", cursor: "pointer",
-              }}>Tuvale Ekle</button>
+              }}>{t.tr("Tuvale Ekle")}</button>
             </div>
           </div>
         )}
@@ -1703,7 +1705,7 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
             boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
             display: "flex", flexDirection: "column", gap: 8, minWidth: 220,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#92400e", letterSpacing: "0.07em" }}>NOT EKLE</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#92400e", letterSpacing: "0.07em" }}>{t.tr("NOT EKLE")}</div>
             <textarea
               autoFocus
               value={noteInput}
@@ -1714,8 +1716,8 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
               style={{ border: "1px solid #f59e0b", borderRadius: 7, padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", color: "#0f172a", background: "#fefce8", outline: "none", resize: "none" }}
             />
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-              <button onClick={() => setNoteModal(null)} style={{ padding: "4px 10px", fontSize: 11, borderRadius: 6, border: "1px solid #d97706", background: "transparent", color: "#92400e", cursor: "pointer" }}>İptal</button>
-              <button onClick={submitNote} style={{ padding: "4px 12px", fontSize: 11, fontWeight: 700, borderRadius: 6, border: "none", background: "#f59e0b", color: "#fff", cursor: "pointer" }}>Tuvale Ekle</button>
+              <button onClick={() => setNoteModal(null)} style={{ padding: "4px 10px", fontSize: 11, borderRadius: 6, border: "1px solid #d97706", background: "transparent", color: "#92400e", cursor: "pointer" }}>{t.tr("İptal")}</button>
+              <button onClick={submitNote} style={{ padding: "4px 12px", fontSize: 11, fontWeight: 700, borderRadius: 6, border: "none", background: "#f59e0b", color: "#fff", cursor: "pointer" }}>{t.tr("Tuvale Ekle")}</button>
             </div>
           </div>
         )}
@@ -1727,7 +1729,7 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
             width: 260, display: "flex", flexDirection: "column", gap: 6,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.07em" }}>BİLİMSEL HESAP MAKİNESİ</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.07em" }}>{t.tr("BİLİMSEL HESAP MAKİNESİ")}</span>
               <button onClick={() => setCalcOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", fontSize: 16, lineHeight: 1 }}>×</button>
             </div>
             <div style={{ background: "var(--bg)", borderRadius: "var(--r-md)", border: "1.5px solid var(--line)", padding: "8px 12px", minHeight: 56 }}>
@@ -1769,7 +1771,7 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
                 padding: "8px", borderRadius: "var(--r-md)", border: "1.5px solid color-mix(in srgb,var(--accent) 30%,var(--line))",
                 background: "color-mix(in srgb,var(--accent) 12%,var(--panel))",
                 color: "var(--accent)", cursor: "pointer", fontSize: 11, fontWeight: 700,
-              }}>Tuvale Ekle ↗</button>
+              }}>{t.tr("Tuvale Ekle")} ↗</button>
               <button onClick={() => calcPress("=")} style={{
                 padding: "8px", borderRadius: "var(--r-md)", border: "none",
                 background: "var(--accent)", color: "#fff", cursor: "pointer", fontSize: 16, fontWeight: 900,
@@ -1950,10 +1952,10 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
             color: calcOpen ? "var(--accent)" : "var(--ink-2)", cursor: "pointer",
           }}>🧮 Hesap</button>
           <div style={{ width: 1, height: 24, background: "var(--line)", margin: "0 4px" }} />
-          <span style={{ fontSize: 11, color: "var(--muted)" }}>Renk</span>
+          <span style={{ fontSize: 11, color: "var(--muted)" }}>{t.tr("Renk")}</span>
           <input type="color" value={color} onChange={(e) => setColor(e.target.value)}
             style={{ width: 36, height: 28, borderRadius: "var(--r-sm)", border: "1.5px solid var(--line)", cursor: "pointer", padding: 2 }} />
-          <span style={{ fontSize: 11, color: "var(--muted)" }}>Kalınlık</span>
+          <span style={{ fontSize: 11, color: "var(--muted)" }}>{t.tr("Kalınlık")}</span>
           <input type="range" min={1} max={16} value={width} onChange={(e) => setWidth(Number(e.target.value))}
             style={{ width: 100, accentColor: "var(--accent)" }} />
         </div>

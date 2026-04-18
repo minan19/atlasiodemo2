@@ -89,11 +89,11 @@ function PaymentSuccessInner() {
               <span className="font-mono text-slate-800 text-xs">{data.id.slice(0, 12)}…</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">Tutar</span>
+              <span className="text-slate-600">{t.tr("Tutar")}</span>
               <span className="font-semibold text-emerald-700">{data.amount} {data.currency}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-600">Durum</span>
+              <span className="text-slate-600">{t.tr("Durum")}</span>
               <span className="pill text-xs bg-emerald-50 border-emerald-200 text-emerald-700">✓ {data.status}</span>
             </div>
           </div>
@@ -116,8 +116,8 @@ function PaymentSuccessInner() {
         </div>
 
         <p className="text-xs text-slate-400">
-          Fatura e-postanıza gönderildi. Sorularınız için{" "}
-          <Link href="/portal" className="text-emerald-600 hover:underline">destek merkezi</Link>ne başvurun.
+          {t.tr("Fatura e-postanıza gönderildi. Sorularınız için")}{" "}
+          <Link href="/portal" className="text-emerald-600 hover:underline">{t.tr("destek merkezi")}</Link>{t.tr("ne başvurun.")}
         </p>
       </div>
     </div>

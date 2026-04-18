@@ -247,6 +247,7 @@ function MatrixDisplay({ data }: { data: number[][] }) {
 // ─── Equation Solver Tab ──────────────────────────────────────────────────────
 
 function EquationSolverTab() {
+  const t = useI18n();
   const [expression, setExpression] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [isDemo, setIsDemo] = useState(false);
@@ -395,12 +396,12 @@ function EquationSolverTab() {
             {loading ? (
               <>
                 <Spinner dark />
-                <span>Hesaplanıyor…</span>
+                <span>{t.tr("Hesaplanıyor…")}</span>
               </>
             ) : (
               <>
                 <span style={{ fontSize: 18 }}>∑</span>
-                <span>Çöz</span>
+                <span>{t.tr("Çöz")}</span>
               </>
             )}
           </button>
@@ -528,6 +529,7 @@ function EquationSolverTab() {
 // ─── Matrix Operations Tab ────────────────────────────────────────────────────
 
 function MatrixOperationsTab() {
+  const t = useI18n();
   const [matrixA, setMatrixA] = useState<number[][]>(DEFAULT_MATRIX_A.map((r) => [...r]));
   const [matrixB, setMatrixB] = useState<number[][]>(DEFAULT_MATRIX_B.map((r) => [...r]));
   const [operation, setOperation] = useState<MatrixOp>("ADD");
@@ -684,12 +686,12 @@ function MatrixOperationsTab() {
             {loading ? (
               <>
                 <Spinner dark />
-                <span>Hesaplanıyor…</span>
+                <span>{t.tr("Hesaplanıyor…")}</span>
               </>
             ) : (
               <>
                 <span style={{ fontSize: 16 }}>⊞</span>
-                <span>Hesapla</span>
+                <span>{t.tr("Hesapla")}</span>
               </>
             )}
           </button>

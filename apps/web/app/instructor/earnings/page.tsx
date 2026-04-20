@@ -287,8 +287,8 @@ export default function InstructorEarningsPage() {
           </p>
           {displaySummary && (
             <div className="mt-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
-              <div>Kişi başı ücret: {formatCurrency(displaySummary.perEnrollmentFee)}</div>
-              <div>Gelir paylaşım oranı: %{(Number(displaySummary.revenueShare) * 100).toFixed(0)}</div>
+              <div>{t.tr("Kişi başı ücret")}: {formatCurrency(displaySummary.perEnrollmentFee)}</div>
+              <div>{t.tr("Gelir paylaşım oranı")}: %{(Number(displaySummary.revenueShare) * 100).toFixed(0)}</div>
             </div>
           )}
         </div>

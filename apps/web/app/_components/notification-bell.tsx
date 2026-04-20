@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { api } from '../api/client';
+import { useI18n } from '../_i18n/use-i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

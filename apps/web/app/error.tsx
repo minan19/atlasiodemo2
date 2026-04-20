@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useI18n } from './_i18n/use-i18n';
 
 type Props = {
   error: Error & { digest?: string };

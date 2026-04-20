@@ -769,7 +769,7 @@ export default function CourseBuilderPage() {
                         {/* Add lesson form */}
                         {isAddingLesson && (
                           <div className="px-4 py-3 bg-emerald-50/60 border-t border-emerald-100 space-y-3">
-                            <p className="text-xs font-semibold text-emerald-700">Yeni Ders</p>
+                            <p className="text-xs font-semibold text-emerald-700">{t.tr("Yeni Ders")}</p>
 
                             <input
                               type="text"

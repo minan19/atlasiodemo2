@@ -55,6 +55,7 @@ function stars(r: number) {
 
 // ─── Welcome banner ───────────────────────────────────────────────────────────
 function WelcomeBanner() {
+  const t = useI18n();
   const params = useSearchParams();
   const [visible, setVisible] = useState(params.get('welcome') === '1');
   if (!visible) return null;
@@ -62,8 +63,8 @@ function WelcomeBanner() {
     <div style={{ borderRadius: 'var(--r-xl)', background: 'rgba(34,197,94,0.08)', border: '1.5px solid rgba(34,197,94,0.25)', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
       <span style={{ fontSize: 24 }}>🎉</span>
       <div style={{ flex: 1 }}>
-        <strong style={{ fontSize: 14, color: '#22c55e' }}>Hoş geldiniz!</strong>
-        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 0' }}>Hesabınız oluşturuldu. Lütfen e-postanızdaki doğrulama linkine tıklayın.</p>
+        <strong style={{ fontSize: 14, color: '#22c55e' }}>{t.tr("Hoş geldiniz!")}</strong>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 0' }}>{t.tr("Hesabınız oluşturuldu. Lütfen e-postanızdaki doğrulama linkine tıklayın.")}</p>
       </div>
       <button onClick={() => setVisible(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 20 }}>×</button>
     </div>
@@ -197,7 +198,7 @@ export default function CoursesPage() {
             <select value={level} onChange={(e) => setLevel(e.target.value as Level | 'all')} style={{ padding: '9px 12px', borderRadius: 'var(--r-lg)', border: '1.5px solid var(--line)', background: 'var(--bg)', color: 'var(--ink-2)', fontSize: 13, cursor: 'pointer', outline: 'none' }}>
               <option value="all">{t.tr("Tüm Seviyeler")}</option>
               <option value={t.tr("Başlangıç")}>{t.tr("Başlangıç")}</option>
-              <option value="Orta">Orta</option>
+              <option value={t.tr("Orta")}>{t.tr("Orta")}</option>
               <option value={t.tr("İleri")}>{t.tr("İleri")}</option>
             </select>
             {/* Sort */}

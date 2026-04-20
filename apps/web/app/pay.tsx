@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "./_i18n/use-i18n";
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 
 export default function PayDemoPage() {
+  const t = useI18n();
   const [courseId, setCourseId] = useState("");
   const [planId, setPlanId] = useState("");
   const [seats, setSeats] = useState(1);
@@ -24,11 +26,11 @@ export default function PayDemoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courseId: courseId || undefined, planId: planId || undefined, seats, installments }),
       });
-      if (!res.ok) throw new Error("Checkout başarısız");
+      if (!res.ok) throw new Error(t.tr("Checkout başarısız"));
       const data = await res.json();
       setUrl(data.checkoutUrl);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Hata");
+      setError(err instanceof Error ? err.message : t.tr("Hata"));
     } finally {
       setBusy(false);
     }
@@ -38,34 +40,34 @@ export default function PayDemoPage() {
     <div className="max-w-xl mx-auto px-4 py-8 space-y-6">
       <header className="glass p-6 rounded-2xl border border-slate-200 hero">
         <div className="hero-content space-y-2">
-          <div className="pill w-fit">Güvenli Ödeme</div>
-          <h1 className="text-2xl font-semibold">Ödeme Demo</h1>
-          <p className="text-sm text-slate-600">Stripe entegrasyonu ile hızlı ve güvenli checkout.</p>
+          <div className="pill w-fit">{t.tr("Güvenli Ödeme")}</div>
+          <h1 className="text-2xl font-semibold">{t.tr("Ödeme Demo")}</h1>
+          <p className="text-sm text-slate-600">{t.tr("Stripe entegrasyonu ile hızlı ve güvenli checkout.")}</p>
         </div>
       </header>
 
       <div className="glass rounded-2xl border border-slate-200 p-6 space-y-4">
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Kurs ID</label>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Kurs ID")}</label>
           <input
             className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
-            placeholder="Kurs ID (opsiyonel)"
+            placeholder={t.tr("Kurs ID (opsiyonel)")}
             value={courseId}
             onChange={(e) => setCourseId(e.target.value)}
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Plan ID</label>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Plan ID")}</label>
           <input
             className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
-            placeholder="Plan ID (opsiyonel)"
+            placeholder={t.tr("Plan ID (opsiyonel)")}
             value={planId}
             onChange={(e) => setPlanId(e.target.value)}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Koltuk Sayısı</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Koltuk Sayısı")}</label>
             <input
               type="number"
               min={1}
@@ -75,7 +77,7 @@ export default function PayDemoPage() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Taksit</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Taksit")}</label>
             <input
               type="number"
               min={1}
@@ -92,12 +94,12 @@ export default function PayDemoPage() {
           className="btn-link w-full justify-center font-semibold disabled:opacity-60"
           style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
         >
-          {busy ? "🔄 Yönlendiriliyor…" : "💳 Checkout'a Git"}
+          {busy ? `🔄 ${t.tr("Yönlendiriliyor…")}` : `💳 ${t.tr("Checkout'a Git")}`}
         </button>
 
         {url && (
           <div className="rounded-xl border border-emerald-100 bg-emerald-50/80 p-3 space-y-1">
-            <div className="text-xs text-emerald-700 font-semibold">Checkout URL hazır</div>
+            <div className="text-xs text-emerald-700 font-semibold">{t.tr("Checkout URL hazır")}</div>
             <a href={url} target="_blank" rel="noreferrer" className="text-emerald-700 underline break-all text-xs">
               {url}
             </a>
@@ -111,7 +113,7 @@ export default function PayDemoPage() {
       </div>
 
       <p className="text-center text-xs text-slate-400">
-        🔒 256-bit SSL şifreleme · PCI DSS uyumlu · Stripe güvencesi
+        🔒 256-bit SSL {t.tr("şifreleme")} · PCI DSS {t.tr("uyumlu")} · Stripe {t.tr("güvencesi")}
       </p>
     </div>
   );

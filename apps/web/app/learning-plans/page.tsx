@@ -476,7 +476,7 @@ export default function LearningPlansPage() {
 
                 {/* ── Add course form ── */}
                 <div style={{ marginTop: 16, borderTop: '1.5px solid var(--line)', paddingTop: 16 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Kurs Ekle</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>{t.tr("Kurs Ekle")}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px auto', gap: 8, alignItems: 'end' }}>
                     <div>
                       <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>{t.tr("Kurs Adı *")}</label>
@@ -487,9 +487,9 @@ export default function LearningPlansPage() {
                       <input className="lp-input" placeholder="12 saat" value={addDuration} onChange={(e) => setAddDuration(e.target.value)} />
                     </div>
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>Seviye</label>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted)', display: 'block', marginBottom: 4 }}>{t.tr("Seviye")}</label>
                       <select className="lp-input" value={addLevel} onChange={(e) => setAddLevel(e.target.value)} style={{ padding: '8px 10px' }}>
-                        <option>{t.tr("Başlangıç")}</option><option>Orta</option><option>{t.tr("İleri")}</option>
+                        <option>{t.tr("Başlangıç")}</option><option>{t.tr("Orta")}</option><option>{t.tr("İleri")}</option>
                       </select>
                     </div>
                   </div>

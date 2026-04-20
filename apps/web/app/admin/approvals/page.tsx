@@ -274,7 +274,7 @@ export default function AdminApprovalsPage() {
                     )}
                   </div>
                   {item.notes && (
-                    <p className="text-xs text-slate-400 italic">Not: {item.notes}</p>
+                    <p className="text-xs text-slate-400 italic">{t.tr("Not")}: {item.notes}</p>
                   )}
                 </div>
 

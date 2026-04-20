@@ -205,7 +205,7 @@ export default function LanguageLabPage() {
           {/* Stats pills */}
           <div className="flex flex-wrap gap-2">
             <span className="pill pill-sm" style={{ background: 'rgba(124,58,237,0.08)', borderColor: 'rgba(124,58,237,0.25)', color: '#7c3aed' }}>
-              🎙 Ses Analizi
+              {t.tr("🎙 Ses Analizi")}
             </span>
             <span className="pill pill-sm" style={{ background: 'rgba(79,70,229,0.08)', borderColor: 'rgba(79,70,229,0.25)', color: '#4f46e5' }}>
               {t.tr("🤖 AI Koçluk")}
@@ -220,7 +220,7 @@ export default function LanguageLabPage() {
       {/* Tab bar */}
       <div className="glass rounded-2xl p-1.5 flex gap-1 overflow-x-auto">
         <TabBtn active={activeTab === 'pronunciation'} onClick={() => setActiveTab('pronunciation')}>
-          🎤 Telaffuz Analizi
+          {t.tr("🎤 Telaffuz Analizi")}
         </TabBtn>
         <TabBtn active={activeTab === 'transcription'} onClick={() => setActiveTab('transcription')}>
           {t.tr("🎙 Canlı Transkripsiyon")}
@@ -245,6 +245,7 @@ export default function LanguageLabPage() {
 // ═══════════════════════════════════════════════════════════════
 
 function PronunciationTab() {
+  const t = useI18n();
   const [expectedText, setExpectedText] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -274,8 +275,8 @@ function PronunciationTab() {
       setResult({
         score: demoScore,
         feedback: {
-          pronunciation: demoScore > 80 ? 'Mükemmel telaffuz' : demoScore > 60 ? 'İyi, geliştirebilirsin' : 'Pratik yapman önerilir',
-          grammar: demoScore > 75 ? 'Doğru kullanım' : 'Bazı hatalar mevcut',
+          pronunciation: demoScore > 80 ? t.tr('Mükemmel telaffuz') : demoScore > 60 ? t.tr('İyi, geliştirebilirsin') : t.tr('Pratik yapman önerilir'),
+          grammar: demoScore > 75 ? t.tr('Doğru kullanım') : t.tr('Bazı hatalar mevcut'),
         },
       });
       setIsDemo(true);
@@ -289,19 +290,19 @@ function PronunciationTab() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h2 className="text-lg font-bold text-slate-800">Telaffuz Analizi</h2>
-        <p className="text-sm text-slate-500">Hedef metni gir, ses kaydını simüle et ve AI koçundan anında geri bildirim al.</p>
+        <h2 className="text-lg font-bold text-slate-800">{t.tr("Telaffuz Analizi")}</h2>
+        <p className="text-sm text-slate-500">{t.tr("Hedef metni gir, ses kaydını simüle et ve AI koçundan anında geri bildirim al.")}</p>
       </div>
 
       {/* Input */}
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Hedef Metin
+          {t.tr("Hedef Metin")}
         </label>
         <textarea
           value={expectedText}
           onChange={(e) => setExpectedText(e.target.value)}
-          placeholder="Okumak istediğiniz metni yazın..."
+          placeholder={t.tr("Okumak istediğiniz metni yazın...")}
           rows={3}
           className="w-full resize-none rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100 transition-all"
         />

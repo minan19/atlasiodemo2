@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "../_i18n/use-i18n";
 
 const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100";
 

@@ -49,10 +49,10 @@ const DEMO_INSIGHTS: ContentInsight[] = [
   { courseId: 'c3', title: 'İngilizce B2', totalViews: 510, dropoffRate: 15, avgQuizScore: 72, lowPerformanceTopics: [], suggestedRevisions: [] },
 ];
 
-function RiskBadge({ score }: { score: number }) {
-  if (score >= 75) return <span className="pill pill-xs bg-rose-50 border-rose-200 text-rose-700 font-bold">⚠ Yüksek Risk</span>;
-  if (score >= 50) return <span className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700 font-bold">Orta Risk</span>;
-  return <span className="pill pill-xs bg-emerald-50 border-emerald-200 text-emerald-700">Düşük Risk</span>;
+function RiskBadge({ score, tr }: { score: number; tr: (s: string) => string }) {
+  if (score >= 75) return <span className="pill pill-xs bg-rose-50 border-rose-200 text-rose-700 font-bold">⚠ {tr("Yüksek Risk")}</span>;
+  if (score >= 50) return <span className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700 font-bold">{tr("Orta Risk")}</span>;
+  return <span className="pill pill-xs bg-emerald-50 border-emerald-200 text-emerald-700">{tr("Düşük Risk")}</span>;
 }
 
 function RiskBar({ score }: { score: number }) {
@@ -168,9 +168,9 @@ export default function InstructorAnalyticsPage() {
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Öğrenci")}</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Risk Skoru</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Quiz Ort.</th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Son Aktivite</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Risk Skoru")}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Quiz Ort.")}</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Son Aktivite")}</th>
                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">{t.tr("Zayıf Konular")}</th>
                     <th className="px-4 py-3"></th>
                   </tr>
@@ -188,7 +188,7 @@ export default function InstructorAnalyticsPage() {
                             <RiskBar score={s.riskScore} />
                           </div>
                           <span className="font-bold text-slate-700">{s.riskScore}</span>
-                          <RiskBadge score={s.riskScore} />
+                          <RiskBadge score={s.riskScore} tr={t.tr} />
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -251,7 +251,7 @@ export default function InstructorAnalyticsPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500">Ort. quiz:</span>
+                  <span className="text-xs text-slate-500">{t.tr("Ort. quiz")}:</span>
                   <span className={`font-bold text-sm ${insight.avgQuizScore < 55 ? 'text-rose-600' : 'text-emerald-600'}`}>
                     %{insight.avgQuizScore}
                   </span>

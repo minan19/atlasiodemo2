@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { createLegacySession, joinLegacySession, useLegacySessions } from "./legacy-hooks";
 import { useRouter } from "next/navigation";
+import { useI18n } from "../_i18n/use-i18n";
 
 export function LegacyPanel({ userId }: { userId: string }) {
+  const t = useI18n();
   const { sessions, refresh, isLoading } = useLegacySessions();
   const [language, setLanguage] = useState("English");
   const [level, setLevel] = useState("B2");
@@ -14,7 +16,7 @@ export function LegacyPanel({ userId }: { userId: string }) {
   return (
     <div className="glass rounded-2xl border border-slate-200 p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-lg font-semibold">Hızlı Oturum (Legacy)</div>
+        <div className="text-lg font-semibold">{t.tr("Hızlı Oturum (Legacy)")}</div>
         <button
           className="btn-link"
           onClick={async () => {
@@ -22,7 +24,7 @@ export function LegacyPanel({ userId }: { userId: string }) {
             await refresh();
           }}
         >
-          + Oturum Aç
+          + {t.tr("Oturum Aç")}
         </button>
       </div>
       <div className="flex gap-2 flex-wrap text-sm">
@@ -30,17 +32,17 @@ export function LegacyPanel({ userId }: { userId: string }) {
           className="rounded-lg border border-slate-200 px-3 py-2"
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
-          placeholder="Dil"
+          placeholder={t.tr("Dil")}
         />
         <input
           className="rounded-lg border border-slate-200 px-3 py-2"
           value={level}
           onChange={(e) => setLevel(e.target.value)}
-          placeholder="Seviye"
+          placeholder={t.tr("Seviye")}
         />
       </div>
       <div className="space-y-2 text-sm">
-        {isLoading && <div>Yükleniyor...</div>}
+        {isLoading && <div>{t.tr("Yükleniyor...")}</div>}
         {(sessions ?? []).map((s) => (
           <div key={s.id} className="flex items-center justify-between rounded-xl border border-slate-200 p-3">
             <div>
@@ -60,7 +62,7 @@ export function LegacyPanel({ userId }: { userId: string }) {
               }
             }}
           >
-              Katıl
+              {t.tr("Katıl")}
             </button>
           </div>
         ))}

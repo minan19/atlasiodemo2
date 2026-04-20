@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '../_i18n/use-i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -140,6 +141,7 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const router  = useRouter();
+  const t = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef  = useRef<HTMLUListElement>(null);
 
@@ -319,7 +321,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm flex items-start justify-center pt-[12vh] px-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Komut paleti"
+      aria-label={t.tr("Komut paleti")}
       onMouseDown={(e) => {
         // Close when clicking the backdrop itself
         if (e.target === e.currentTarget) onClose();
@@ -350,9 +352,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onInputKeyDown}
-            placeholder="Ara... kurs, sayfa, kullanıcı"
+            placeholder={t.tr("Ara... kurs, sayfa, kullanıcı")}
             className="flex-1 bg-transparent outline-none text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400"
-            aria-label="Ara"
+            aria-label={t.tr("Ara")}
             autoComplete="off"
             spellCheck={false}
           />
@@ -391,7 +393,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {showRecent && (
             <div className="px-4 pt-3 pb-1">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-2">
-                Son Aramalar
+                {t.tr("Son Aramalar")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {recent.map((q) => (
@@ -414,7 +416,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {!query.trim() && !showRecent && (
             <div className="py-10 text-center text-sm text-slate-400">
               <div className="text-3xl mb-3">⌨️</div>
-              Bir şeyler yazmaya başlayın…
+              {t.tr("Bir şeyler yazmaya başlayın…")}
             </div>
           )}
 

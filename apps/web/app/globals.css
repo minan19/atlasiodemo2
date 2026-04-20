@@ -144,15 +144,15 @@ textarea.bg-slate-800 { background-color: var(--card-2) !important; }
   --t-slow: 380ms cubic-bezier(.22,.68,0,1.2);
 }
 
-/* Light mode — Elite Corporate Sapphire */
+/* Light mode — Hybrid Navy+Gold: warm cream canvas */
 [data-theme="light"] {
-  /* ── Canvas — ferah, göz yormaz, hafif soğuk beyaz ── */
-  --bg:       #F7F8FC;
-  --bg-2:     #EFF1F8;
-  --surface:  #FFFFFF;
+  /* ── Canvas — sıcak krem, göz yormaz, prestige his ── */
+  --bg:       #F7F5F0;
+  --bg-2:     #EDE9E1;
+  --surface:  #FAFAF8;
   --card:     #FFFFFF;
-  --card-2:   #F3F5FB;
-  --overlay:  rgba(247, 248, 252, 0.92);
+  --card-2:   #F3EFEA;
+  --overlay:  rgba(247, 245, 240, 0.93);
 
   /* ── Marka rengi — Safir Mavi (kurumsal, güven) ── */
   --brand-a:  #2563EB;   /* sapphire blue — primary */
@@ -359,10 +359,10 @@ img, svg { display: block; }
 
 [data-theme="light"] .bg-canvas {
   background:
-    radial-gradient(ellipse 70% 50% at 0%   0%,   rgba(37,99,235,0.06)  0, transparent 55%),
-    radial-gradient(ellipse 50% 40% at 100% 0%,   rgba(5,150,105,0.04)  0, transparent 50%),
-    radial-gradient(ellipse 40% 40% at 50%  100%, rgba(37,99,235,0.04)  0, transparent 50%),
-    linear-gradient(180deg, #F7F8FC 0%, #EFF1F8 60%, #F7F8FC 100%);
+    radial-gradient(ellipse 70% 50% at 0%   0%,   rgba(200,169,106,0.07) 0, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 100% 0%,   rgba(11,31,58,0.04)    0, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 50%  100%, rgba(200,169,106,0.04) 0, transparent 50%),
+    linear-gradient(180deg, #F7F5F0 0%, #EDE9E1 60%, #F7F5F0 100%);
 }
 
 /* Dot-grid overlay */
@@ -411,12 +411,113 @@ img, svg { display: block; }
 }
 
 .shell-header {
-  border: 1px solid var(--line);
+  border: 1px solid rgba(200,169,106,0.14);
   border-radius: var(--r-xl);
-  background: var(--card);
-  box-shadow: var(--shadow-lg);
+  background: #0B1F3A;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.30), inset 0 1px 0 rgba(200,169,106,0.07);
   padding: 14px 20px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HYBRID — Navy topbar overrides (always white text on #0B1F3A)
+═══════════════════════════════════════════════════════════════ */
+
+/* Logo + Cormorant wordmark → white */
+.shell-header .brand-logo-icon { color: #FAFAF8; }
+.shell-header .brand-wordmark  { color: #FAFAF8; }
+
+/* Breadcrumb row on navy */
+.shell-header .breadcrumb-row a { color: rgba(255,255,255,0.42); }
+.shell-header .breadcrumb-row a:hover { color: #FAFAF8; }
+.shell-header .sep { color: rgba(255,255,255,0.14); }
+
+/* Back / forward buttons */
+.shell-header .back-btn {
+  color: rgba(255,255,255,0.42);
+  border-color: rgba(255,255,255,0.09);
+}
+.shell-header .back-btn:hover:not(:disabled) {
+  color: #FAFAF8;
+  border-color: rgba(200,169,106,0.45);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Role select */
+.shell-header .nav-select {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.78);
+}
+.shell-header .nav-select:focus {
+  border-color: #C8A96A;
+  box-shadow: 0 0 0 3px rgba(200,169,106,0.18);
+}
+
+/* Lang switcher */
+.shell-header .lang-switcher {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+}
+.shell-header .lang-code  { color: rgba(255,255,255,0.48); }
+.shell-header .lang-sep   { color: rgba(255,255,255,0.14); }
+.shell-header .lang-btn:hover:not(.lang-btn--active) { background: rgba(255,255,255,0.09); }
+.shell-header .lang-btn--active { background: #C8A96A; }
+.shell-header .lang-btn--active .lang-code { color: #0B1F3A; }
+
+/* Theme / search / AI icon buttons */
+.shell-header .theme-toggle {
+  color: rgba(255,255,255,0.52);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+.shell-header .theme-toggle:hover {
+  color: #FAFAF8;
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(200,169,106,0.35);
+  box-shadow: none;
+}
+
+/* Admin button → gold on navy */
+.shell-header .nav-admin-btn {
+  background: rgba(200,169,106,0.13);
+  color: #C8A96A;
+  border-color: rgba(200,169,106,0.28);
+}
+.shell-header .nav-admin-btn:hover {
+  background: rgba(200,169,106,0.24);
+  border-color: rgba(200,169,106,0.50);
+  color: #E8C880;
+  box-shadow: 0 0 18px rgba(200,169,106,0.18);
+}
+
+/* Login CTA → solid gold */
+.shell-header .nav-login-btn {
+  background: #C8A96A;
+  color: #0B1F3A;
+  border: none;
+  font-weight: 700;
+}
+.shell-header .nav-login-btn:hover {
+  background: #D9BE80;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(200,169,106,0.32);
+}
+
+/* User avatar → gold ring */
+.shell-header .nav-user-avatar {
+  background: rgba(200,169,106,0.14);
+  color: #C8A96A;
+  border-color: rgba(200,169,106,0.32);
+}
+.shell-header .nav-user-avatar:hover {
+  background: rgba(200,169,106,0.24);
+  box-shadow: 0 0 18px rgba(200,169,106,0.22);
+}
+
+/* My courses link on navy */
+.shell-header .btn-link { color: rgba(255,255,255,0.52); }
+.shell-header .btn-link:hover { color: #FAFAF8; }
 
 /* ═══════════════════════════════════════════════════════════════
    BRAND
@@ -429,73 +530,35 @@ img, svg { display: block; }
   justify-content: space-between;
 }
 
-.brand-logo { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
-
-.brand-logo-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--r-md);
-  overflow: hidden;
-  background: var(--brand-grad);
+/* ── Brand logo icon (Globe-A inline SVG) ── */
+.brand-logo-icon {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: var(--glow);
-  position: relative;
+  flex-shrink: 0;
+  color: #0B1F3A;        /* A strokes: navy in light mode */
+  text-decoration: none;
+}
+[data-theme="dark"] .brand-logo-icon { color: #FAFAF8; }  /* A strokes: white in dark mode */
+.brand-logo-icon svg {
+  display: block;
+  width: 28px;
+  height: auto;
 }
 
-.brand-logo-img {
-  width: 44px;
-  height: 44px;
-  object-fit: cover;
-  border-radius: var(--r-md);
+/* ── Cormorant Garamond wordmark ── */
+.brand-wordmark {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: 22px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  line-height: 1;
+  user-select: none;
 }
-
-.brand-ring {
-  position: absolute;
-  inset: -3px;
-  border-radius: calc(var(--r-md) + 3px);
-  border: 1.5px solid rgba(91,110,255,0.45);
-  animation: orbit 10s linear infinite;
-  pointer-events: none;
-}
-
-.brand-glow {
-  position: absolute;
-  inset: -8px;
-  background: radial-gradient(circle, rgba(91,110,255,0.3), transparent 65%);
-  filter: blur(8px);
-  animation: orbPulse 4s ease-in-out infinite;
-  z-index: -1;
-}
-
-.brand-orbit {
-  position: absolute;
-  width: 56px; height: 56px;
-  border: 1px solid rgba(155,89,255,0.25);
-  border-radius: var(--r-full);
-  animation: orbit 14s linear infinite reverse;
-  z-index: -1;
-}
-
-.brand-title { display: grid; line-height: 1.1; }
-
-.brand-title-main {
-  font-weight: 800;
-  font-size: 15px;
-  letter-spacing: 0.04em;
-  background: var(--brand-grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.brand-title-sub {
-  font-size: 9px;
-  color: var(--muted);
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  -webkit-text-fill-color: var(--muted);
+.brand-wordmark em {
+  color: #C8A96A;
+  font-style: italic;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1177,6 +1240,66 @@ tbody tr:hover { background: rgba(255,255,255,0.025); }
 .nav-select option {
   background: var(--card);
   color: var(--ink);
+}
+
+/* ── Language switcher with flags ─────────────────────────────────────────── */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  background: var(--card-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 2px 4px;
+}
+
+.lang-item {
+  display: flex;
+  align-items: center;
+}
+
+.lang-sep {
+  color: var(--line);
+  font-size: 11px;
+  padding: 0 2px;
+  user-select: none;
+}
+
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 5px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  background: var(--surface);
+}
+
+.lang-btn--active {
+  background: var(--brand-a);
+}
+
+.lang-btn--active .lang-code {
+  color: #fff;
+}
+
+.lang-flag {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.lang-code {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--ink-2);
 }
 
 .nav-user-avatar {

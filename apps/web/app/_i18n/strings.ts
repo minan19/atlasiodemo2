@@ -1,4 +1,4 @@
-export type LangKey = "tr" | "en" | "de" | "ar" | "ru";
+export type LangKey = "tr" | "en" | "de" | "ar" | "ru" | "kk";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type definitions — every key must exist in every language
@@ -1917,4 +1917,4 @@ const ru: I18nStrings = {
 // ─────────────────────────────────────────────────────────────────────────────
 // Export
 // ─────────────────────────────────────────────────────────────────────────────
-export const strings: Record<LangKey, I18nStrings> = { tr, en, de, ar, ru };
+export const strings: Record<LangKey, I18nStrings> = { tr, en, de, ar, ru, kk: en };

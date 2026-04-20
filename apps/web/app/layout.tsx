@@ -1,5 +1,5 @@
 import "./globals.css";
-import { Plus_Jakarta_Sans, Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans, Inter, Cormorant_Garamond } from 'next/font/google';
 import { TopNav } from './_components/top-nav';
 import { EmailVerifyBanner } from './_components/email-verify-banner';
 import { RoleProvider } from './_components/role-context';
@@ -21,6 +21,14 @@ const bodyFont = Inter({
   weight: ['300', '400', '500', '600', '700'],
 });
 
+const serifFont = Cormorant_Garamond({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-serif',
+  display: 'swap',
+  weight: ['500', '600'],
+  style: ['normal', 'italic'],
+});
+
 export const metadata = {
   title: 'ATLASIO — Global Öğrenme Ağı',
   description: 'Dünya standartlarında uzaktan eğitim platformu',
@@ -29,7 +37,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className={`${headingFont.variable} ${bodyFont.variable}`}>
+      <body className={`${headingFont.variable} ${bodyFont.variable} ${serifFont.variable}`}>
         <ThemeProvider>
           <div className="bg-canvas" />
           <div className="bg-grid" />

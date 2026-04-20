@@ -112,11 +112,10 @@ export function TopNav() {
   return (
     <header className="shell-header">
       <div className="brand-row">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <BrandLogo />
-          <div className="brand-title">
-            <div className="brand-title-main">ATLASIO</div>
-            <div className="brand-title-sub">{t.nav.brandSub}</div>
+          <div className="brand-wordmark">
+            Atlas<em>io</em>
           </div>
         </div>
         <div className="flex items-center gap-2 ml-auto">
@@ -132,18 +131,30 @@ export function TopNav() {
             <option value="student">{t.roles.student}</option>
             <option value="guardian">{t.roles.guardian}</option>
           </select>
-          <select
-            aria-label={t.nav.langLabel}
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="nav-select"
-          >
-            <option value="tr">TR</option>
-            <option value="en">EN</option>
-            <option value="de">DE</option>
-            <option value="ar">AR</option>
-            <option value="ru">RU</option>
-          </select>
+
+          {/* ── Language switcher with flags ── */}
+          <div className="lang-switcher" role="navigation" aria-label={t.nav.langLabel}>
+            {([
+              { code: 'tr', flag: '🇹🇷', label: 'TR' },
+              { code: 'en', flag: '🇬🇧', label: 'EN' },
+              { code: 'de', flag: '🇩🇪', label: 'DE' },
+              { code: 'ar', flag: '🇸🇦', label: 'AR' },
+              { code: 'ru', flag: '🇷🇺', label: 'RU' },
+              { code: 'kk', flag: '🇰🇿', label: 'KK' },
+            ] as const).map((l, i) => (
+              <span key={l.code} className="lang-item">
+                {i > 0 && <span className="lang-sep">|</span>}
+                <button
+                  className={`lang-btn${language === l.code ? ' lang-btn--active' : ''}`}
+                  onClick={() => setLanguage(l.code)}
+                  title={l.label}
+                >
+                  <span className="lang-flag">{l.flag}</span>
+                  <span className="lang-code">{l.label}</span>
+                </button>
+              </span>
+            ))}
+          </div>
 
           {/* Search / Command palette trigger */}
           <button

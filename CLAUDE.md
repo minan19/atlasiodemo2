@@ -208,3 +208,42 @@ Kullanıcıdan onay sonrası seçenek:
 - Kalan sarılmamış sayfalara bak (admin/alarms, admin/proctoring, admin/security, admin/automation, admin/lti, admin/approvals, admin/volunteer, payments/success vb.)
 - DE/AR/RU native çevirileri eklemek isteniyor mu?
 - Commit + final preview testi (RU/DE/AR dilleri)
+
+### 2026-04-20 — Pass 6-7 + Design System + Cleanup + DE/AR genişletme
+**Yapılanlar:**
+
+**Pass 6 (6 dosya, ~76 t.tr sarması):**
+- `whiteboard/smartboard/page.tsx`, `courses/math-lab/page.tsx`, `admin/content/page.tsx` (StatusDot refactor + `ct` rename), `pay.tsx`, `live/legacy-panel.tsx`, `instructor/analytics/page.tsx` (RiskBadge tr prop)
+- EN sözlüğüne +23 anahtar (Pass 6 bloğu): BİLİMSEL HESAP MAKİNESİ, Güvenli Ödeme, Ödeme Demo, Risk Skoru, Yüksek/Orta/Düşük Risk, Kişi başı ücret, Gelir paylaşım oranı vb.
+
+**Pass 7 (15 dosya, ~98 t.tr sarması):**
+- `courses/page.tsx` (WelcomeBanner subcomponent), `instructor/`, `notifications/`, `portal/`, çeşitli sayfalar
+- EN sözlüğüne +34 anahtar (Pass 7 bloğu): AI Asistan, Tuvale Ekle, Hızlı Oturum (Legacy), Oturum Aç, Katıl vb.
+
+**Design System (commit ae4a84d):**
+- Font değişikliği: Space Grotesk + Source Sans 3 → **Plus Jakarta Sans** (başlık) + **Inter** (gövde)
+- Renk paleti: Corporate Sapphire — `--brand-a: #2563EB`, `--brand-b: #1D4ED8`, `--brand-c: #059669`
+- Light mode canvas: hafif mavi-gri (`#F7F8FC`), subtle gradients (mavi + yeşil radial)
+- Kullanıcı onayı: "evt güzel olmuş"
+
+**Dizin temizliği:**
+- Masaüstünde 4 ATLASIO klasörü vardı: ana proje (`/Desktop/ATLASIO/`), 3 gereksiz kopya
+- Temizlendi: `ATLASIO-backup/`, `ATLASIO-2/`, `atlasio-fresh/` silindi
+- `/Desktop/atlasiodemo2/` ayrı proje (ECONIQ), dokunulmadı
+- Doğru kök dizin: `/Users/mustafainan/Desktop/ATLASIO/`
+
+**GitHub sync (commits):**
+- `aecd85c` — i18n pass 3-5 + EN sözlük
+- `73b69a9` — pass 6 (whiteboard, math, content, pay, legacy, analytics)
+- `7f9bd56` — pass 7 (courses, instructor, notifications, portal, components)
+- `ae4a84d` — design system (Plus Jakarta Sans + Corporate Sapphire)
+
+**DE/AR genişletme (bu oturum):**
+- DE bloğuna ~200 yeni anahtar eklendi: whiteboard, live, admin, instructor, progress, certificates, payments, guardian, learning plans, booking, AI mentor, roadmap, peer review, language lab, math lab, adaptive quiz, analytics, profile, portal, 3D science
+- AR bloğuna ~200 yeni anahtar eklendi: aynı kategoriler + zaman birimleri (gün/hafta/ay/yıl), durum etiketleri (Açık/Kapalı/Bağlanıyor vb.)
+- 0 TS hatası
+
+**Sıradaki oturumda:**
+- Kalan sarılmamış sayfalar: admin/alarms, admin/proctoring, admin/security, admin/automation, admin/lti, admin/approvals, admin/volunteer, payments/success vb.
+- Commit + final preview testi (RU/DE/AR dilleri)
+- İsteğe bağlı: RU bloğunu da genişlet (şu an en kapsamlı ama hâlâ eksikler var)

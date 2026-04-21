@@ -184,14 +184,14 @@ const STATUS_COLOR: Record<NodeStatus, string> = {
   LOCKED: 'bg-slate-100 border-slate-200 text-slate-400',
   AVAILABLE: 'bg-indigo-50 border-indigo-300 text-indigo-800',
   IN_PROGRESS: 'bg-amber-50 border-amber-300 text-amber-800',
-  COMPLETED: 'bg-emerald-50 border-emerald-300 text-emerald-800',
+  COMPLETED: 'bg-amber-50 border-amber-300 text-amber-800',
 };
 
 const STATUS_ACCENT: Record<NodeStatus, string> = {
   LOCKED: 'bg-slate-300',
   AVAILABLE: 'bg-indigo-500',
   IN_PROGRESS: 'bg-amber-400',
-  COMPLETED: 'bg-emerald-500',
+  COMPLETED: 'bg-amber-500',
 };
 
 const STATUS_ICON: Record<NodeStatus, string> = {
@@ -393,13 +393,13 @@ function NodeDetailPanel({
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                         done
-                          ? 'bg-emerald-100 text-emerald-600'
+                          ? 'bg-amber-100 text-amber-600'
                           : 'bg-slate-100 text-slate-400'
                       }`}
                     >
                       {done ? '✓' : '·'}
                     </span>
-                    <span className={done ? 'text-emerald-700 font-medium' : 'text-slate-400'}>
+                    <span className={done ? 'text-amber-700 font-medium' : 'text-slate-400'}>
                       {pre.title}
                     </span>
                   </li>
@@ -436,11 +436,11 @@ function NodeDetailPanel({
 
         {/* Completed message */}
         {node.status === 'COMPLETED' && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 flex items-center gap-3">
+          <div className="rounded-2xl px-4 py-3 flex items-center gap-3" style={{ border: "1px solid rgba(200,169,106,0.3)", background: "rgba(200,169,106,0.08)" }}>
             <span className="text-2xl">🏆</span>
             <div>
-              <p className="text-sm font-bold text-emerald-700">{t.tr("Tamamlandı!")}</p>
-              <p className="text-xs text-emerald-600">{t.tr("Bu konuyu başarıyla bitirdiniz.")}</p>
+              <p className="text-sm font-bold" style={{ color: "#C8A96A" }}>{t.tr("Tamamlandı!")}</p>
+              <p className="text-xs" style={{ color: "#b8933a" }}>{t.tr("Bu konuyu başarıyla bitirdiniz.")}</p>
             </div>
           </div>
         )}
@@ -475,7 +475,7 @@ function NodeDetailPanel({
         {node.status === 'COMPLETED' && (
           <button
             onClick={() => router.push('/courses')}
-            className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-all"
+            className="w-full rounded-2xl px-4 py-3 text-sm font-semibold transition-all" style={{ border: "1px solid rgba(200,169,106,0.35)", background: "rgba(200,169,106,0.08)", color: "#C8A96A" }}
           >
             ✓ {t.tr("Kurslara Git")}
           </button>
@@ -611,7 +611,7 @@ function SkillTreeCanvas({
                 <span
                   className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                     node.status === 'COMPLETED'
-                      ? 'bg-emerald-100 text-emerald-600'
+                      ? 'bg-amber-100 text-amber-600'
                       : node.status === 'IN_PROGRESS'
                         ? 'bg-amber-100 text-amber-600'
                         : node.status === 'AVAILABLE'
@@ -784,8 +784,8 @@ export default function RoadmapPage() {
       icon: '✅',
       label: t.tr('Tamamlanan Düğüm'),
       value: completedCount,
-      bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200',
-      valClass: 'text-emerald-700',
+      bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200',
+      valClass: 'text-amber-700',
       delay: 1,
     },
     {
@@ -951,11 +951,11 @@ export default function RoadmapPage() {
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="shrink-0 w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 text-xs font-bold flex items-center justify-center mt-0.5">
+              <span className="shrink-0 w-5 h-5 rounded-full bg-amber-100 text-amber-600 text-xs font-bold flex items-center justify-center mt-0.5">
                 3
               </span>
               <span>
-                <strong>{t.tr("Yeşil düğümler")}</strong> {t.tr("tamamladığın konular — XP kazandın!")}
+                <strong>{t.tr("Altın düğümler")}</strong> {t.tr("tamamladığın konular — XP kazandın!")}
               </span>
             </li>
             <li className="flex items-start gap-2">

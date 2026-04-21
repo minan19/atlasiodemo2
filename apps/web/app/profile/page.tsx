@@ -77,7 +77,7 @@ const ROLE_GRADIENT: Record<string, string> = {
   ADMIN: 'from-red-500 to-orange-500',
   HEAD_INSTRUCTOR: 'from-violet-600 to-blue-500',
   INSTRUCTOR: 'from-blue-500 to-violet-500',
-  STUDENT: 'from-emerald-500 to-cyan-500',
+  STUDENT: 'from-amber-500 to-yellow-400',
   GUARDIAN: 'from-amber-500 to-yellow-400',
 };
 
@@ -85,7 +85,7 @@ const ROLE_BADGE_COLOR: Record<string, string> = {
   ADMIN: 'bg-red-50 border-red-200 text-red-700',
   HEAD_INSTRUCTOR: 'bg-violet-50 border-violet-200 text-violet-700',
   INSTRUCTOR: 'bg-blue-50 border-blue-200 text-blue-700',
-  STUDENT: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+  STUDENT: 'bg-amber-50 border-amber-200 text-amber-700',
   GUARDIAN: 'bg-amber-50 border-amber-200 text-amber-700',
 };
 
@@ -724,7 +724,7 @@ export default function ProfilePage() {
                 <span>{t.tr("Katılım")}: {joinDate}</span>
               </span>
               {profile.emailVerified ? (
-                <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                <span className="flex items-center gap-1 font-medium" style={{ color: "#C8A96A" }}>
                   <span>✓</span>
                   <span>{t.tr("E-posta doğrulandı")}</span>
                 </span>
@@ -738,12 +738,13 @@ export default function ProfilePage() {
             {!profile.emailVerified && (
               <div className="pt-1">
                 {resendState === 'sent' ? (
-                  <p className="text-xs text-emerald-700">{t.tr("✓ Doğrulama e-postası gönderildi.")}</p>
+                  <p className="text-xs font-medium" style={{ color: "#C8A96A" }}>{t.tr("✓ Doğrulama e-postası gönderildi.")}</p>
                 ) : (
                   <button
                     onClick={resendVerification}
                     disabled={resendState === 'sending'}
-                    className="text-xs text-emerald-600 hover:underline disabled:opacity-60 font-medium"
+                    className="text-xs hover:underline disabled:opacity-60 font-medium"
+                    style={{ color: "#C8A96A" }}
                   >
                     {resendState === 'sending' ? t.tr('Gönderiliyor…') : t.tr('Doğrulama e-postası yeniden gönder →')}
                   </button>
@@ -832,9 +833,9 @@ export default function ProfilePage() {
             label: 'Kayıtlı Kurs',
             value: courseCount,
             icon: '📚',
-            color: 'text-emerald-700',
-            bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50',
-            border: 'border-emerald-200',
+            color: 'text-amber-700',
+            bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50',
+            border: 'border-amber-200',
           },
           {
             label: 'Rozet',
@@ -973,7 +974,7 @@ export default function ProfilePage() {
       {/* ── Quick Links ── */}
       <div>
         <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 px-1 mb-3">
-          <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
+          <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
           {t.tr("Hızlı Erişim")}
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -981,7 +982,7 @@ export default function ProfilePage() {
             <Link
               key={link.href}
               href={link.href}
-              className="glass rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-2 text-center shadow-sm hover:border-emerald-300 hover:shadow-md transition-all group"
+              className="glass rounded-2xl border border-slate-200 p-4 flex flex-col items-center gap-2 text-center shadow-sm hover:border-amber-300 hover:shadow-md transition-all group"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{link.icon}</span>
               <span className="text-sm font-semibold text-slate-800">{t.tr(link.label)}</span>
@@ -1010,19 +1011,19 @@ export default function ProfilePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t.tr("Adınız Soyadınız")}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-amber-400 focus:outline-none bg-white"
               />
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
                   disabled={nameSaving}
                   className="btn-link text-sm font-semibold disabled:opacity-60"
-                  style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
+                  style={{ background: '#0B1F3A', color: '#FAFAF8', borderColor: '#0B1F3A' }}
                 >
                   {nameSaving ? t.tr('Kaydediliyor…') : t.tr('Kaydet')}
                 </button>
                 {nameMsg && (
-                  <span className={`text-xs ${nameMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
+                  <span className={`text-xs ${nameMsg.ok ? 'text-amber-700' : 'text-red-600'}`}>
                     {nameMsg.ok ? '✓ ' : '✗ '}{t.tr(nameMsg.text)}
                   </span>
                 )}
@@ -1044,7 +1045,7 @@ export default function ProfilePage() {
                   type="password"
                   value={currentPw}
                   onChange={(e) => setCurrentPw(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-amber-400 focus:outline-none bg-white"
                 />
               </label>
               <label className="space-y-1 text-sm">
@@ -1055,7 +1056,7 @@ export default function ProfilePage() {
                   value={newPw}
                   onChange={(e) => setNewPw(e.target.value)}
                   placeholder={t.tr("En az 8 karakter")}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm shadow-sm focus:border-amber-400 focus:outline-none bg-white"
                 />
               </label>
               <label className="space-y-1 text-sm">
@@ -1068,7 +1069,7 @@ export default function ProfilePage() {
                   className={`w-full rounded-xl border px-3 py-2.5 text-sm shadow-sm focus:outline-none bg-white ${
                     confirmPw && confirmPw !== newPw
                       ? 'border-red-300 focus:border-red-400'
-                      : 'border-slate-200 focus:border-emerald-400'
+                      : 'border-slate-200 focus:border-amber-400'
                   }`}
                 />
                 {confirmPw && confirmPw !== newPw && (
@@ -1080,12 +1081,12 @@ export default function ProfilePage() {
                   type="submit"
                   disabled={pwSaving}
                   className="btn-link text-sm font-semibold disabled:opacity-60"
-                  style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
+                  style={{ background: '#0B1F3A', color: '#FAFAF8', borderColor: '#0B1F3A' }}
                 >
                   {pwSaving ? t.tr('Güncelleniyor…') : t.tr('Şifremi değiştir')}
                 </button>
                 {pwMsg && (
-                  <span className={`text-xs ${pwMsg.ok ? 'text-emerald-700' : 'text-red-600'}`}>
+                  <span className={`text-xs ${pwMsg.ok ? 'text-amber-700' : 'text-red-600'}`}>
                     {pwMsg.ok ? '✓ ' : '✗ '}{t.tr(pwMsg.text)}
                   </span>
                 )}

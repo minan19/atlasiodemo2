@@ -36,7 +36,7 @@ const ROLE_COLORS: Record<string, string> = {
   ADMIN: 'bg-purple-50 text-purple-700 border-purple-200',
   HEAD_INSTRUCTOR: 'bg-blue-50 text-blue-700 border-blue-200',
   INSTRUCTOR: 'bg-sky-50 text-sky-700 border-sky-200',
-  STUDENT: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  STUDENT: 'bg-amber-50 text-amber-700 border-amber-200',
   GUARDIAN: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
@@ -98,7 +98,7 @@ function UserDetailPanel({
 
   const gradientFor = (id: string) => {
     const palette = [
-      'from-emerald-400 to-cyan-400',
+      'from-amber-400 to-yellow-400',
       'from-violet-400 to-purple-400',
       'from-rose-400 to-orange-400',
       'from-sky-400 to-blue-400',
@@ -143,7 +143,7 @@ function UserDetailPanel({
             <div className="text-sm text-slate-500 flex items-center justify-center gap-1 mt-0.5">
               {user.email}
               {user.emailVerified ? (
-                <span className="text-emerald-600 text-xs" title={t.tr("Doğrulandı")}>✓</span>
+                <span className="text-xs font-medium" style={{ color: "#C8A96A" }} title={t.tr("Doğrulandı")}>✓</span>
               ) : (
                 <span className="text-amber-500 text-xs" title={t.tr("Doğrulanmadı")}>!</span>
               )}
@@ -164,11 +164,11 @@ function UserDetailPanel({
             <span
               className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${
                 user.isActive
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200'
                   : 'bg-slate-100 text-slate-500 border-slate-200'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${user.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${user.isActive ? 'bg-amber-500' : 'bg-slate-400'}`} />
               {user.isActive ? t.tr('Aktif') : t.tr('Pasif')}
             </span>
           </div>
@@ -207,8 +207,8 @@ function UserDetailPanel({
               </div>
               <div className="text-xs text-slate-500 mt-0.5">{t.tr("Toplam Kayıt")}</div>
             </div>
-            <div className="glass rounded-xl p-4 text-center border border-emerald-100 bg-emerald-50/40">
-              <div className="text-2xl font-bold text-emerald-700">
+            <div className="glass rounded-xl p-4 text-center" style={{ border: "1px solid rgba(200,169,106,0.2)", background: "rgba(200,169,106,0.06)" }}>
+              <div className="text-2xl font-bold" style={{ color: "#C8A96A" }}>
                 {user.xp !== undefined ? user.xp.toLocaleString('tr-TR') : '—'}
               </div>
               <div className="text-xs text-slate-500 mt-0.5">XP</div>
@@ -250,7 +250,7 @@ function BulkRoleModal({
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:border-emerald-400"
+          className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:border-amber-400"
         >
           {ROLE_OPTIONS.map((r) => (
             <option key={r.value} value={r.value}>{t.tr(r.label)}</option>
@@ -483,7 +483,7 @@ export default function AdminUsersPage() {
             { label: 'Toplam', value: users.length, color: 'text-slate-700', bg: 'glass' },
             { label: 'Admin', value: users.filter((u) => u.role === 'ADMIN').length, color: 'text-purple-700', bg: 'bg-purple-50/50 border border-purple-100' },
             { label: t.roles.instructor, value: users.filter((u) => u.role === 'INSTRUCTOR' || u.role === 'HEAD_INSTRUCTOR').length, color: 'text-blue-700', bg: 'bg-blue-50/50 border border-blue-100' },
-            { label: t.roles.student, value: users.filter((u) => u.role === 'STUDENT').length, color: 'text-emerald-700', bg: 'bg-emerald-50/50 border border-emerald-100' },
+            { label: t.roles.student, value: users.filter((u) => u.role === 'STUDENT').length, color: 'text-amber-700', bg: 'bg-amber-50/50 border border-amber-100' },
             { label: 'Aktif', value: users.filter((u) => u.isActive).length, color: 'text-teal-700', bg: 'bg-teal-50/50 border border-teal-100' },
           ].map((s, i) => (
             <div key={t.tr(s.label)} className={`rounded-xl p-3 text-center ${s.bg} animate-fade-slide-up stagger-${i + 1}`}>
@@ -502,14 +502,14 @@ export default function AdminUsersPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t.tr("E-posta veya ad ile ara…")}
-          className="flex-1 min-w-[220px] rounded-xl border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-emerald-400 focus:outline-none bg-white"
+          className="flex-1 min-w-[220px] rounded-xl border border-slate-200 px-3 py-2 text-sm shadow-sm focus:border-amber-400 focus:outline-none bg-white"
         />
 
         {/* Status filter dropdown (NEW) */}
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as '' | 'active' | 'inactive')}
-          className="rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-emerald-400 shadow-sm"
+          className="rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white focus:outline-none focus:border-amber-400 shadow-sm"
         >
           <option value="">{t.tr("Tüm durumlar")}</option>
           <option value="active">{t.tr("Aktif")}</option>
@@ -633,7 +633,7 @@ export default function AdminUsersPage() {
                         if (el) el.indeterminate = !allPageSelected && somePageSelected;
                       }}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                      className="w-4 h-4 accent-amber-600 cursor-pointer"
                       aria-label={t.tr("Sayfadakilerin tümünü seç")}
                     />
                   </th>
@@ -648,7 +648,7 @@ export default function AdminUsersPage() {
                 {paginated.map((u) => (
                   <tr
                     key={u.id}
-                    className={`hover:bg-slate-50 transition-colors ${selected.has(u.id) ? 'bg-emerald-50/40' : ''}`}
+                    className={`hover:bg-slate-50 transition-colors ${selected.has(u.id) ? 'bg-amber-50/40' : ''}`}
                   >
                     {/* Checkbox (NEW) */}
                     <td className="w-10 px-3 py-3">
@@ -656,7 +656,7 @@ export default function AdminUsersPage() {
                         type="checkbox"
                         checked={selected.has(u.id)}
                         onChange={() => toggleSelectOne(u.id)}
-                        className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                        className="w-4 h-4 accent-amber-600 cursor-pointer"
                         aria-label={`${u.name ?? u.email} seç`}
                       />
                     </td>
@@ -667,17 +667,17 @@ export default function AdminUsersPage() {
                         onClick={() => setDetailUser(u)}
                         className="flex items-center gap-2.5 text-left w-full group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 group-hover:opacity-80 transition-opacity">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 group-hover:opacity-80 transition-opacity" style={{ background: "linear-gradient(135deg, #C8A96A, #0B1F3A)" }}>
                           {(u.name ?? u.email).charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-medium text-slate-900 line-clamp-1 group-hover:text-emerald-700 transition-colors">
+                          <div className="font-medium text-slate-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
                             {u.name ?? <span className="text-slate-400 italic">{t.tr("İsimsiz")}</span>}
                           </div>
                           <div className="text-xs text-slate-500 flex items-center gap-1">
                             {u.email}
                             {u.emailVerified ? (
-                              <span className="text-emerald-600" title={t.tr("E-posta doğrulandı")}>✓</span>
+                              <span className="font-medium" style={{ color: "#C8A96A" }} title={t.tr("E-posta doğrulandı")}>✓</span>
                             ) : (
                               <span className="text-amber-500" title={t.tr("E-posta doğrulanmadı")}>!</span>
                             )}
@@ -716,11 +716,11 @@ export default function AdminUsersPage() {
                         onClick={() => toggleActive(u.id, u.isActive)}
                         className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold border transition-colors disabled:opacity-60 ${
                           u.isActive
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                             : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'
                         }`}
                       >
-                        <span className={`w-1.5 h-1.5 rounded-full ${u.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                        <span className={`w-1.5 h-1.5 rounded-full ${u.isActive ? 'bg-amber-500' : 'bg-slate-400'}`} />
                         {u.isActive ? t.tr('Aktif') : t.tr('Pasif')}
                       </button>
                     </td>
@@ -731,7 +731,7 @@ export default function AdminUsersPage() {
                         <span className="text-xs text-slate-400">…</span>
                       )}
                       {!saving[u.id] && msgs[u.id] && (
-                        <span className={`text-xs ${msgs[u.id].ok ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        <span className={`text-xs ${msgs[u.id].ok ? 'text-amber-600' : 'text-rose-600'}`}>
                           {msgs[u.id].text}
                         </span>
                       )}

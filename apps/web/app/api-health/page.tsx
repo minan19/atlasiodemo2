@@ -68,96 +68,163 @@ export default async function ApiHealth() {
     { date: "Bugün",       title: "Tüm sistemler normal",  severity: "Normal",  status: "Aktif",   active: true  },
   ];
 
-  const severityBadge: Record<string, string> = {
-    Uyarı:  "bg-amber-100 text-amber-700",
-    Bilgi:  "bg-blue-100 text-blue-700",
-    Normal: "bg-emerald-100 text-emerald-700",
+  const severityStyle: Record<string, { background: string; color: string }> = {
+    Uyarı:  { background: "rgba(245,158,11,0.12)", color: "#d97706" },
+    Bilgi:  { background: "rgba(37,99,235,0.10)",  color: "#2563eb" },
+    Normal: { background: "rgba(200,169,106,0.15)", color: "#C8A96A" },
   };
 
   return (
     <main className="space-y-6">
-      {/* Hero Banner */}
+      {/* ── Hero Banner ── */}
       <header
-        className={`rounded-2xl p-8 text-center text-white shadow-lg ${
-          h.ok
-            ? "bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700"
-            : "bg-gradient-to-br from-rose-600 via-rose-700 to-pink-800"
-        }`}
+        style={{
+          borderRadius: 20,
+          padding: "40px 32px",
+          textAlign: "center",
+          background: h.ok
+            ? "linear-gradient(135deg, #0B1F3A 0%, #102848 60%, #0f2240 100%)"
+            : "linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)",
+          boxShadow: h.ok
+            ? "0 8px 40px rgba(11,31,58,0.35)"
+            : "0 8px 40px rgba(127,29,29,0.35)",
+          position: "relative",
+          overflow: "hidden",
+        }}
       >
-        <div className="text-3xl font-bold tracking-tight mb-1">
-          {h.ok ? "Tüm Sistemler Çalışıyor ✓" : "Servis Bozuk ✗"}
+        {/* Gold glow */}
+        {h.ok && (
+          <div style={{
+            position: "absolute", top: -60, right: -60,
+            width: 220, height: 220, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(200,169,106,0.18) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
+        )}
+        {/* Gold accent bar */}
+        <div style={{
+          width: 48, height: 3, background: "#C8A96A",
+          borderRadius: 2, margin: "0 auto 20px",
+        }} />
+        <div style={{ fontSize: 26, fontWeight: 700, color: "#FAFAF8", marginBottom: 6, letterSpacing: "-0.01em" }}>
+          {h.ok ? "✓ Tüm Sistemler Çalışıyor" : "✗ Servis Bozuk"}
         </div>
-        <p className="text-sm opacity-80">Son kontrol: {timestamp}</p>
+        <p style={{ fontSize: 13, color: "rgba(250,250,248,0.55)" }}>Son kontrol: {timestamp}</p>
         {version !== "N/A" && (
-          <p className="text-xs opacity-60 mt-1">v{version}</p>
+          <p style={{ fontSize: 11, color: "rgba(200,169,106,0.7)", marginTop: 4 }}>v{version}</p>
         )}
       </header>
 
-      {/* Service Grid */}
+      {/* ── Service Grid ── */}
       <section className="grid gap-4 sm:grid-cols-2">
         {services.map((svc) => (
           <div
             key={svc.name}
-            className={`glass rounded-2xl border p-5 shadow-sm ${
-              svc.ok
-                ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/30"
-                : "border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100/30"
-            }`}
+            style={{
+              borderRadius: 16,
+              border: svc.ok
+                ? "1px solid rgba(200,169,106,0.25)"
+                : "1px solid rgba(239,68,68,0.25)",
+              background: svc.ok
+                ? "rgba(200,169,106,0.05)"
+                : "rgba(239,68,68,0.05)",
+              padding: "20px",
+              boxShadow: "0 2px 12px rgba(11,31,58,0.06)",
+            }}
           >
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">{svc.icon}</span>
-              <span className="font-semibold text-slate-800">{svc.name}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 22 }}>{svc.icon}</span>
+              <span style={{ fontWeight: 600, color: "#1e293b", fontSize: 14 }}>{svc.name}</span>
             </div>
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className={`h-2.5 w-2.5 rounded-full shrink-0 ${svc.ok ? "bg-emerald-500" : "bg-rose-500"}`}
-              />
-              <span className={`text-sm font-semibold ${svc.ok ? "text-emerald-700" : "text-rose-700"}`}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <span style={{
+                width: 9, height: 9, borderRadius: "50%", flexShrink: 0,
+                background: svc.ok ? "#C8A96A" : "#ef4444",
+              }} />
+              <span style={{
+                fontSize: 13, fontWeight: 600,
+                color: svc.ok ? "#C8A96A" : "#dc2626",
+              }}>
                 {svc.label}
               </span>
             </div>
-            <p className="text-xs text-slate-400">{svc.detail}</p>
+            <p style={{ fontSize: 12, color: "#94a3b8" }}>{svc.detail}</p>
           </div>
         ))}
       </section>
 
-      {/* Metrics */}
+      {/* ── Metrics ── */}
       <section className="grid gap-4 sm:grid-cols-3">
         {[
-          { label: "API Yanıt",  value: h.ok ? "< 50ms" : "Timeout", icon: "⏱",  bg: "bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200",   val: "text-blue-700"   },
-          { label: "Uptime",     value: "99.97%",                     icon: "📈", bg: "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200", val: "text-emerald-700" },
-          { label: "Son Olay",   value: "Bugün 08:14",                icon: "🕐", bg: "bg-gradient-to-br from-slate-50 to-slate-100/50 border-slate-200",  val: "text-slate-700"  },
+          {
+            label: "API Yanıt", value: h.ok ? "< 50ms" : "Timeout", icon: "⏱",
+            bg: "rgba(37,99,235,0.05)", border: "rgba(37,99,235,0.2)", color: "#2563eb",
+          },
+          {
+            label: "Uptime", value: "99.97%", icon: "📈",
+            bg: "rgba(200,169,106,0.07)", border: "rgba(200,169,106,0.25)", color: "#C8A96A",
+          },
+          {
+            label: "Son Olay", value: "Bugün 08:14", icon: "🕐",
+            bg: "rgba(11,31,58,0.04)", border: "rgba(11,31,58,0.12)", color: "#0B1F3A",
+          },
         ].map((m) => (
-          <div key={m.label} className={`rounded-2xl border p-5 text-center shadow-sm ${m.bg}`}>
-            <div className="text-2xl mb-2">{m.icon}</div>
-            <div className={`text-xl font-bold mb-1 ${m.val}`}>{m.value}</div>
-            <div className="text-xs text-slate-500">{m.label}</div>
+          <div key={m.label} style={{
+            borderRadius: 16,
+            border: `1px solid ${m.border}`,
+            background: m.bg,
+            padding: "20px 16px",
+            textAlign: "center",
+            boxShadow: "0 2px 12px rgba(11,31,58,0.06)",
+          }}>
+            <div style={{ fontSize: 22, marginBottom: 8 }}>{m.icon}</div>
+            <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: m.color }}>{m.value}</div>
+            <div style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{m.label}</div>
           </div>
         ))}
       </section>
 
-      {/* Incident History */}
-      <section className="glass rounded-2xl border border-slate-200 p-5 space-y-4">
-        <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-          <span className="w-1 h-5 rounded-full bg-gradient-to-b from-slate-400 to-slate-600 inline-block" />
+      {/* ── Incident History ── */}
+      <section style={{
+        borderRadius: 16,
+        border: "1px solid rgba(11,31,58,0.1)",
+        background: "#fff",
+        padding: "20px",
+        boxShadow: "0 2px 12px rgba(11,31,58,0.06)",
+      }}>
+        <h2 style={{
+          fontSize: 14, fontWeight: 700, color: "#1e293b",
+          display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
+        }}>
+          <span style={{ width: 3, height: 18, borderRadius: 2, background: "#C8A96A", display: "inline-block" }} />
           Olay Geçmişi
         </h2>
         <div className="space-y-2">
           {incidents.map((inc, i) => (
             <div
               key={i}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3"
+              style={{
+                display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12,
+                borderRadius: 12,
+                border: "1px solid rgba(11,31,58,0.07)",
+                background: "rgba(248,250,252,0.8)",
+                padding: "10px 16px",
+              }}
             >
-              <span className="text-xs text-slate-400 min-w-[80px]">{inc.date}</span>
-              <span className="flex-1 text-sm font-medium text-slate-700">{inc.title}</span>
-              <span className={`rounded-full px-3 py-0.5 text-xs font-semibold ${severityBadge[inc.severity] ?? "bg-slate-100 text-slate-600"}`}>
+              <span style={{ fontSize: 12, color: "#94a3b8", minWidth: 80 }}>{inc.date}</span>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: "#475569" }}>{inc.title}</span>
+              <span style={{
+                borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 600,
+                ...(severityStyle[inc.severity] ?? { background: "rgba(11,31,58,0.08)", color: "#64748b" }),
+              }}>
                 {inc.severity}
               </span>
-              <span
-                className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
-                  inc.active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"
-                }`}
-              >
+              <span style={{
+                borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 600,
+                background: inc.active ? "rgba(200,169,106,0.15)" : "rgba(11,31,58,0.06)",
+                color: inc.active ? "#C8A96A" : "#64748b",
+                border: inc.active ? "1px solid rgba(200,169,106,0.3)" : "1px solid rgba(11,31,58,0.1)",
+              }}>
                 {inc.status}
               </span>
             </div>
@@ -165,10 +232,10 @@ export default async function ApiHealth() {
         </div>
       </section>
 
-      {/* Footer */}
-      <p className="text-center text-xs text-slate-400">
+      {/* ── Footer ── */}
+      <p style={{ textAlign: "center", fontSize: 12, color: "#94a3b8" }}>
         Bu sayfa her yüklemede API&apos;yi kontrol eder.{" "}
-        <Link href="/" className="text-emerald-600 hover:underline">
+        <Link href="/" style={{ color: "#C8A96A", textDecoration: "underline" }}>
           Ana Sayfa
         </Link>
       </p>

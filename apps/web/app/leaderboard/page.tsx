@@ -249,10 +249,10 @@ export default function StudentHubPage() {
       </header>
 
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 shadow-sm animate-fade-slide-up stagger-1">
-          <div className="flex items-center gap-2 text-sm text-emerald-700 mb-1">📚 <span>{t.tr("Kayıtlı kurs")}</span></div>
-          <div className="text-3xl font-bold text-emerald-700">{enrollmentsLoading ? "—" : (enrollments?.length ?? 0)}</div>
-          <div className="text-xs text-emerald-600 mt-1">{t.tr("Toplam")}</div>
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/50 p-4 shadow-sm animate-fade-slide-up stagger-1">
+          <div className="flex items-center gap-2 text-sm text-amber-700 mb-1">📚 <span>{t.tr("Kayıtlı kurs")}</span></div>
+          <div className="text-3xl font-bold text-amber-700">{enrollmentsLoading ? "—" : (enrollments?.length ?? 0)}</div>
+          <div className="text-xs text-amber-600 mt-1">{t.tr("Toplam")}</div>
         </div>
         <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 shadow-sm animate-fade-slide-up stagger-2">
           <div className="flex items-center gap-2 text-sm text-blue-700 mb-1">✅ <span>{t.tr("Tamamlanan")}</span></div>
@@ -296,14 +296,14 @@ export default function StudentHubPage() {
                   </div>
                 )
               : roadmap.map((r) => (
-                  <div key={r.id} className="rounded-xl border border-slate-200 bg-white/80 p-3 hover:border-emerald-200 transition-colors">
+                  <div key={r.id} className="rounded-xl border border-slate-200 bg-white/80 p-3 hover:border-amber-200 transition-colors">
                     <div className="flex items-center justify-between text-sm">
                       <div className="font-semibold text-slate-800">{t.tr(r.title)}</div>
-                      <span className={`text-xs font-bold ${r.progress >= 80 ? 'text-emerald-600' : r.progress >= 50 ? 'text-blue-600' : 'text-amber-600'}`}>%{r.progress}</span>
+                      <span className={`text-xs font-bold ${r.progress >= 80 ? 'text-amber-600' : r.progress >= 50 ? 'text-blue-600' : 'text-amber-600'}`}>%{r.progress}</span>
                     </div>
                     <div className="h-2 rounded-full bg-slate-100 overflow-hidden mt-2">
                       <div
-                        className={`h-full rounded-full transition-all duration-700 ${r.progress >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : r.progress >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' : 'bg-gradient-to-r from-amber-500 to-orange-400'}`}
+                        className={`h-full rounded-full transition-all duration-700 ${r.progress >= 80 ? 'bg-gradient-to-r from-amber-500 to-yellow-400' : r.progress >= 50 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' : 'bg-gradient-to-r from-amber-500 to-orange-400'}`}
                         style={{ width: `${r.progress}%` }}
                       />
                     </div>
@@ -373,7 +373,7 @@ export default function StudentHubPage() {
         <div className="glass p-4 rounded-2xl border border-slate-200 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-teal-400 inline-block" />
+              <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
               {t.tr("Materyaller")}
             </h2>
             <Link href="/courses" className="btn-link text-xs">{t.tr("Tümü")}</Link>
@@ -425,7 +425,7 @@ export default function StudentHubPage() {
                   <div className="font-semibold">{t.tr(a.name)}</div>
                   <div className="text-xs text-slate-500">{t.tr("Teslim")}: {a.due}</div>
                 </div>
-                <span className={`pill text-xs ${a.status === "Bekliyor" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}>
+                <span className={`pill text-xs ${a.status === "Bekliyor" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}>
                   {t.tr(a.status)}
                 </span>
               </div>
@@ -447,7 +447,7 @@ export default function StudentHubPage() {
           <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50/80 p-3 text-xs text-slate-500">
             {t.tr("Dosyanı yükle, öğretmene teslim edilir. Birden fazla dosya gönderebilirsin.")}
           </div>
-          {note ? <div className="text-xs text-emerald-600">{note}</div> : null}
+          {note ? <div className="text-xs font-medium" style={{ color: "#C8A96A" }}>{note}</div> : null}
           {loading ? <div className="text-xs text-slate-500">{t.tr("Yükleniyor...")}</div> : null}
           <div className="divide-y divide-slate-100 text-sm">
             {uploads.length === 0 ? (
@@ -474,7 +474,7 @@ export default function StudentHubPage() {
       <section className="glass p-4 rounded-2xl border border-slate-200 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
+            <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
             {t.tr("Haftalık Hedefler")}
           </h2>
           <span className="pill text-xs">{t.tr("Bu hafta")}</span>
@@ -495,7 +495,7 @@ export default function StudentHubPage() {
               <span className="text-slate-500">1 / 2</span>
             </div>
             <div className="progress-track h-2 rounded-full bg-slate-200 overflow-hidden">
-              <div className="progress-fill h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: "50%" }} />
+              <div className="progress-fill h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full" style={{ width: "50%" }} />
             </div>
           </div>
           <div>
@@ -518,7 +518,7 @@ export default function StudentHubPage() {
             <h2 className="text-2xl font-semibold">{t.leaderboard.title}</h2>
             <p className="text-sm text-slate-600">{t.leaderboard.subtitle}</p>
           </div>
-          <div className="pill bg-emerald-50 border-emerald-200 text-emerald-700">{t.tr("Haftalık yenilenir")}</div>
+          <div className="pill" style={{ background: "rgba(200,169,106,0.12)", borderColor: "rgba(200,169,106,0.3)", color: "#C8A96A" }}>{t.tr("Haftalık yenilenir")}</div>
         </div>
 
         {leaderboardLoading ? (
@@ -656,7 +656,7 @@ export default function StudentHubPage() {
               <p className="text-xs text-slate-500">{t.tr(b.desc)}</p>
               <span className="pill text-xs bg-amber-50 border-amber-200 text-amber-700">+{b.xpReward} XP</span>
               {b.earned ? (
-                <span className="absolute top-2 right-2 text-emerald-500 text-xs font-bold">✓</span>
+                <span className="absolute top-2 right-2 text-xs font-bold" style={{ color: "#C8A96A" }}>✓</span>
               ) : (
                 <span className="absolute top-2 right-2 text-slate-400 text-xs">🔒</span>
               )}

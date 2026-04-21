@@ -53,7 +53,7 @@ export default function PaymentCancelPage() {
 
         <Link
           href="/portal"
-          className="text-xs text-slate-400 hover:text-emerald-600 hover:underline transition-colors"
+          className="text-xs text-slate-400 hover:text-amber-600 hover:underline transition-colors"
         >
           {t.tr("Destek merkezi")} →
         </Link>

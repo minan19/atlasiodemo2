@@ -118,86 +118,67 @@ export default function Home() {
 
 // ─── HeroSection ──────────────────────────────────────────────────────────────
 
+const heroStats = [
+  { value: "24K+",  label: "Aktif Öğrenci" },
+  { value: "380+",  label: "Kurs" },
+  { value: "6",     label: "Dil Desteği" },
+  { value: "4.8/5", label: "AI Puanı" },
+];
+
 function HeroSection() {
   const { tr } = useI18n();
   return (
-    <header className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/60 p-6 md:p-12 shadow-2xl">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(45,125,246,0.18),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(247,172,57,0.18),transparent_32%),radial-gradient(circle_at_70%_70%,rgba(18,168,122,0.16),transparent_36%)] pointer-events-none" />
-      <div className="relative space-y-8">
-        {/* Top bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="pill w-fit">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Atlasio 2026 • Global Learning Grid
+    <header className="hero-section">
+      <div className="relative">
+        {/* Top row */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+          <div className="hero-badge">
+            <span style={{width:6,height:6,borderRadius:'50%',background:'#C8A96A',display:'inline-block'}} />
+            {tr("Global Öğrenme Ağı")}
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          <div className="hero-live">
+            <span className="relative flex" style={{width:10,height:10}}>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex rounded-full bg-emerald-500" style={{width:10,height:10}} />
             </span>
-            {tr("Şu an")} <strong className="text-emerald-700">{tr("1.247 öğrenci")}</strong> {tr("aktif")}
+            {tr("Şu an")} <strong className="hero-live">{tr("1.247 öğrenci")}</strong> {tr("aktif")}
           </div>
         </div>
 
-        {/* Headline */}
-        <div className="space-y-2 max-w-3xl">
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight text-slate-900">
-            {tr("Dünya Standartlarında")}
-          </h1>
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-500 to-blue-500">
-              {tr("Uzaktan Eğitim Platformu")}
-            </span>
-          </h1>
-          <p className="text-xs font-bold tracking-[0.18em] text-amber-600 uppercase mt-3">
-            {tr("Bilgiyi Değere Dönüştüren Dijital Eğitim Platformu")}
-          </p>
-          <p className="mt-3 text-xl text-slate-600 max-w-2xl leading-relaxed">
+        {/* Headline — Cormorant Garamond */}
+        <div style={{maxWidth:700}}>
+          <h1 className="hero-h1">{tr("Dünya Standartlarında")}</h1>
+          <h1 className="hero-h1-gold">{tr("Uzaktan Eğitim")}</h1>
+          <p className="hero-tagline">{tr("Bilgiyi Değere Dönüştüren Dijital Eğitim Platformu")}</p>
+          <p className="hero-body">
             {tr("Eğitmen, öğrenci ve kurumlar için tek ekrandan canlı ders, akıllı tahta, AI mentor ve sertifika deneyimi.")}
           </p>
         </div>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-          >
-            {tr("Ücretsiz Başla")}
+        {/* CTA */}
+        <div className="flex flex-wrap gap-3 mt-9">
+          <Link href="/register" className="hero-btn-primary">
+            {tr("Ücretsiz Başla")} →
           </Link>
-          <Link
-            href="/demo"
-            className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-700 shadow hover:shadow-lg hover:scale-105 transition-all"
-          >
-            {tr("▶ Canlı Demo İzle")}
+          <Link href="/demo" className="hero-btn-secondary">
+            ▶ {tr("Demo İzle")}
           </Link>
-          <Link
-            href="/courses"
-            className="btn-link"
-          >
+          <Link href="/courses" className="btn-link" style={{alignSelf:'center'}}>
             {tr("Kurs Katalogu")}
           </Link>
         </div>
 
-        {/* Metric cards */}
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
-          {heroMetrics.map((m) => (
-            <div key={m.label} className="metric">
-              <div className="label">{tr(m.label)}</div>
-              <div className="value">{m.value}</div>
-              <div className="text-xs text-emerald-700">{tr(m.hint)}</div>
+        {/* Stats row */}
+        <div className="hero-stats">
+          {heroStats.map((s) => (
+            <div key={s.label}>
+              <div className="hero-stat-val">{s.value}</div>
+              <div className="hero-stat-label">{tr(s.label)}</div>
             </div>
           ))}
-        </div>
-
-        {/* Trusted by */}
-        <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500 border-t border-slate-100 pt-4">
-          <span className="font-medium text-slate-600">{tr("Güvenen kurumlar:")}</span>
-          <span>{tr("🏛️ 42 Üniversite")}</span>
-          <span className="text-slate-300">·</span>
-          <span>{tr("🏢 180 Şirket")}</span>
-          <span className="text-slate-300">·</span>
-          <span>{tr("🌍 64 Ülke")}</span>
+          <div style={{marginLeft:'auto',alignSelf:'center',fontSize:12,color:'var(--ink-2)'}}>
+            🏛️ {tr("42 Üniversite")} &nbsp;·&nbsp; 🏢 {tr("180 Şirket")} &nbsp;·&nbsp; 🌍 {tr("64 Ülke")}
+          </div>
         </div>
       </div>
     </header>
@@ -209,22 +190,31 @@ function HeroSection() {
 function StatsSection() {
   const { tr } = useI18n();
   return (
-    <section className="glass rounded-3xl border border-slate-200 p-8 md:p-12 shadow-2xl">
-      <div className="text-center mb-8">
-        <span className="pill">{tr("Platform İstatistikleri")}</span>
-        <h2 className="mt-3 text-3xl font-bold text-slate-900">{tr("Rakamlarla Atlasio")}</h2>
+    <section className="rounded-3xl border p-8 md:p-12" style={{
+      background:'var(--surface)',
+      borderColor:'rgba(200,169,106,0.10)',
+      boxShadow:'0 2px 24px rgba(11,31,58,0.05)'
+    }}>
+      <div className="text-center mb-10">
+        <span className="hero-badge">{tr("Platform İstatistikleri")}</span>
+        <h2 className="mt-4" style={{
+          fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+          fontSize:'clamp(1.8rem,3vw,2.4rem)', fontWeight:600, color:'var(--ink)'
+        }}>{tr("Rakamlarla Atlasio")}</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-4">
         {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-slate-100 bg-white/80 p-6 text-center shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-500 to-blue-500">
-              {s.value}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-slate-800">{tr(s.label)}</div>
-            <div className="mt-1 text-xs text-emerald-600 font-medium">{tr(s.hint)}</div>
+          <div key={s.label} className="rounded-2xl p-6 text-center transition-all hover:-translate-y-1" style={{
+            border:'1px solid rgba(200,169,106,0.12)',
+            background:'var(--card)',
+            boxShadow:'0 1px 12px rgba(11,31,58,0.04)'
+          }}>
+            <div style={{
+              fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+              fontSize:'2.6rem', fontWeight:600, color:'#C8A96A', lineHeight:1
+            }}>{s.value}</div>
+            <div className="mt-2 text-sm font-semibold" style={{color:'var(--ink)',letterSpacing:'0.04em'}}>{tr(s.label)}</div>
+            <div className="mt-1 text-xs font-medium" style={{color:'var(--ink-2)'}}>{tr(s.hint)}</div>
           </div>
         ))}
       </div>
@@ -237,23 +227,27 @@ function StatsSection() {
 function FeaturesSection() {
   const { tr } = useI18n();
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div className="text-center">
-        <span className="pill">{tr("Özellikler")}</span>
-        <h2 className="mt-3 text-3xl font-bold text-slate-900">{tr("Bir Platformda Her Şey")}</h2>
-        <p className="mt-2 text-slate-600 max-w-2xl mx-auto">
+        <span className="hero-badge">{tr("Özellikler")}</span>
+        <h2 className="mt-4" style={{
+          fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+          fontSize:'clamp(1.8rem,3vw,2.4rem)', fontWeight:600, color:'var(--ink)'
+        }}>{tr("Bir Platformda Her Şey")}</h2>
+        <p className="mt-2 max-w-2xl mx-auto" style={{color:'var(--ink-2)',fontSize:15}}>
           {tr("Bireyden kuruma, öğrenciden eğitimciye — ihtiyaç duyduğunuz her çözüm tek çatı altında entegre ve hazır.")}
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {features.map((f) => (
-          <div
-            key={f.title}
-            className="glass rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
-          >
-            <div className="text-4xl mb-3">{f.icon}</div>
-            <div className="text-sm font-semibold text-slate-900">{tr(f.title)}</div>
-            <div className="mt-1 text-xs text-slate-500 leading-relaxed">{tr(f.desc)}</div>
+          <div key={f.title} className="rounded-2xl p-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{
+            border:'1px solid rgba(200,169,106,0.10)',
+            background:'var(--card)',
+            boxShadow:'0 1px 8px rgba(11,31,58,0.04)'
+          }}>
+            <div className="text-3xl mb-3">{f.icon}</div>
+            <div className="text-sm font-semibold" style={{color:'var(--ink)'}}>{tr(f.title)}</div>
+            <div className="mt-1 text-xs leading-relaxed" style={{color:'var(--ink-2)'}}>{tr(f.desc)}</div>
           </div>
         ))}
       </div>
@@ -266,37 +260,40 @@ function FeaturesSection() {
 function WhiteboardShowcase() {
   const { tr } = useI18n();
   return (
-    <section className="glass rounded-3xl border border-slate-200 p-8 md:p-12 shadow-2xl overflow-hidden">
+    <section className="rounded-3xl p-8 md:p-12 overflow-hidden" style={{
+      border:'1px solid rgba(200,169,106,0.10)',
+      background:'var(--surface)',
+      boxShadow:'0 2px 24px rgba(11,31,58,0.05)'
+    }}>
       <div className="grid gap-10 md:grid-cols-2 items-center">
         {/* Left: feature list */}
         <div className="space-y-6">
           <div>
-            <span className="pill">{tr("Akıllı Tahta")}</span>
-            <h2 className="mt-3 text-3xl font-bold text-slate-900">
+            <span className="hero-badge">{tr("Akıllı Tahta")}</span>
+            <h2 className="mt-4" style={{
+              fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+              fontSize:'clamp(1.8rem,3vw,2.4rem)', fontWeight:600, color:'var(--ink)', lineHeight:1.1
+            }}>
               {tr("Sınıfı")}{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-emerald-500 to-blue-500">
-                {tr("Dijitale Taşı")}
-              </span>
+              <span style={{color:'#C8A96A'}}>{tr("Dijitale Taşı")}</span>
             </h2>
-            <p className="mt-2 text-slate-600 leading-relaxed">
+            <p className="mt-2 leading-relaxed" style={{color:'var(--ink-2)',fontSize:15}}>
               {tr("Gerçek zamanlı işbirliği, AI destekli araçlar ve interaktif dersler için tasarlanmış profesyonel whiteboard.")}
             </p>
           </div>
           <ul className="space-y-3">
             {whiteboardFeatures.map((feat) => (
-              <li key={feat} className="flex items-start gap-3 text-sm text-slate-700">
-                <span className="mt-0.5 flex-shrink-0 h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
-                  ✓
-                </span>
+              <li key={feat} className="flex items-start gap-3 text-sm" style={{color:'var(--ink)'}}>
+                <span className="mt-0.5 flex-shrink-0 flex items-center justify-center text-xs font-bold" style={{
+                  width:20,height:20,borderRadius:'50%',
+                  background:'rgba(200,169,106,0.12)',color:'#C8A96A',flexShrink:0
+                }}>✓</span>
                 {tr(feat)}
               </li>
             ))}
           </ul>
-          <Link
-            href="/whiteboard"
-            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all w-fit"
-          >
-            {tr("🧠 Tahtayı Şimdi Dene")}
+          <Link href="/whiteboard" className="hero-btn-primary w-fit">
+            🧠 {tr("Tahtayı Şimdi Dene")}
           </Link>
         </div>
 
@@ -358,26 +355,32 @@ function WhiteboardShowcase() {
 function TestimonialsSection() {
   const { tr } = useI18n();
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div className="text-center">
-        <span className="pill">{tr("Yorumlar")}</span>
-        <h2 className="mt-3 text-3xl font-bold text-slate-900">{tr("Kullanıcılarımız Ne Diyor?")}</h2>
+        <span className="hero-badge">{tr("Yorumlar")}</span>
+        <h2 className="mt-4" style={{
+          fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+          fontSize:'clamp(1.8rem,3vw,2.4rem)', fontWeight:600, color:'var(--ink)'
+        }}>{tr("Kullanıcılarımız Ne Diyor?")}</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {testimonials.map((item) => (
-          <div
-            key={item.name}
-            className="glass rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col gap-4"
-          >
-            <div className="text-amber-400 text-lg tracking-widest">⭐⭐⭐⭐⭐</div>
-            <p className="text-sm text-slate-700 leading-relaxed flex-1">"{tr(item.quote)}"</p>
+          <div key={item.name} className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg" style={{
+            border:'1px solid rgba(200,169,106,0.10)',
+            background:'var(--card)',
+            boxShadow:'0 1px 8px rgba(11,31,58,0.04)'
+          }}>
+            <div style={{color:'#C8A96A',letterSpacing:'0.15em',fontSize:14}}>★★★★★</div>
+            <p className="text-sm leading-relaxed flex-1" style={{color:'var(--ink-2)'}}>"{tr(item.quote)}"</p>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400 to-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {item.initials}
-              </div>
+              <div className="flex items-center justify-center text-sm font-bold flex-shrink-0" style={{
+                width:38,height:38,borderRadius:10,
+                background:'rgba(11,31,58,0.08)',color:'#0B1F3A',
+                border:'1px solid rgba(200,169,106,0.20)'
+              }}>{item.initials}</div>
               <div>
-                <div className="text-sm font-semibold text-slate-900">{item.name}</div>
-                <div className="text-xs text-slate-500">{tr(item.role)}</div>
+                <div className="text-sm font-semibold" style={{color:'var(--ink)'}}>{item.name}</div>
+                <div className="text-xs" style={{color:'var(--ink-2)'}}>{tr(item.role)}</div>
               </div>
             </div>
           </div>
@@ -392,61 +395,63 @@ function TestimonialsSection() {
 function PricingSection() {
   const { tr } = useI18n();
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div className="text-center">
-        <span className="pill">{tr("Fiyatlandırma")}</span>
-        <h2 className="mt-3 text-3xl font-bold text-slate-900">{tr("Sade ve Şeffaf Fiyatlar")}</h2>
-        <p className="mt-2 text-slate-600">{tr("14 gün ücretsiz deneme. İstediğin zaman iptal et.")}</p>
+        <span className="hero-badge">{tr("Fiyatlandırma")}</span>
+        <h2 className="mt-4" style={{
+          fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+          fontSize:'clamp(1.8rem,3vw,2.4rem)', fontWeight:600, color:'var(--ink)'
+        }}>{tr("Sade ve Şeffaf Fiyatlar")}</h2>
+        <p className="mt-2" style={{color:'var(--ink-2)',fontSize:14}}>{tr("14 gün ücretsiz deneme. İstediğin zaman iptal et.")}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3 items-start">
         {pricingTiers.map((tier) => (
-          <div
-            key={tier.name}
-            className={`rounded-3xl border p-6 flex flex-col gap-5 transition-all duration-200 ${
-              tier.highlighted
-                ? "border-emerald-400 bg-gradient-to-b from-emerald-50 to-blue-50 shadow-2xl scale-105"
-                : "border-slate-200 glass shadow-sm hover:shadow-xl"
-            }`}
-          >
+          <div key={tier.name} className="rounded-2xl p-6 flex flex-col gap-5 transition-all duration-200" style={
+            tier.highlighted ? {
+              border:'1.5px solid rgba(200,169,106,0.45)',
+              background:'var(--card)',
+              boxShadow:'0 8px 40px rgba(11,31,58,0.12)',
+              transform:'scale(1.03)'
+            } : {
+              border:'1px solid rgba(200,169,106,0.10)',
+              background:'var(--card)',
+              boxShadow:'0 1px 8px rgba(11,31,58,0.04)'
+            }
+          }>
             {tier.highlighted && (
               <div className="text-center">
-                <span className="rounded-full bg-gradient-to-r from-emerald-500 to-blue-500 px-3 py-1 text-xs font-bold text-white">
-                  {tr("En Popüler")}
-                </span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full" style={{
+                  background:'#0B1F3A', color:'#C8A96A', letterSpacing:'0.05em'
+                }}>{tr("En Popüler")}</span>
               </div>
             )}
             <div>
-              <div className="text-lg font-bold text-slate-900">{tr(tier.name)}</div>
+              <div className="text-base font-bold" style={{color:'var(--ink)'}}>{tr(tier.name)}</div>
               <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">
-                  {tier.price}
-                </span>
-                <span className="text-sm text-slate-500">{tr(tier.period)}</span>
+                <span style={{
+                  fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+                  fontSize:'2.4rem', fontWeight:600,
+                  color: tier.highlighted ? '#C8A96A' : 'var(--ink)'
+                }}>{tier.price}</span>
+                <span className="text-sm" style={{color:'var(--ink-2)'}}>{tr(tier.period)}</span>
               </div>
-              <div className="mt-1 text-xs text-slate-500">{tr(tier.description)}</div>
+              <div className="mt-1 text-xs" style={{color:'var(--ink-2)'}}>{tr(tier.description)}</div>
             </div>
             <ul className="space-y-2 flex-1">
               {tier.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
-                  <span className="text-emerald-500 font-bold">✓</span>
+                <li key={f} className="flex items-center gap-2 text-sm" style={{color:'var(--ink)'}}>
+                  <span style={{color:'#C8A96A',fontWeight:700}}>✓</span>
                   {tr(f)}
                 </li>
               ))}
               {tier.missing.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-400 line-through">
-                  <span className="text-slate-300">✗</span>
+                <li key={f} className="flex items-center gap-2 text-sm line-through" style={{color:'var(--muted)'}}>
+                  <span style={{color:'var(--muted)'}}>✗</span>
                   {tr(f)}
                 </li>
               ))}
             </ul>
-            <Link
-              href={tier.href}
-              className={`text-center rounded-2xl px-5 py-3 text-sm font-semibold transition-all hover:scale-105 ${
-                tier.highlighted
-                  ? "bg-gradient-to-r from-emerald-500 to-blue-500 text-white shadow-lg hover:shadow-xl"
-                  : "border border-slate-200 bg-white/80 text-slate-700 hover:shadow-md"
-              }`}
-            >
+            <Link href={tier.href} className={tier.highlighted ? 'hero-btn-primary text-center' : 'hero-btn-secondary text-center'}>
               {tr(tier.cta)}
             </Link>
           </div>
@@ -461,32 +466,46 @@ function PricingSection() {
 function CTASection() {
   const { tr } = useI18n();
   return (
-    <section className="relative overflow-hidden rounded-3xl p-10 md:p-16 text-center shadow-2xl">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-blue-500 to-amber-400 opacity-90" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%),radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent_50%)] pointer-events-none" />
+    <section className="relative overflow-hidden rounded-3xl p-10 md:p-16 text-center" style={{
+      background:'#0B1F3A',
+      boxShadow:'0 8px 48px rgba(11,31,58,0.25)'
+    }}>
+      {/* Subtle gold radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background:'radial-gradient(ellipse 60% 50% at 50% 0%, rgba(200,169,106,0.10) 0, transparent 65%)'
+      }} />
+      {/* Thin gold top border */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2" style={{
+        width:'40%', height:1,
+        background:'linear-gradient(to right, transparent, #C8A96A, transparent)'
+      }} />
       <div className="relative space-y-6">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
+        <h2 style={{
+          fontFamily:'var(--font-serif,serif)', fontStyle:'italic',
+          fontSize:'clamp(2rem,5vw,3.5rem)', fontWeight:600,
+          color:'#FAFAF8', lineHeight:1.1
+        }}>
           {tr("Öğrenmeye bugün başla")}
         </h2>
-        <p className="text-lg text-white/90 max-w-lg mx-auto">
+        <p style={{fontSize:16, color:'rgba(250,250,248,0.65)', maxWidth:440, margin:'0 auto'}}>
           {tr("14 gün ücretsiz deneme. Kredi kartı gerekmez. İstediğin zaman iptal et.")}
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-3.5 text-sm font-bold text-emerald-700 shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
-          >
-            {tr("Hesap Oluştur")}
+          <Link href="/register" className="inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-bold transition-all hover:-translate-y-0.5" style={{
+            background:'#C8A96A', color:'#0B1F3A',
+            boxShadow:'0 4px 20px rgba(200,169,106,0.30)'
+          }}>
+            {tr("Hesap Oluştur")} →
           </Link>
-          <Link
-            href="/courses"
-            className="inline-flex items-center gap-2 rounded-2xl border-2 border-white/60 bg-white/10 backdrop-blur px-8 py-3.5 text-sm font-bold text-white hover:bg-white/20 hover:scale-105 transition-all"
-          >
+          <Link href="/courses" className="inline-flex items-center gap-2 rounded-xl px-8 py-3.5 text-sm font-bold transition-all hover:-translate-y-0.5" style={{
+            border:'1.5px solid rgba(200,169,106,0.35)',
+            color:'rgba(250,250,248,0.80)',
+            background:'rgba(255,255,255,0.04)'
+          }}>
             {tr("Kurslara Göz At")}
           </Link>
         </div>
-        <div className="flex flex-wrap justify-center gap-6 text-white/80 text-sm">
+        <div className="flex flex-wrap justify-center gap-6 text-sm" style={{color:'rgba(200,169,106,0.55)'}}>
           <span>✓ {tr("Kurulum gerekmez")}</span>
           <span>✓ {tr("Anında erişim")}</span>
           <span>✓ {tr("7/24 destek")}</span>

@@ -454,16 +454,19 @@ img, svg { display: block; }
   box-shadow: 0 0 0 3px rgba(200,169,106,0.18);
 }
 
-/* Lang switcher */
+/* Lang switcher — Hüda-i Şifa stili: sadece aktif dilin bayrağı görünür */
 .shell-header .lang-switcher {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.08);
+  background: transparent;
+  border: none;
+  padding: 0;
+  gap: 0;
 }
-.shell-header .lang-code  { color: rgba(255,255,255,0.48); }
-.shell-header .lang-sep   { color: rgba(255,255,255,0.14); }
-.shell-header .lang-btn:hover:not(.lang-btn--active) { background: rgba(255,255,255,0.09); }
-.shell-header .lang-btn--active { background: #C8A96A; }
-.shell-header .lang-btn--active .lang-code { color: #0B1F3A; }
+.shell-header .lang-sep  { color: rgba(255,255,255,0.18); padding: 0 5px; font-size: 11px; user-select: none; }
+.shell-header .lang-flag { font-size: 14px; margin-right: 3px; line-height: 1; }
+.shell-header .lang-code { color: rgba(255,255,255,0.38); font-size: 11px; font-weight: 600; letter-spacing: 0.4px; }
+.shell-header .lang-btn  { background: transparent; border: none; padding: 2px 1px; cursor: pointer; display: inline-flex; align-items: center; }
+.shell-header .lang-btn:hover:not(.lang-btn--active) .lang-code { color: rgba(255,255,255,0.72); }
+.shell-header .lang-btn--active .lang-code { color: #C8A96A; font-weight: 700; font-size: 11.5px; }
 
 /* Theme / search / AI icon buttons */
 .shell-header .theme-toggle {
@@ -1377,6 +1380,180 @@ tbody tr:hover { background: rgba(255,255,255,0.025); }
   border: none;
   margin: 24px 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   HYBRID HERO — Cormorant serif + Navy + Gold
+═══════════════════════════════════════════════════════════════ */
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-2xl);
+  border: 1px solid rgba(200,169,106,0.10);
+  background: var(--surface);
+  padding: 56px 60px;
+  box-shadow: 0 2px 32px rgba(11,31,58,0.06);
+}
+[data-theme="dark"] .hero-section {
+  border-color: rgba(200,169,106,0.08);
+  background: var(--card);
+}
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 50% at 90% 10%, rgba(200,169,106,0.07) 0, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 5% 90%, rgba(11,31,58,0.04) 0, transparent 50%);
+  pointer-events: none;
+}
+
+/* Badge pill */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(200,169,106,0.30);
+  color: #C8A96A;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: rgba(200,169,106,0.07);
+}
+
+/* Cormorant hero heading */
+.hero-h1 {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.hero-h1-gold {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: #C8A96A;
+}
+
+/* Tagline */
+.hero-tagline {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(200,169,106,0.6);
+  margin-top: 8px;
+}
+
+/* Body text */
+.hero-body {
+  font-size: 17px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  max-width: 540px;
+  margin-top: 16px;
+}
+
+/* CTA buttons */
+.hero-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 32px;
+  border-radius: 10px;
+  background: #0B1F3A;
+  color: #FAFAF8;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hero-btn-primary:hover {
+  background: #152B50;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(11,31,58,0.22);
+}
+[data-theme="dark"] .hero-btn-primary {
+  background: #C8A96A;
+  color: #0B1F3A;
+}
+[data-theme="dark"] .hero-btn-primary:hover { background: #D9BE80; }
+
+.hero-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 28px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid rgba(11,31,58,0.18);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hero-btn-secondary:hover {
+  border-color: rgba(200,169,106,0.5);
+  color: #C8A96A;
+  background: rgba(200,169,106,0.04);
+}
+[data-theme="dark"] .hero-btn-secondary {
+  border-color: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+}
+[data-theme="dark"] .hero-btn-secondary:hover {
+  border-color: rgba(200,169,106,0.45);
+  color: #C8A96A;
+}
+
+/* Hero stat row */
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-top: 32px;
+  border-top: 1px solid rgba(200,169,106,0.12);
+  margin-top: 36px;
+}
+.hero-stat-val {
+  font-family: var(--font-serif, 'Cormorant Garamond', serif);
+  font-size: 2.4rem;
+  font-weight: 600;
+  font-style: italic;
+  color: #C8A96A;
+  line-height: 1;
+}
+.hero-stat-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-top: 4px;
+}
+
+/* Active pulse dot */
+.hero-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.hero-live strong { color: #059669; }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE

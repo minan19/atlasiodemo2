@@ -133,6 +133,7 @@ export function TopNav() {
           </select>
 
           {/* ── Language switcher with flags ── */}
+          {/* Lang switcher — aktif dilin bayrağı gösterilir, pasifler sadece kod */}
           <div className="lang-switcher" role="navigation" aria-label={t.nav.langLabel}>
             {([
               { code: 'tr', flag: '🇹🇷', label: 'TR' },
@@ -141,19 +142,23 @@ export function TopNav() {
               { code: 'ar', flag: '🇸🇦', label: 'AR' },
               { code: 'ru', flag: '🇷🇺', label: 'RU' },
               { code: 'kk', flag: '🇰🇿', label: 'KK' },
-            ] as const).map((l, i) => (
-              <span key={l.code} className="lang-item">
-                {i > 0 && <span className="lang-sep">|</span>}
-                <button
-                  className={`lang-btn${language === l.code ? ' lang-btn--active' : ''}`}
-                  onClick={() => setLanguage(l.code)}
-                  title={l.label}
-                >
-                  <span className="lang-flag">{l.flag}</span>
-                  <span className="lang-code">{l.label}</span>
-                </button>
-              </span>
-            ))}
+            ] as const).map((l, i) => {
+              const isActive = language === l.code;
+              return (
+                <span key={l.code} className="lang-item">
+                  {i > 0 && <span className="lang-sep">|</span>}
+                  <button
+                    className={`lang-btn${isActive ? ' lang-btn--active' : ''}`}
+                    onClick={() => setLanguage(l.code)}
+                    title={l.label}
+                  >
+                    {/* Sadece aktif dilin bayrağı görünür */}
+                    {isActive && <span className="lang-flag">{l.flag}</span>}
+                    <span className="lang-code">{l.label}</span>
+                  </button>
+                </span>
+              );
+            })}
           </div>
 
           {/* Search / Command palette trigger */}

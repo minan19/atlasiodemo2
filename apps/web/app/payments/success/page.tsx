@@ -68,10 +68,12 @@ function PaymentSuccessInner() {
         </div>
       ))}
 
-      <div className="glass p-10 rounded-3xl border border-emerald-200 bg-white/90 shadow-2xl max-w-lg w-full text-center space-y-6">
+      <div style={{ background:"var(--card,#fff)", borderRadius:24, padding:40, border:"1px solid rgba(200,169,106,0.25)", boxShadow:"0 8px 40px rgba(11,31,58,0.10)", maxWidth:480, width:"100%", textAlign:"center" }}>
+        {/* Gold accent bar */}
+        <div style={{ width:60, height:4, background:"#C8A96A", borderRadius:2, margin:"0 auto 28px" }} />
         {/* Success Icon */}
-        <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-200">
-          <span className="text-4xl">🎉</span>
+        <div style={{ margin:"0 auto 20px", width:80, height:80, borderRadius:"50%", background:"#0B1F3A", display:"flex", alignItems:"center", justifyContent:"center", boxShadow:"0 8px 24px rgba(11,31,58,0.25)" }}>
+          <span style={{ fontSize:36 }}>🎉</span>
         </div>
 
         <div>
@@ -82,42 +84,35 @@ function PaymentSuccessInner() {
         </div>
 
         {data && (
-          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 space-y-2 text-left">
-            <div className="text-xs text-emerald-700 font-semibold uppercase tracking-wide">{t.tr("İşlem Özeti")}</div>
+          <div style={{ borderRadius:14, border:"1px solid rgba(200,169,106,0.25)", background:"rgba(200,169,106,0.06)", padding:16, textAlign:"left", display:"flex", flexDirection:"column", gap:8 }}>
+            <div style={{ fontSize:11, color:"#C8A96A", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.06em" }}>{t.tr("İşlem Özeti")}</div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">{t.tr("İşlem No")}</span>
               <span className="font-mono text-slate-800 text-xs">{data.id.slice(0, 12)}…</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">{t.tr("Tutar")}</span>
-              <span className="font-semibold text-emerald-700">{data.amount} {data.currency}</span>
+              <span style={{ fontWeight:700, color:"#C8A96A" }}>{data.amount} {data.currency}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-slate-600">{t.tr("Durum")}</span>
-              <span className="pill text-xs bg-emerald-50 border-emerald-200 text-emerald-700">✓ {data.status}</span>
+              <span style={{ fontSize:11, fontWeight:600, color:"#C8A96A", background:"rgba(200,169,106,0.12)", border:"1px solid rgba(200,169,106,0.3)", borderRadius:6, padding:"2px 8px" }}>✓ {data.status}</span>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
-          <Link
-            href="/my-courses"
-            className="btn-link justify-center text-sm font-semibold"
-            style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
-          >
+          <Link href="/my-courses" style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"11px 16px", borderRadius:10, background:"#0B1F3A", color:"#FAFAF8", fontSize:13, fontWeight:700, textDecoration:"none", boxShadow:"0 4px 14px rgba(11,31,58,0.2)" }}>
             {t.tr("📚 Kurslarıma Git")}
           </Link>
-          <Link
-            href="/courses"
-            className="btn-link justify-center text-sm font-medium border-slate-200 bg-white text-slate-700"
-          >
+          <Link href="/courses" style={{ display:"flex", alignItems:"center", justifyContent:"center", padding:"11px 16px", borderRadius:10, border:"1.5px solid rgba(200,169,106,0.35)", color:"#C8A96A", fontSize:13, fontWeight:600, textDecoration:"none" }}>
             {t.tr("Diğer Kurslar")}
           </Link>
         </div>
 
         <p className="text-xs text-slate-400">
           {t.tr("Fatura e-postanıza gönderildi. Sorularınız için")}{" "}
-          <Link href="/portal" className="text-emerald-600 hover:underline">{t.tr("destek merkezi")}</Link>{t.tr("ne başvurun.")}
+          <Link href="/portal" style={{ color:"#C8A96A", textDecoration:"underline" }}>{t.tr("destek merkezi")}</Link>{t.tr("ne başvurun.")}
         </p>
       </div>
     </div>

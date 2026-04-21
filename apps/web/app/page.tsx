@@ -138,8 +138,8 @@ function HeroSection() {
           </div>
           <div className="hero-live">
             <span className="relative flex" style={{width:10,height:10}}>
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-              <span className="relative inline-flex rounded-full bg-emerald-500" style={{width:10,height:10}} />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full" style={{background:"#C8A96A",opacity:0.6}} />
+              <span className="relative inline-flex rounded-full" style={{width:10,height:10,background:"#C8A96A"}} />
             </span>
             {tr("Şu an")} <strong className="hero-live">{tr("1.247 öğrenci")}</strong> {tr("aktif")}
           </div>
@@ -303,7 +303,7 @@ function WhiteboardShowcase() {
           <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2">
             <div className="h-3 w-3 rounded-full bg-red-400" />
             <div className="h-3 w-3 rounded-full bg-amber-400" />
-            <div className="h-3 w-3 rounded-full bg-emerald-400" />
+            <div className="h-3 w-3 rounded-full" style={{background:"#C8A96A"}} />
             <span className="ml-3 text-xs text-slate-400 font-medium">Atlasio Whiteboard</span>
           </div>
           {/* Tool sidebar */}
@@ -312,7 +312,7 @@ function WhiteboardShowcase() {
               {["✏️", "⬜", "⭕", "➡️", "🔆", "📝", "🖼️", "🗑️"].map((tool) => (
                 <button
                   key={tool}
-                  className="h-8 w-8 rounded-lg bg-white border border-slate-200 text-sm flex items-center justify-center shadow-sm hover:bg-emerald-50 transition-colors"
+                  className="h-8 w-8 rounded-lg bg-white border border-slate-200 text-sm flex items-center justify-center shadow-sm hover:bg-amber-50 transition-colors"
                 >
                   {tool}
                 </button>
@@ -321,17 +321,17 @@ function WhiteboardShowcase() {
             {/* Canvas area */}
             <div className="flex-1 relative bg-white min-h-48 p-4">
               <div className="absolute top-6 left-10 w-24 h-16 border-2 border-blue-400 rounded opacity-70" />
-              <div className="absolute top-10 left-40 w-16 h-16 border-2 border-emerald-400 rounded-full opacity-70" />
+              <div className="absolute top-10 left-40 w-16 h-16 border-2 rounded-full opacity-70" style={{borderColor:"#C8A96A"}} />
               <div className="absolute bottom-8 left-8 text-xs text-slate-400 font-medium border-b border-slate-300 w-32">
                 y = mx + b
               </div>
               <div className="absolute top-4 right-4 flex flex-col gap-1">
                 <div className="h-1.5 w-12 rounded-full bg-amber-300 opacity-80" />
                 <div className="h-1.5 w-8 rounded-full bg-blue-300 opacity-80" />
-                <div className="h-1.5 w-10 rounded-full bg-emerald-300 opacity-80" />
+                <div className="h-1.5 w-10 rounded-full opacity-80" style={{background:"rgba(200,169,106,0.7)"}} />
               </div>
               <div className="absolute bottom-4 right-4 flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full" style={{background:"#C8A96A"}} />
                 <span className="text-xs text-slate-500">{tr("3 katılımcı")}</span>
               </div>
             </div>
@@ -340,7 +340,7 @@ function WhiteboardShowcase() {
           <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-4 py-2">
             <div className="flex gap-2">
               <span className="rounded px-2 py-0.5 bg-white border border-slate-200 text-xs text-slate-600 shadow-sm">{tr("Sayfa 1/3")}</span>
-              <span className="rounded px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 shadow-sm">{tr("Anket Aktif")}</span>
+              <span className="rounded px-2 py-0.5 text-xs shadow-sm" style={{background:"rgba(200,169,106,0.12)",border:"1px solid rgba(200,169,106,0.35)",color:"#C8A96A"}}>{tr("Anket Aktif")}</span>
             </div>
             <span className="text-xs text-slate-400">{tr("Canlı")} • 00:14:32</span>
           </div>

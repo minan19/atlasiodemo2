@@ -157,16 +157,16 @@ textarea.bg-slate-800 { background-color: var(--card-2) !important; }
   /* ── Marka rengi — Safir Mavi (kurumsal, güven) ── */
   --brand-a:  #2563EB;   /* sapphire blue — primary */
   --brand-b:  #1D4ED8;   /* hover state */
-  --brand-c:  #059669;   /* emerald — accent / success */
-  --brand-grad: linear-gradient(135deg, #2563EB, #059669);
-  --brand-grad-h: linear-gradient(135deg, #1D4ED8, #047857);
+  --brand-c:  #C8A96A;   /* gold — accent / success */
+  --brand-grad: linear-gradient(135deg, #0B1F3A, #C8A96A);
+  --brand-grad-h: linear-gradient(135deg, #1D4ED8, #b45309);
 
   --accent:        #2563EB;
-  --accent-2:      #059669;
+  --accent-2:      #C8A96A;
   --accent-soft:   rgba(37, 99, 235, 0.08);
   --accent-2-soft: rgba(5, 150, 105, 0.08);
 
-  --success:       #059669;
+  --success:       #d97706;
   --success-soft:  rgba(5, 150, 105, 0.10);
   --warning:       #D97706;
   --warning-soft:  rgba(217, 119, 6, 0.10);
@@ -433,8 +433,9 @@ img, svg { display: block; }
 
 /* Back / forward buttons */
 .shell-header .back-btn {
-  color: rgba(255,255,255,0.42);
-  border-color: rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.08);   /* dark nav'da yarı şeffaf — her iki modda okunur */
+  color: rgba(255,255,255,0.75);
+  border-color: rgba(255,255,255,0.12);
 }
 .shell-header .back-btn:hover:not(:disabled) {
   color: #FAFAF8;
@@ -1553,7 +1554,7 @@ tbody tr:hover { background: rgba(255,255,255,0.025); }
   font-size: 12px;
   color: var(--ink-2);
 }
-.hero-live strong { color: #059669; }
+.hero-live strong { color: #C8A96A; }
 
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE

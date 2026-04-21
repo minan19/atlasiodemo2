@@ -127,7 +127,7 @@ export default function AdminVolunteerPage() {
   const rejectedCount = contents.filter((c) => c.status === 'REJECTED').length;
 
   const statusBadgeClass = (status: string) => {
-    if (status === 'APPROVED') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'APPROVED') return 'bg-amber-100 text-amber-700';
     if (status === 'REJECTED') return 'bg-rose-100 text-rose-700';
     return 'bg-amber-100 text-amber-700';
   };
@@ -173,8 +173,8 @@ export default function AdminVolunteerPage() {
           <p className="text-2xl font-bold text-amber-700">{pendingCount}</p>
           <p className="text-xs text-slate-500 mt-1">{t.tr("⏳ İnceleme")}</p>
         </div>
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 text-center">
-          <p className="text-2xl font-bold text-emerald-700">{approvedCount}</p>
+        <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/50 p-4 text-center">
+          <p className="text-2xl font-bold text-amber-700">{approvedCount}</p>
           <p className="text-xs text-slate-500 mt-1">{t.tr("✅ Onaylı")}</p>
         </div>
         <div className="rounded-2xl border border-rose-200 bg-gradient-to-br from-rose-50 to-rose-100/50 p-4 text-center">
@@ -202,7 +202,7 @@ export default function AdminVolunteerPage() {
 
       {/* Toast Feedback */}
       {message && (
-        <div className="pill inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
+        <div className="pill inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-sm font-medium text-amber-700">
           <span>✓</span> {message}
         </div>
       )}
@@ -247,7 +247,7 @@ export default function AdminVolunteerPage() {
           </div>
         ) : (
           displayContents.map((item) => (
-            <div key={item.id} className={`glass rounded-2xl p-5 border ${item.status === 'APPROVED' ? 'border-emerald-100' : item.status === 'REJECTED' ? 'border-rose-100' : 'border-amber-100'} hover:shadow-md transition-all`}>
+            <div key={item.id} className={`glass rounded-2xl p-5 border ${item.status === 'APPROVED' ? 'border-amber-100' : item.status === 'REJECTED' ? 'border-rose-100' : 'border-amber-100'} hover:shadow-md transition-all`}>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 {/* Left: Avatar + Instructor Info */}
                 <div className="flex items-center gap-3">
@@ -292,7 +292,7 @@ export default function AdminVolunteerPage() {
               {/* Action Buttons */}
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-white disabled:opacity-50 transition-colors" style={{ background: "#0B1F3A" }}
                   disabled={busy}
                   onClick={() => handleStatusChange(item.id, 'APPROVED')}
                 >

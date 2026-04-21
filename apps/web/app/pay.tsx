@@ -50,7 +50,7 @@ export default function PayDemoPage() {
         <div className="space-y-1">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Kurs ID")}</label>
           <input
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-amber-400 focus:outline-none"
             placeholder={t.tr("Kurs ID (opsiyonel)")}
             value={courseId}
             onChange={(e) => setCourseId(e.target.value)}
@@ -59,7 +59,7 @@ export default function PayDemoPage() {
         <div className="space-y-1">
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t.tr("Plan ID")}</label>
           <input
-            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
+            className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-amber-400 focus:outline-none"
             placeholder={t.tr("Plan ID (opsiyonel)")}
             value={planId}
             onChange={(e) => setPlanId(e.target.value)}
@@ -73,7 +73,7 @@ export default function PayDemoPage() {
               min={1}
               value={seats}
               onChange={(e) => setSeats(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-amber-400 focus:outline-none"
             />
           </div>
           <div className="space-y-1">
@@ -83,7 +83,7 @@ export default function PayDemoPage() {
               min={1}
               value={installments}
               onChange={(e) => setInstallments(Number(e.target.value))}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-emerald-400 focus:outline-none"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white focus:border-amber-400 focus:outline-none"
             />
           </div>
         </div>
@@ -92,15 +92,15 @@ export default function PayDemoPage() {
           onClick={handleCheckout}
           disabled={busy}
           className="btn-link w-full justify-center font-semibold disabled:opacity-60"
-          style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
+          style={{ background: '#0B1F3A', color: '#fff', borderColor: '#0B1F3A' }}
         >
           {busy ? `🔄 ${t.tr("Yönlendiriliyor…")}` : `💳 ${t.tr("Checkout'a Git")}`}
         </button>
 
         {url && (
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50/80 p-3 space-y-1">
-            <div className="text-xs text-emerald-700 font-semibold">{t.tr("Checkout URL hazır")}</div>
-            <a href={url} target="_blank" rel="noreferrer" className="text-emerald-700 underline break-all text-xs">
+          <div className="rounded-xl border border-amber-100 bg-amber-50/80 p-3 space-y-1">
+            <div className="text-xs text-amber-700 font-semibold">{t.tr("Checkout URL hazır")}</div>
+            <a href={url} target="_blank" rel="noreferrer" className="text-amber-700 underline break-all text-xs">
               {url}
             </a>
           </div>

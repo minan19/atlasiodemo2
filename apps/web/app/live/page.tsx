@@ -123,7 +123,7 @@ export default function LiveHubPage() {
                 <span className="status-dot online" />
                 {t.tr("Canlı")}
               </div>
-              <span className="pill pill-sm bg-emerald-50 border-emerald-200 text-emerald-700">
+              <span className="pill pill-sm bg-amber-50 border-amber-200 text-amber-700">
                 {liveStudentCount} {t.tr("öğrenci aktif")}
               </span>
             </div>
@@ -134,7 +134,7 @@ export default function LiveHubPage() {
               {[
                 { icon: "🔴", label: t.live.statusRunning, value: activeSessions.filter(s => s.status === "RUNNING").length.toString(), color: "text-rose-600", bg: "bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200" },
                 { icon: "⏰", label: t.live.statusScheduled, value: activeSessions.filter(s => s.status === "SCHEDULED").length.toString(), color: "text-amber-600", bg: "bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200" },
-                { icon: "👥", label: t.live.participantsLabel, value: liveStudentCount.toString(), color: "text-emerald-600", bg: "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200" },
+                { icon: "👥", label: t.live.participantsLabel, value: liveStudentCount.toString(), color: "text-amber-600", bg: "bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200" },
                 { icon: "✓", label: t.live.statusEnded, value: endedSessions.length.toString(), color: "text-slate-600", bg: "bg-gradient-to-br from-slate-50 to-slate-100/50 border-slate-200" },
               ].map(stat => (
                 <div key={t.tr(stat.label)} className={`rounded-xl border p-3 text-center shadow-sm ${stat.bg}`}>
@@ -148,7 +148,7 @@ export default function LiveHubPage() {
             <Link href="/whiteboard" className="btn-link text-sm">{t.tr("🧠 Akıllı Tahta")}</Link>
             {isInstructor && (
               <button
-                className="btn-link text-sm bg-emerald-500/10 border-emerald-400 text-emerald-700"
+                className="btn-link text-sm bg-amber-500/10 border-amber-400 text-amber-700"
                 onClick={() => setShowCreateForm((v) => !v)}
               >
                 {showCreateForm ? t.tr("✕ Vazgeç") : t.tr("➕ Yeni Oturum")}
@@ -160,11 +160,11 @@ export default function LiveHubPage() {
 
       {/* Create session form (instructor) */}
       {isInstructor && showCreateForm && (
-        <div className="glass rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 space-y-3 animate-scale-in">
-          <div className="text-sm font-semibold text-emerald-800">{t.tr("Yeni Canlı Oturum Başlat")}</div>
+        <div className="glass rounded-2xl border border-amber-200 bg-amber-50/60 p-4 space-y-3 animate-scale-in">
+          <div className="text-sm font-semibold text-amber-800">{t.tr("Yeni Canlı Oturum Başlat")}</div>
           <div className="flex gap-2">
             <input
-              className="flex-1 rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none"
+              className="flex-1 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
               placeholder={t.tr("Oturum başlığı (ör. Matematik — Ders 5)")}
               value={newSessionTitle}
               onChange={(e) => setNewSessionTitle(e.target.value)}
@@ -178,7 +178,7 @@ export default function LiveHubPage() {
               {creatingSession ? t.tr("Oluşturuluyor…") : t.tr("🚀 Başlat")}
             </button>
           </div>
-          <p className="text-xs text-emerald-700">
+          <p className="text-xs text-amber-700">
             {t.tr("Oturum başlatıldıktan sonra öğrenciler bağlantı kodu veya link ile katılabilir.")}
           </p>
         </div>
@@ -186,11 +186,11 @@ export default function LiveHubPage() {
 
       {/* Quick join for students */}
       {!isInstructor && (
-        <div className="glass rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-emerald-50/30 p-4">
+        <div className="glass rounded-2xl border border-slate-200 bg-gradient-to-br from-white to-amber-50/30 p-4">
           <div className="text-sm font-semibold mb-3">{t.tr("Oturuma Katıl")}</div>
           <div className="flex gap-2">
             <input
-              className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-emerald-400 focus:outline-none uppercase tracking-widest"
+              className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm focus:border-amber-400 focus:outline-none uppercase tracking-widest"
               placeholder={t.tr("Oturum kodu gir (ör. MATH-01)")}
               value={joinCode}
               onChange={(e) => { setJoinCode(e.target.value.toUpperCase()); setJoinError(null); }}
@@ -261,7 +261,7 @@ export default function LiveHubPage() {
                             {/* Mini participant dots */}
                             <div className="flex -space-x-1 ml-1">
                               {Array.from({length: Math.min(s.participantCount, 4)}).map((_, i) => (
-                                <div key={i} className="w-4 h-4 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 border border-white text-[8px] flex items-center justify-center text-white font-bold">{i+1}</div>
+                                <div key={i} className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-yellow-400 border border-white text-[8px] flex items-center justify-center text-white font-bold">{i+1}</div>
                               ))}
                               {s.participantCount > 4 && <div className="w-4 h-4 rounded-full bg-slate-200 border border-white text-[8px] flex items-center justify-center text-slate-500">+{s.participantCount-4}</div>}
                             </div>
@@ -275,7 +275,7 @@ export default function LiveHubPage() {
                           className="btn-link text-xs flex-1 justify-center"
                           style={s.status === "RUNNING"
                             ? { background: 'linear-gradient(to right, #f43f5e, #f97316)', color: '#fff', borderColor: '#fb7185' }
-                            : { background: 'rgba(16,185,129,0.1)', color: '#047857', borderColor: '#34d399' }}
+                            : { background: 'rgba(200,169,106,0.1)', color: '#b45309', borderColor: '#C8A96A' }}
                         >
                           {s.status === "RUNNING" ? t.tr("🔴 Derse Gir") : t.tr("📅 Görüntüle")}
                         </Link>
@@ -333,7 +333,7 @@ export default function LiveHubPage() {
             { icon: "🧠", title: "Entegre Tahta", desc: "Her oturuma bağlı akıllı tahta. Kalem, şekil, PDF, quiz — hepsi hazır." },
             { icon: "⏺️", title: "Otomatik Kayıt", desc: "Canlı ders otomatik kaydedilir. Sonradan izle, ödev olarak ekle." },
           ].map((card, i) => (
-            <div key={t.tr(card.title)} className="glass rounded-xl border border-slate-200 p-4 space-y-2 hover:border-emerald-300 transition-colors">
+            <div key={t.tr(card.title)} className="glass rounded-xl border border-slate-200 p-4 space-y-2 hover:border-amber-300 transition-colors">
               <div className="flex items-center gap-2">
                 <span className={`w-8 h-8 rounded-lg bg-gradient-to-br ${["from-rose-400 to-orange-400", "from-blue-400 to-cyan-400", "from-violet-400 to-purple-400"][i]} flex items-center justify-center text-base`}>{card.icon}</span>
                 <span className="font-semibold text-sm">{t.tr(card.title)}</span>

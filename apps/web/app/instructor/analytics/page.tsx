@@ -52,11 +52,11 @@ const DEMO_INSIGHTS: ContentInsight[] = [
 function RiskBadge({ score, tr }: { score: number; tr: (s: string) => string }) {
   if (score >= 75) return <span className="pill pill-xs bg-rose-50 border-rose-200 text-rose-700 font-bold">⚠ {tr("Yüksek Risk")}</span>;
   if (score >= 50) return <span className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700 font-bold">{tr("Orta Risk")}</span>;
-  return <span className="pill pill-xs bg-emerald-50 border-emerald-200 text-emerald-700">{tr("Düşük Risk")}</span>;
+  return <span className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700">{tr("Düşük Risk")}</span>;
 }
 
 function RiskBar({ score }: { score: number }) {
-  const color = score >= 75 ? 'bg-rose-500' : score >= 50 ? 'bg-amber-400' : 'bg-emerald-500';
+  const color = score >= 75 ? 'bg-rose-500' : score >= 50 ? 'bg-amber-400' : 'bg-amber-300';
   return (
     <div className="w-full bg-slate-100 rounded-full h-2">
       <div className={`${color} h-2 rounded-full transition-all`} style={{ width: `${score}%` }} />
@@ -192,7 +192,7 @@ export default function InstructorAnalyticsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`font-semibold ${s.avgQuizScore < 50 ? 'text-rose-600' : s.avgQuizScore < 65 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                        <span className={`font-semibold ${s.avgQuizScore < 50 ? 'text-rose-600' : s.avgQuizScore < 65 ? 'text-amber-600' : 'text-amber-600'}`}>
                           %{s.avgQuizScore}
                         </span>
                       </td>
@@ -243,7 +243,7 @@ export default function InstructorAnalyticsPage() {
                     <p className="text-xs text-slate-500">{insight.totalViews} görüntülenme</p>
                   </div>
                   <div className="text-right">
-                    <div className={`text-xl font-extrabold ${insight.dropoffRate > 30 ? 'text-rose-600' : insight.dropoffRate > 20 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    <div className={`text-xl font-extrabold ${insight.dropoffRate > 30 ? 'text-rose-600' : insight.dropoffRate > 20 ? 'text-amber-600' : 'text-amber-600'}`}>
                       %{insight.dropoffRate}
                     </div>
                     <div className="text-xs text-slate-400">{t.tr("terk oranı")}</div>
@@ -252,7 +252,7 @@ export default function InstructorAnalyticsPage() {
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-slate-500">{t.tr("Ort. quiz")}:</span>
-                  <span className={`font-bold text-sm ${insight.avgQuizScore < 55 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  <span className={`font-bold text-sm ${insight.avgQuizScore < 55 ? 'text-rose-600' : 'text-amber-600'}`}>
                     %{insight.avgQuizScore}
                   </span>
                 </div>

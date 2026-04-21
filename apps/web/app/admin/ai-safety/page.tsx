@@ -152,7 +152,7 @@ function ScoreRing({ score, safe }: ScoreRingProps) {
   const fill = score * circumference;
   const color = safe
     ? score >= 0.8
-      ? '#10b981' // emerald
+      ? '#C8A96A' // gold
       : '#f59e0b' // amber
     : score >= 0.5
     ? '#f59e0b'
@@ -366,7 +366,7 @@ export default function AiSafetyPage() {
 
   const safeRateColor =
     s.safeRate >= 95
-      ? 'text-emerald-600'
+      ? 'text-amber-600'
       : s.safeRate >= 85
       ? 'text-amber-600'
       : 'text-red-600';
@@ -408,7 +408,7 @@ export default function AiSafetyPage() {
       label: 'Güvenli Oran',
       value: `%${s.safeRate.toFixed(1)}`,
       icon: '✅',
-      bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-emerald-200',
+      bg: 'bg-gradient-to-br from-amber-50 to-amber-100/60 border-amber-200',
       valueColor: safeRateColor,
       stagger: 'stagger-4',
     },
@@ -423,9 +423,9 @@ export default function AiSafetyPage() {
 
   /* ── Check result panel (shared for input/output) ── */
   function CheckResultPanel({ result }: { result: CheckResult }) {
-    const statusColor = result.safe ? 'text-emerald-600' : 'text-rose-600';
+    const statusColor = result.safe ? 'text-amber-600' : 'text-rose-600';
     const statusBg = result.safe
-      ? 'bg-emerald-50 border-emerald-200'
+      ? 'bg-amber-50 border-amber-200'
       : 'bg-rose-50 border-rose-200';
     const statusLabel = result.safe ? 'GÜVENLİ' : 'GÜVENSİZ';
     const statusIcon = result.safe ? '✅' : '🚨';
@@ -461,7 +461,7 @@ export default function AiSafetyPage() {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-emerald-700">
+          <p className="text-sm text-amber-700">
             {t.tr("Herhangi bir sorun tespit edilmedi.")}
           </p>
         )}
@@ -689,7 +689,7 @@ export default function AiSafetyPage() {
                   </div>
 
                   {piiResult.detectedTypes.length === 0 && (
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex items-center gap-2">
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 flex items-center gap-2">
                       <span>✅</span>
                       {t.tr("Metinde kişisel veri (PII) tespit edilmedi.")}
                     </div>
@@ -768,7 +768,7 @@ export default function AiSafetyPage() {
                 <div
                   className={`rounded-2xl border p-5 space-y-4 ${
                     modelResult.approved
-                      ? 'bg-emerald-50 border-emerald-200'
+                      ? 'bg-amber-50 border-amber-200'
                       : 'bg-rose-50 border-rose-200'
                   }`}
                 >
@@ -779,7 +779,7 @@ export default function AiSafetyPage() {
                     <div>
                       <p
                         className={`text-2xl font-extrabold ${
-                          modelResult.approved ? 'text-emerald-700' : 'text-rose-700'
+                          modelResult.approved ? 'text-amber-700' : 'text-rose-700'
                         }`}
                       >
                         {modelResult.approved ? t.tr("ONAYLANDI") : t.tr("REDDEDİLDİ")}
@@ -810,7 +810,7 @@ export default function AiSafetyPage() {
                   )}
 
                   {modelResult.approved && modelResult.issues.length === 0 && (
-                    <p className="text-sm text-emerald-700">
+                    <p className="text-sm text-amber-700">
                       {t.tr("Bu model güvenlik politikasına uygundur ve kullanıma hazırdır.")}
                     </p>
                   )}

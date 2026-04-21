@@ -1183,8 +1183,8 @@ export default function SmartBoardPage({
               {sessionId.length > 18 ? `${sessionId.slice(0, 18)}…` : sessionId}
             </span>
             {/* Live status */}
-            <span className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${connected ? "bg-emerald-900/40 text-emerald-400" : "bg-slate-700 text-slate-500"}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-emerald-400 animate-pulse" : "bg-slate-500"}`} />
+            <span className={`flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${connected ? "bg-amber-900/40 text-amber-400" : "bg-slate-700 text-slate-500"}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${connected ? "bg-amber-400 animate-pulse" : "bg-slate-500"}`} />
               {connected ? "Live" : "Offline"}
             </span>
           </div>
@@ -1391,7 +1391,8 @@ export default function SmartBoardPage({
                       {/* Confirm */}
                       <button
                         onClick={() => confirmTextBox(tb.id)}
-                        className="h-6 w-6 rounded bg-emerald-600 text-white text-xs hover:bg-emerald-500 transition-all"
+                        className="h-6 w-6 rounded text-white text-xs hover:opacity-80 transition-all"
+                        style={{ background: "#0B1F3A" }}
                         title="Confirm (Enter)"
                       >✓</button>
                       {/* Cancel */}
@@ -1587,7 +1588,7 @@ export default function SmartBoardPage({
                               setCodeBlocks((prev) => prev.map((b) => b.id === cb.id ? { ...b, code: pendingCode, language: pendingLang } : b));
                               setEditingCodeId(null);
                             }}
-                            className="text-emerald-400 text-[10px] hover:text-emerald-300 transition-colors"
+                            className="text-amber-400 text-[10px] hover:text-amber-300 transition-colors"
                           >✓ Save</button>
                           <button
                             onMouseDown={(e) => e.stopPropagation()}
@@ -1633,12 +1634,12 @@ export default function SmartBoardPage({
                       onMouseDown={(e) => e.stopPropagation()}
                       placeholder="// Write your code here…"
                       spellCheck={false}
-                      className="w-full min-h-[120px] resize-y bg-slate-950 text-emerald-300 text-xs font-mono p-3 focus:outline-none border-0"
+                      className="w-full min-h-[120px] resize-y bg-slate-950 text-amber-300 text-xs font-mono p-3 focus:outline-none border-0"
                       style={{ lineHeight: 1.6, tabSize: 2 }}
                     />
                   ) : (
                     <pre
-                      className="bg-slate-950 text-emerald-300 text-xs font-mono p-3 overflow-auto max-h-48"
+                      className="bg-slate-950 text-amber-300 text-xs font-mono p-3 overflow-auto max-h-48"
                       style={{ lineHeight: 1.6 }}
                     >
                       {cb.code || <span className="text-slate-600 italic">// empty</span>}
@@ -1841,7 +1842,7 @@ export default function SmartBoardPage({
                   {mwLoading ? t.tr("Yazıyor…") : t.tr("✏️ Yeniden Yaz")}
                 </button>
                 {mwResult && (
-                  <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                  <div className="rounded-xl border border-amber-800/40 bg-amber-950/20 p-3 text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
                     {mwResult}
                   </div>
                 )}
@@ -1964,13 +1965,13 @@ export default function SmartBoardPage({
                 <div className="rounded-xl border border-slate-700 bg-slate-800/40 px-3 py-2.5 text-[11px] text-slate-500">
                   {t.tr("Tahtadaki tüm TEXT eylemleri otomatik analiz edilir.")}
                 </div>
-                <button onClick={handleSummarize} disabled={sumLoading} className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-2 text-xs font-semibold text-white disabled:opacity-50 hover:from-emerald-500 hover:to-teal-500 transition-all">
+                <button onClick={handleSummarize} disabled={sumLoading} className="w-full rounded-xl py-2 text-xs font-semibold text-white disabled:opacity-50 hover:opacity-80 transition-all" style={{ background: "#0B1F3A" }}>
                   {sumLoading ? t.tr("Analiz ediliyor…") : t.tr("📄 Dönüştür")}
                 </button>
                 {sumResult && (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-emerald-800/40 bg-emerald-950/20 p-3">
-                      <div className="text-xs font-bold text-emerald-300 mb-1">{t.tr(sumResult.title)}</div>
+                    <div className="rounded-xl border border-amber-800/40 bg-amber-950/20 p-3">
+                      <div className="text-xs font-bold text-amber-300 mb-1">{t.tr(sumResult.title)}</div>
                       <p className="text-[11px] text-slate-300 leading-relaxed">{sumResult.introduction}</p>
                     </div>
                     {sumResult.sections.map((s, i) => (

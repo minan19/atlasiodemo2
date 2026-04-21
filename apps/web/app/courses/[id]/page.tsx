@@ -142,11 +142,11 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             <p className="text-sm font-bold text-blue-700">{lessonCount}</p>
           </div>
         </div>
-        <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-emerald-100/50 flex items-center gap-2 px-5 py-3 shadow-sm">
+        <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-amber-100/50 flex items-center gap-2 px-5 py-3 shadow-sm">
           <span className="text-lg">🗓️</span>
           <div>
             <p className="text-xs text-slate-500 font-medium">{t.tr("Oturum Sayısı")}</p>
-            <p className="text-sm font-bold text-emerald-700">{schedule.length}</p>
+            <p className="text-sm font-bold text-amber-700">{schedule.length}</p>
           </div>
         </div>
         <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50 to-violet-100/50 flex items-center gap-2 px-5 py-3 shadow-sm">
@@ -181,7 +181,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
+              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-yellow-400 inline-block" />
               {t.courses.detailCurriculum}
             </h2>
             <Link
@@ -194,7 +194,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {schedule.map((s) => (
-              <article key={s.id} className="glass flex flex-col gap-3 rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all">
+              <article key={s.id} className="glass flex flex-col gap-3 rounded-2xl p-5 shadow-sm border border-slate-200 hover:border-amber-200 hover:shadow-md transition-all">
                 <h3 className="font-semibold text-slate-800 leading-snug">{t.tr(s.title)}</h3>
                 {s.description && (
                   <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
@@ -219,7 +219,8 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                     href={s.meetingUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-600"
+                    className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90"
+                    style={{ background: "#0B1F3A" }}
                   >
                     {t.tr("🎥 Canlı Katıl")}
                   </Link>
@@ -265,7 +266,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                 </div>
                 {/* Access badge */}
                 {lesson.isPreview ? (
-                  <span className="pill shrink-0 bg-emerald-50 text-emerald-700 font-semibold">
+                  <span className="pill shrink-0 bg-amber-50 text-amber-700 font-semibold">
                     {t.courses.preview}
                   </span>
                 ) : (

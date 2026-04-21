@@ -149,7 +149,7 @@ function statusLabel(status: Agent['status'], tr: (s: string) => string): string
 
 function statusClasses(status: Agent['status']): string {
   switch (status) {
-    case 'ACTIVE': return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+    case 'ACTIVE': return 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
     case 'IDLE':   return 'bg-slate-500/20 text-slate-300 border border-slate-500/30';
     case 'ERROR':  return 'bg-red-500/20 text-red-300 border border-red-500/30';
   }
@@ -157,7 +157,7 @@ function statusClasses(status: Agent['status']): string {
 
 function statusDot(status: Agent['status']): string {
   switch (status) {
-    case 'ACTIVE': return 'bg-emerald-400';
+    case 'ACTIVE': return 'bg-amber-400';
     case 'IDLE':   return 'bg-slate-400';
     case 'ERROR':  return 'bg-red-400';
   }
@@ -165,14 +165,14 @@ function statusDot(status: Agent['status']): string {
 
 function rateColor(rate?: number): string {
   if (rate === undefined) return 'bg-slate-600';
-  if (rate > 80) return 'bg-emerald-500';
+  if (rate > 80) return 'bg-amber-500';
   if (rate > 50) return 'bg-amber-500';
   return 'bg-red-500';
 }
 
 function rateTextColor(rate?: number): string {
   if (rate === undefined) return 'text-slate-400';
-  if (rate > 80) return 'text-emerald-400';
+  if (rate > 80) return 'text-amber-400';
   if (rate > 50) return 'text-amber-400';
   return 'text-red-400';
 }
@@ -375,7 +375,7 @@ function FeedbackForm({ agentId, isDemo, onClose }: FeedbackFormProps) {
       <div className="mt-4 border-t border-white/10 pt-4">
         <div className="flex flex-col items-center gap-2 py-4 text-center">
           <span className="text-3xl">✅</span>
-          <p className="font-medium text-emerald-400">{t.tr("Geri bildiriminiz alındı!")}</p>
+          <p className="font-medium text-amber-400">{t.tr("Geri bildiriminiz alındı!")}</p>
           <p className="text-sm text-slate-400">{t.tr("Teşekkür ederiz.")}</p>
           <button
             onClick={onClose}
@@ -719,7 +719,7 @@ export default function AIAgentsPage() {
               return (
                 <div
                   key={agentId}
-                  className="flex items-center gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2.5 text-sm text-emerald-300"
+                  className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-300"
                 >
                   <span>✅</span>
                   <span>
@@ -737,7 +737,7 @@ export default function AIAgentsPage() {
                         return next;
                       })
                     }
-                    className="ml-auto text-emerald-400 hover:text-white transition-colors"
+                    className="ml-auto text-amber-400 hover:text-white transition-colors"
                     aria-label={t.tr("Kapat")}
                   >
                     ✕
@@ -767,7 +767,7 @@ export default function AIAgentsPage() {
             {loading ? (
               <div className="skeleton mt-2 h-8 w-16 rounded" />
             ) : (
-              <p className="mt-1 text-3xl font-bold text-emerald-400">
+              <p className="mt-1 text-3xl font-bold text-amber-400">
                 {activeAgents}
               </p>
             )}

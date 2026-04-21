@@ -42,7 +42,7 @@ function relativeTime(dateStr: string): string {
 }
 
 const SEVERITY_TOAST: Record<AlarmPayload['severity'], string> = {
-  LOW:    'bg-emerald-600 border-emerald-700',
+  LOW:    'bg-teal-600 border-teal-700',
   MEDIUM: 'bg-amber-500   border-amber-600',
   HIGH:   'bg-rose-600    border-rose-700',
 };
@@ -215,7 +215,7 @@ export function NotificationBell() {
                 {unread > 0 && (
                   <button
                     onClick={markAll}
-                    className="text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+                    style={{ fontSize:12, color:"#C8A96A", background:"none", border:"none", cursor:"pointer", textDecoration:"underline" }}
                   >
                     Hepsini okundu işaretle
                   </button>
@@ -265,7 +265,7 @@ export function NotificationBell() {
               <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/60 flex items-center justify-between">
                 <Link
                   href="/notifications"
-                  className="text-xs text-emerald-600 hover:underline dark:text-emerald-400"
+                  style={{ fontSize:12, color:"#C8A96A", background:"none", border:"none", cursor:"pointer", textDecoration:"underline" }}
                   onClick={() => setOpen(false)}
                 >
                   Tümünü gör →

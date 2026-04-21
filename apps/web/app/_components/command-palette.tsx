@@ -92,7 +92,7 @@ function Highlighted({ text, term }: { text: string; term: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <strong className="font-bold text-emerald-600 dark:text-emerald-400">
+      <strong style={{ fontWeight:700, color:"#C8A96A" }}>
         {text.slice(idx, idx + term.length)}
       </strong>
       {text.slice(idx + term.length)}
@@ -126,7 +126,7 @@ function resultCategory(r: SearchResult): string {
 
 function resultCategoryChipClass(r: SearchResult): string {
   if (r.kind === 'page')   return 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300';
-  if (r.kind === 'course') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300';
+  if (r.kind === 'course') return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300';
   return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300';
 }
 
@@ -367,7 +367,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           {/* Loading spinner */}
           {loading && (
             <svg
-              className="w-4 h-4 text-emerald-500 animate-spin flex-shrink-0"
+              className="w-4 h-4 animate-spin flex-shrink-0" style={{ color:"#C8A96A" }}
               fill="none"
               viewBox="0 0 24 24"
               aria-hidden="true"
@@ -400,7 +400,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                   <button
                     key={q}
                     onClick={() => applyRecent(q)}
-                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+                    className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
                   >
                     <svg className="w-3 h-3 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -456,7 +456,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                             className={`
                               flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors
                               ${isActive
-                                ? 'bg-emerald-50 dark:bg-emerald-900/20'
+                                ? 'bg-amber-50 dark:bg-amber-900/20'
                                 : 'hover:bg-slate-50 dark:hover:bg-slate-700/40'}
                             `}
                           >

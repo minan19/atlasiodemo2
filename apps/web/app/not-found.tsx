@@ -7,30 +7,26 @@ export default function NotFound() {
   const { tr } = useI18n();
   return (
     <div className="grid place-items-center min-h-[60vh] px-4">
-      <div className="glass p-8 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl max-w-md w-full text-center space-y-5">
-        <div className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500">
+      <div style={{ background:"var(--card,#fff)", borderRadius:24, padding:36, border:"1px solid var(--line,#e2e8f0)", boxShadow:"0 8px 40px rgba(11,31,58,0.08)", maxWidth:440, width:"100%", textAlign:"center" }}>
+        {/* Gold accent */}
+        <div style={{ width:60, height:4, background:"#C8A96A", borderRadius:2, margin:"0 auto 24px" }} />
+        {/* 404 in navy */}
+        <div style={{ fontSize:80, fontWeight:800, color:"#0B1F3A", fontFamily:"var(--font-serif,Georgia)", lineHeight:1, marginBottom:16, letterSpacing:"-0.03em" }}>
           404
         </div>
 
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">{tr("Sayfa bulunamadı")}</h1>
-          <p className="text-sm text-slate-500 mt-1">
+        <div style={{ marginBottom:24 }}>
+          <h1 style={{ fontSize:22, fontWeight:700, color:"var(--ink,#0f172a)", margin:"0 0 8px" }}>{tr("Sayfa bulunamadı")}</h1>
+          <p style={{ fontSize:14, color:"var(--ink-2,#64748b)", margin:0 }}>
             {tr("Aradığınız sayfa taşınmış, silinmiş veya hiç var olmamış olabilir.")}
           </p>
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <Link
-            href="/"
-            className="btn-link text-sm font-semibold px-5 py-2"
-            style={{ background: 'linear-gradient(to right, #10b981, #06b6d4)', color: '#fff', borderColor: '#10b981' }}
-          >
+        <div style={{ display:"flex", gap:10, justifyContent:"center" }}>
+          <Link href="/" style={{ display:"inline-flex", alignItems:"center", padding:"10px 22px", borderRadius:10, background:"#0B1F3A", color:"#FAFAF8", fontSize:13, fontWeight:700, textDecoration:"none", boxShadow:"0 4px 14px rgba(11,31,58,0.2)" }}>
             {tr("Ana sayfa")}
           </Link>
-          <Link
-            href="/courses"
-            className="btn-link text-sm font-medium border-slate-200 bg-white text-slate-700 shadow-sm px-5 py-2"
-          >
+          <Link href="/courses" style={{ display:"inline-flex", alignItems:"center", padding:"10px 22px", borderRadius:10, background:"transparent", border:"1.5px solid rgba(200,169,106,0.4)", color:"#C8A96A", fontSize:13, fontWeight:600, textDecoration:"none" }}>
             {tr("Kurslara göz at")}
           </Link>
         </div>

@@ -38,13 +38,13 @@ export default function GlobalError({ error, reset }: Props) {
         <div className="flex gap-3 pt-2">
           <button
             onClick={reset}
-            className="flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition"
+            style={{ flex:1, borderRadius:10, border:"none", padding:"10px 16px", background:"#0B1F3A", color:"#FAFAF8", fontSize:13, fontWeight:600, cursor:"pointer" }}
           >
             Tekrar dene
           </button>
           <a
             href="/"
-            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition text-center"
+            style={{ flex:1, borderRadius:10, border:"1.5px solid rgba(200,169,106,0.35)", padding:"10px 16px", background:"transparent", color:"#C8A96A", fontSize:13, fontWeight:600, textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center" }}
           >
             Ana sayfaya dön
           </a>

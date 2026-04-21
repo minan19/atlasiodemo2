@@ -61,7 +61,7 @@ export function EmailVerifyBanner() {
       <div className="flex-1 text-amber-800">
         <strong>E-posta adresinizi doğrulayın.</strong>{' '}
         {resendState === 'sent' ? (
-          <span className="text-emerald-700">✓ Doğrulama e-postası gönderildi!</span>
+          <span style={{ color:"#C8A96A", fontWeight:600 }}>✓ Doğrulama e-postası gönderildi!</span>
         ) : resendState === 'error' ? (
           <span className="text-red-600">Gönderilemedi. </span>
         ) : (

@@ -109,7 +109,7 @@ function StatusBadge({ status }: { status: BookingStatus }) {
   }
   if (status === 'COMPLETED') {
     return (
-      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: "rgba(200,169,106,0.15)", color: "#C8A96A" }}>
         {t.tr("Tamamlandı")}
       </span>
     );
@@ -290,8 +290,8 @@ export default function BookingPage() {
             label: 'Yaklaşan',
             value: upcomingCount,
             icon: '🔜',
-            bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200 dark:from-emerald-900/20 dark:to-emerald-800/10 dark:border-emerald-700',
-            val: 'text-emerald-700 dark:text-emerald-300',
+            bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200 dark:from-amber-900/20 dark:to-amber-800/10 dark:border-amber-700',
+            val: 'text-amber-700 dark:text-amber-300',
             stagger: 'stagger-2',
           },
           {
@@ -472,7 +472,7 @@ export default function BookingPage() {
                   booking.status === 'CANCELLED'
                     ? 'border-rose-200 dark:border-rose-900/50 opacity-60'
                     : booking.status === 'COMPLETED'
-                    ? 'border-emerald-200 dark:border-emerald-800/50'
+                    ? 'border-amber-200 dark:border-amber-800/50'
                     : 'border-blue-200 dark:border-blue-800/50',
                 ].join(' ')}
               >
@@ -515,7 +515,7 @@ export default function BookingPage() {
                         href={booking.meetingLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-white text-xs font-semibold transition-colors" style={{ background: "#0B1F3A" }}
                       >
                         <span>🔗</span>
                         {t.tr("Toplantıya Katıl")}

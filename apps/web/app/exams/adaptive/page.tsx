@@ -79,7 +79,7 @@ const DEMO_QUESTIONS: Question[] = [
 ];
 
 const DIFFICULTY_LABELS: Record<number, { label: string; color: string; stars: number }> = {
-  1: { label: "Kolay",  color: "text-emerald-600 bg-emerald-50 border-emerald-200", stars: 1 },
+  1: { label: "Kolay",  color: "text-amber-600 bg-amber-50 border-amber-200", stars: 1 },
   2: { label: "Orta",   color: "text-amber-600 bg-amber-50 border-amber-200",       stars: 2 },
   3: { label: "Zor",    color: "text-rose-600 bg-rose-50 border-rose-200",          stars: 3 },
 };
@@ -249,12 +249,12 @@ export default function AdaptiveExamPage() {
           <div className="flex gap-3">
             <div className={`rounded-xl border px-4 py-2.5 text-center ${
               pct >= 70
-                ? "bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200"
+                ? "border-amber-200 bg-amber-50"
                 : pct >= 40
                 ? "bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200"
                 : "bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200"
             }`}>
-              <div className={`text-2xl font-extrabold ${pct >= 70 ? "text-emerald-600" : pct >= 40 ? "text-amber-600" : "text-rose-600"}`}>
+              <div className={`text-2xl font-extrabold ${pct >= 70 ? "text-amber-600" : pct >= 40 ? "text-amber-600" : "text-rose-600"}`}>
                 {pct}%
               </div>
               <div className="text-[10px] text-slate-500">{t.tr("Doğruluk")}</div>
@@ -280,7 +280,7 @@ export default function AdaptiveExamPage() {
               <div
                 key={i}
                 className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  correct ? "bg-emerald-100 text-emerald-700 border border-emerald-300" : "bg-rose-100 text-rose-700 border border-rose-300"
+                  correct ? "bg-amber-100 text-amber-700 border border-amber-300" : "bg-rose-100 text-rose-700 border border-rose-300"
                 }`}
               >
                 {correct ? "✓" : "✗"}
@@ -328,13 +328,13 @@ export default function AdaptiveExamPage() {
 
                 let choiceClass = "glass text-left border rounded-xl px-4 py-3 transition-all duration-200 flex items-center gap-3 group ";
                 if (!selectedChoice) {
-                  choiceClass += "border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 hover:-translate-y-0.5 hover:shadow-md cursor-pointer";
+                  choiceClass += "border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 hover:-translate-y-0.5 hover:shadow-md cursor-pointer";
                 } else if (isSelected && lastResult === "correct") {
-                  choiceClass += "border-emerald-400 bg-emerald-50 text-emerald-800";
+                  choiceClass += "border-amber-400 bg-amber-50 text-amber-800";
                 } else if (isSelected && lastResult === "wrong") {
                   choiceClass += "border-rose-400 bg-rose-50 text-rose-800";
                 } else if (selectedChoice && isCorrect) {
-                  choiceClass += "border-emerald-400 bg-emerald-50/60 text-emerald-800";
+                  choiceClass += "border-amber-400 bg-amber-50/60 text-amber-800";
                 } else {
                   choiceClass += "border-slate-200 opacity-60";
                 }
@@ -347,10 +347,10 @@ export default function AdaptiveExamPage() {
                     className={choiceClass}
                   >
                     <span className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold border ${
-                      !selectedChoice ? "border-slate-300 bg-slate-100 text-slate-600 group-hover:border-emerald-400 group-hover:bg-emerald-100 group-hover:text-emerald-700" :
-                      isSelected && lastResult === "correct" ? "bg-emerald-500 text-white border-emerald-500" :
+                      !selectedChoice ? "border-slate-300 bg-slate-100 text-slate-600 group-hover:border-amber-400 group-hover:bg-amber-100 group-hover:text-amber-700" :
+                      isSelected && lastResult === "correct" ? "bg-amber-500 text-white border-amber-500" :
                       isSelected && lastResult === "wrong" ? "bg-rose-500 text-white border-rose-500" :
-                      selectedChoice && isCorrect ? "bg-emerald-500 text-white border-emerald-500" :
+                      selectedChoice && isCorrect ? "bg-amber-500 text-white border-amber-500" :
                       "border-slate-200 bg-slate-50 text-slate-400"
                     }`}>
                       {letter}
@@ -365,7 +365,7 @@ export default function AdaptiveExamPage() {
             {feedback && (
               <div className={`rounded-xl border px-4 py-3 text-sm font-medium animate-scale-in ${
                 lastResult === "correct"
-                  ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                  ? "bg-amber-50 border-amber-300 text-amber-800"
                   : "bg-rose-50 border-rose-300 text-rose-800"
               }`}>
                 {feedback}
@@ -388,7 +388,7 @@ export default function AdaptiveExamPage() {
             ← {t.common.back}
           </button>
           <button
-            className="btn-link text-sm border-emerald-400 text-emerald-700 bg-emerald-50/60"
+            className="btn-link text-sm border-amber-400 text-amber-700 bg-amber-50/60"
             onClick={start}
             disabled={loading}
           >

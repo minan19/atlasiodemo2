@@ -140,7 +140,7 @@ function gradeToPoints(grade: string): number {
 
 function gradeBadgeClass(grade: string): string {
   const map: Record<string, string> = {
-    A: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    A: "bg-amber-100 text-amber-700 border border-amber-200",
     B: "bg-blue-100 text-blue-700 border border-blue-200",
     C: "bg-amber-100 text-amber-700 border border-amber-200",
     D: "bg-orange-100 text-orange-700 border border-orange-200",
@@ -156,7 +156,7 @@ function statusBadge(status: CourseRecord["status"]): {
   if (status === "COMPLETED")
     return {
       label: "Tamamlandı",
-      cls: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+      cls: "bg-amber-100 text-amber-700 border border-amber-200",
     };
   if (status === "IN_PROGRESS")
     return {
@@ -170,7 +170,7 @@ function statusBadge(status: CourseRecord["status"]): {
 }
 
 function gpaColor(gpa: number): string {
-  if (gpa >= 3.5) return "text-emerald-600";
+  if (gpa >= 3.5) return "text-amber-600";
   if (gpa >= 2.5) return "text-blue-600";
   if (gpa >= 1.5) return "text-amber-600";
   return "text-red-600";
@@ -467,7 +467,7 @@ export default function ReportCardsPage() {
         {/* GPA Gauge */}
         <div className="glass rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center space-y-2">
           <h2 className="text-base font-bold text-slate-800 self-start flex items-center gap-2 w-full">
-            <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
+            <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
             {t.tr("GPA Göstergesi")}
           </h2>
           {loading ? (
@@ -489,7 +489,7 @@ export default function ReportCardsPage() {
                   {t.tr("2.5–3.5 İyi")}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-200 inline-block" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-200 inline-block" />
                   {">"}3.5 {t.tr("Mükemmel")}
                 </span>
               </div>
@@ -639,7 +639,7 @@ export default function ReportCardsPage() {
           <div className="flex items-center gap-3">
             <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full transition-all duration-700"
+                className="h-full bg-gradient-to-r from-blue-500 to-amber-500 rounded-full transition-all duration-700"
                 style={{
                   width: `${Math.round((data.completedCredits / data.totalCredits) * 100)}%`,
                 }}
@@ -652,7 +652,7 @@ export default function ReportCardsPage() {
           <div className="flex gap-6 text-sm text-slate-600">
             <span>
               {t.tr("Tamamlanan")}:{" "}
-              <strong className="text-emerald-600">{data.completedCredits}</strong>
+              <strong style={{ color: "#C8A96A" }}>{data.completedCredits}</strong>
             </span>
             <span>
               {t.tr("Kalan")}:{" "}

@@ -131,7 +131,7 @@ const LESSON_LABELS: Record<LessonType, string> = {
 const LESSON_TYPES: LessonType[] = ['VIDEO', 'QUIZ', 'READING', 'LIVE'];
 
 const STATUS_CONFIG: Record<string, { label: string; cls: string }> = {
-  PUBLISHED: { label: 'Yayında', cls: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+  PUBLISHED: { label: 'Yayında', cls: 'bg-amber-50 border-amber-200 text-amber-700' },
   DRAFT: { label: 'Taslak', cls: 'bg-amber-50 border-amber-200 text-amber-700' },
   ARCHIVED: { label: 'Arşiv', cls: 'bg-slate-50 border-slate-200 text-slate-600' },
 };
@@ -679,7 +679,7 @@ export default function CourseBuilderPage() {
                           setNewLessonType('VIDEO');
                           setNewLessonDuration(15);
                         }}
-                        className="pill pill-xs bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 transition-colors flex-shrink-0"
+                        className="pill pill-xs bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100 transition-colors flex-shrink-0"
                       >
                         + Ders Ekle
                       </button>
@@ -768,15 +768,15 @@ export default function CourseBuilderPage() {
 
                         {/* Add lesson form */}
                         {isAddingLesson && (
-                          <div className="px-4 py-3 bg-emerald-50/60 border-t border-emerald-100 space-y-3">
-                            <p className="text-xs font-semibold text-emerald-700">{t.tr("Yeni Ders")}</p>
+                          <div className="px-4 py-3 border-t border-amber-100 space-y-3" style={{ background: "rgba(200,169,106,0.06)" }}>
+                            <p className="text-xs font-semibold" style={{ color: "#b8933a" }}>{t.tr("Yeni Ders")}</p>
 
                             <input
                               type="text"
                               placeholder={t.tr("Ders başlığı...")}
                               value={newLessonTitle}
                               onChange={(e) => setNewLessonTitle(e.target.value)}
-                              className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                              className="w-full border border-slate-200 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                               onKeyDown={(e) => { if (e.key === 'Enter') handleAddLesson(mod.id); }}
                               autoFocus
                             />
@@ -800,7 +800,7 @@ export default function CourseBuilderPage() {
                                 max={300}
                                 value={newLessonDuration}
                                 onChange={(e) => setNewLessonDuration(Number(e.target.value))}
-                                className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-sm outline-none focus:border-emerald-400"
+                                className="w-20 border border-slate-200 rounded-lg px-2 py-1 text-sm outline-none focus:border-amber-400"
                               />
                               <span className="text-xs text-slate-400">dakika</span>
                             </div>
@@ -810,7 +810,7 @@ export default function CourseBuilderPage() {
                                 type="button"
                                 onClick={() => handleAddLesson(mod.id)}
                                 disabled={savingLesson || !newLessonTitle.trim()}
-                                className="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                                className="px-4 py-1.5 rounded-lg text-white text-xs font-semibold disabled:opacity-50 transition-colors" style={{ background: "#0B1F3A" }}
                               >
                                 {savingLesson ? 'Kaydediliyor…' : 'Ekle'}
                               </button>
@@ -1003,7 +1003,7 @@ export default function CourseBuilderPage() {
                 </button>
 
                 {detailSaved && (
-                  <p className="text-center text-xs text-emerald-600 font-semibold animate-fade-slide-up">
+                  <p className="text-center text-xs font-semibold animate-fade-slide-up" style={{ color: "#C8A96A" }}>
                     {t.tr("Değişiklikler uygulandı.")}
                   </p>
                 )}
@@ -1041,7 +1041,7 @@ export default function CourseBuilderPage() {
                   { label: 'Toplam Ders', value: totalLessons(modules), color: 'text-blue-700', bg: 'bg-blue-50' },
                   { label: 'Video', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'VIDEO').length, 0), color: 'text-slate-700', bg: 'bg-slate-50' },
                   { label: 'Quiz', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'QUIZ').length, 0), color: 'text-amber-700', bg: 'bg-amber-50' },
-                  { label: 'Okuma', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'READING').length, 0), color: 'text-emerald-700', bg: 'bg-emerald-50' },
+                  { label: 'Okuma', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'READING').length, 0), color: 'text-amber-700', bg: 'bg-amber-50' },
                   { label: 'Canlı', value: modules.reduce((a, m) => a + m.lessons.filter((l) => l.type === 'LIVE').length, 0), color: 'text-rose-700', bg: 'bg-rose-50' },
                 ].map((s, i) => (
                   <div key={t.tr(s.label)} className={`metric flex items-center justify-between px-3 py-2 rounded-lg ${s.bg} animate-fade-slide-up stagger-${Math.min(i + 1, 4)}`}>

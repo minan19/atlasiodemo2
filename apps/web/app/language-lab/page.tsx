@@ -75,9 +75,9 @@ function authHeaders(): HeadersInit {
 function scoreColor(score: number): { ring: string; badge: string; text: string } {
   if (score > 80)
     return {
-      ring: '#22c55e',
-      badge: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-      text: 'text-emerald-600',
+      ring: '#C8A96A',
+      badge: 'bg-amber-50 border-amber-200 text-amber-700',
+      text: 'text-amber-600',
     };
   if (score > 50)
     return {

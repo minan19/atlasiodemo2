@@ -167,13 +167,13 @@ function formatDate(iso: string): string {
 function progressColor(pct: number): string {
   if (pct < 30) return 'from-red-500 to-red-400';
   if (pct < 70) return 'from-amber-500 to-amber-400';
-  return 'from-emerald-500 to-emerald-400';
+  return 'from-amber-500 to-amber-400';
 }
 
 function progressTextColor(pct: number): string {
   if (pct < 30) return 'text-red-500';
   if (pct < 70) return 'text-amber-500';
-  return 'text-emerald-500';
+  return 'text-amber-500';
 }
 
 function leagueMeta(league: string): { label: string; color: string; bg: string } {
@@ -234,7 +234,7 @@ function ProgressRing({ completed, total }: ProgressRingProps) {
   const dash = (pct / 100) * circ;
 
   let ringColor = '#ef4444'; // red
-  if (pct >= 70) ringColor = '#10b981'; // emerald
+  if (pct >= 70) ringColor = '#C8A96A'; // gold
   else if (pct >= 30) ringColor = '#f59e0b'; // amber
 
   return (
@@ -301,7 +301,7 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
               {enrollment.courseName}
             </h3>
             {isComplete && (
-              <span className="pill-sm bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 font-semibold">
+              <span className="pill-sm font-semibold" style={{ background: "rgba(200,169,106,0.15)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}>
                 {t.tr("✓ Tamamlandı")}
               </span>
             )}
@@ -338,7 +338,7 @@ function CourseCard({ enrollment }: { enrollment: Enrollment }) {
         {/* CTA */}
         <div className="flex-shrink-0 self-center">
           {isComplete ? (
-            <span className="pill bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
+            <span className="pill text-xs font-semibold" style={{ background: "rgba(200,169,106,0.12)", color: "#C8A96A", border: "1px solid rgba(200,169,106,0.3)" }}>
               {t.tr("✓ Bitti")}
             </span>
           ) : (
@@ -586,7 +586,7 @@ export default function ProgressPage() {
             <StatCard
               label={t.progress.completedCourses}
               value={completedCourses}
-              accent="text-emerald-600 dark:text-emerald-400"
+              accent="text-amber-600 dark:text-amber-400"
               icon="✅"
               delay="stagger-2"
             />

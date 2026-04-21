@@ -171,7 +171,7 @@ function ReviewPanel({
           onChange={(e) =>
             setState((prev) => ({ ...prev, score: Number(e.target.value) }))
           }
-          className="w-full accent-emerald-500 cursor-pointer"
+          className="w-full accent-amber-500 cursor-pointer"
           style={{ height: "6px" }}
         />
         <div className="text-xs" style={{ color: "var(--muted)" }}>
@@ -211,7 +211,7 @@ function ReviewPanel({
                 type="checkbox"
                 checked={state.criteria[i]}
                 onChange={() => toggleCriterion(i)}
-                className="w-4 h-4 accent-emerald-500 cursor-pointer flex-shrink-0"
+                className="w-4 h-4 accent-amber-500 cursor-pointer flex-shrink-0"
               />
               <span
                 className="text-xs font-medium"

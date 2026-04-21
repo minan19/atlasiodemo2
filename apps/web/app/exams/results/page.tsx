@@ -182,7 +182,7 @@ function absoluteDate(isoString: string): string {
 }
 
 const GRADE_STYLES: Record<Grade, string> = {
-  A: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30",
+  A: "bg-amber-500/20 text-amber-400 border border-amber-500/30",
   B: "bg-blue-500/20 text-blue-400 border border-blue-500/30",
   C: "bg-amber-500/20 text-amber-400 border border-amber-500/30",
   D: "bg-orange-500/20 text-orange-400 border border-orange-500/30",
@@ -338,7 +338,7 @@ function ScoreTrendChart({ results }: { results: ExamResult[] }) {
       </div>
       <div className="flex items-center gap-5 mt-3 text-xs text-white/40">
         <span className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
           {t.tr("Geçti")}
         </span>
         <span className="flex items-center gap-1.5">
@@ -396,7 +396,7 @@ function StatsStrip({ results }: { results: ExamResult[] }) {
       value: `%${passRate}`,
       icon: "✅",
       sub: `${passedCount}/${total} ${t.tr("sınav")}`,
-      color: passRate >= 70 ? "text-emerald-400" : "text-red-400",
+      color: passRate >= 70 ? "text-amber-400" : "text-red-400",
     },
   ];
 
@@ -467,7 +467,7 @@ function ResultCard({ result }: { result: ExamResult }) {
   const [showAbsolute, setShowAbsolute] = useState(false);
   const scoreColor =
     result.score >= 85
-      ? "text-emerald-400"
+      ? "text-amber-400"
       : result.score >= 70
       ? "text-blue-400"
       : result.score >= 60
@@ -476,7 +476,7 @@ function ResultCard({ result }: { result: ExamResult }) {
 
   const barColor =
     result.score >= 85
-      ? "bg-emerald-500"
+      ? "bg-amber-500"
       : result.score >= 70
       ? "bg-blue-500"
       : result.score >= 60
@@ -499,7 +499,7 @@ function ResultCard({ result }: { result: ExamResult }) {
         <span
           className={`pill text-xs font-bold px-3 py-1 rounded-full ${
             result.passed
-              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
               : "bg-red-500/20 text-red-400 border border-red-500/30"
           }`}
         >
@@ -569,7 +569,7 @@ function ResultTableRow({ result }: { result: ExamResult }) {
   const [showAbsolute, setShowAbsolute] = useState(false);
   const scoreColor =
     result.score >= 85
-      ? "text-emerald-400"
+      ? "text-amber-400"
       : result.score >= 70
       ? "text-blue-400"
       : result.score >= 60
@@ -577,7 +577,7 @@ function ResultTableRow({ result }: { result: ExamResult }) {
       : "text-red-400";
   const barColor =
     result.score >= 85
-      ? "bg-emerald-500"
+      ? "bg-amber-500"
       : result.score >= 70
       ? "bg-blue-500"
       : result.score >= 60
@@ -634,7 +634,7 @@ function ResultTableRow({ result }: { result: ExamResult }) {
         <span
           className={`pill text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap ${
             result.passed
-              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
               : "bg-red-500/20 text-red-400 border border-red-500/30"
           }`}
         >

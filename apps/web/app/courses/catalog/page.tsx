@@ -74,7 +74,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   Yazılım:   'from-blue-500 to-cyan-500',
   Tasarım:   'from-purple-500 to-pink-500',
   İş:        'from-amber-500 to-orange-500',
-  Dil:       'from-emerald-500 to-teal-500',
+  Dil:       'from-teal-500 to-cyan-500',
   Matematik: 'from-indigo-500 to-blue-500',
   Bilim:     'from-rose-500 to-red-500',
 };
@@ -91,7 +91,7 @@ const LEVEL_LABELS: Record<Level, string> = {
 };
 
 const LEVEL_COLORS: Record<Level, string> = {
-  BEGINNER:     'bg-emerald-100 text-emerald-700',
+  BEGINNER:     'bg-amber-100 text-amber-700',
   INTERMEDIATE: 'bg-amber-100 text-amber-700',
   ADVANCED:     'bg-rose-100 text-rose-700',
 };
@@ -365,7 +365,7 @@ function CourseCard({
       <div className={`relative h-40 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
         <span className="text-5xl opacity-30 select-none">{emoji}</span>
         {enrolled && (
-          <span className="absolute top-3 right-3 bg-emerald-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm shadow-lg">
+          <span className="absolute top-3 right-3 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm shadow-lg" style={{ background: "#C8A96A" }}>
             ✓
           </span>
         )}
@@ -426,7 +426,7 @@ function CourseCard({
         {/* Price + CTA */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-slate-700">
           {course.isFree ? (
-            <span className="text-sm font-bold text-emerald-600">{tCourses.free.toUpperCase()}</span>
+            <span className="text-sm font-bold" style={{ color: "#C8A96A" }}>{tCourses.free.toUpperCase()}</span>
           ) : (
             <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
               ₺{course.price}
@@ -434,7 +434,7 @@ function CourseCard({
           )}
           <Link
             href={`/courses/${course.id}`}
-            className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm hover:shadow-md"
+            className="text-xs font-semibold px-4 py-2 rounded-xl bg-gradient-to-r bg-[#0B1F3A] text-white hover:bg-[#102848] transition-all shadow-sm hover:shadow-md"
           >
             {enrolled ? tCourses.continue : tCourses.enroll}
           </Link>
@@ -455,7 +455,7 @@ function EmptyState({ onReset, tCourses, tCommon }: { onReset: () => void; tCour
       </p>
       <button
         onClick={onReset}
-        className="mt-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-sm hover:from-emerald-600 hover:to-teal-600 transition-all shadow-sm hover:shadow-md"
+        className="mt-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-all shadow-sm hover:shadow-md" style={{ background: "#0B1F3A" }}
       >
         {tCommon.reset}
       </button>
@@ -509,7 +509,7 @@ function PaginationBar({
             onClick={() => onPage(p as number)}
             className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
               p === page
-                ? 'bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-md'
+                ? 'text-white shadow-md bg-[#0B1F3A]'
                 : 'border border-slate-200 hover:bg-slate-50 text-slate-600'
             }`}
           >
@@ -728,7 +728,7 @@ export default function CourseCatalogPage() {
     <div className="space-y-6 pb-12">
       {/* ── Hero Banner ── */}
       <div className="hero rounded-2xl overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 opacity-95" />
+        <div className="absolute inset-0 opacity-95" style={{ background: "linear-gradient(135deg, #0B1F3A 0%, #102848 60%, #0f2240 100%)" }} />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.12),transparent_60%)]" />
         <div className="relative hero-content px-6 py-10 md:py-14 flex flex-col items-center text-center gap-5">
           <div className="animate-fade-slide-up stagger-1">
@@ -739,7 +739,7 @@ export default function CourseCatalogPage() {
             <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
               🎓 {t.courses.catalogTitle}
             </h1>
-            <p className="text-emerald-100 mt-2 text-sm md:text-base max-w-xl mx-auto">
+            <p className="mt-2 text-sm md:text-base max-w-xl mx-auto" style={{ color: "rgba(250,250,248,0.7)" }}>
               {t.courses.catalogDesc}
             </p>
           </div>
@@ -761,7 +761,7 @@ export default function CourseCatalogPage() {
               />
               <button
                 type="submit"
-                className="px-6 py-3.5 rounded-2xl bg-white text-emerald-700 font-bold text-sm shadow-lg hover:bg-emerald-50 transition-colors flex-shrink-0"
+                className="px-6 py-3.5 rounded-2xl bg-white font-bold text-sm shadow-lg transition-colors flex-shrink-0" style={{ color: "#0B1F3A" }}
               >
                 {t.common.search}
               </button>
@@ -783,7 +783,7 @@ export default function CourseCatalogPage() {
                 >
                   <span className="text-base">{m.icon}</span>
                   <span className="font-bold text-sm">{m.value}</span>
-                  <span className="text-emerald-100 text-xs">{t.tr(m.label)}</span>
+                  <span className="text-xs" style={{ color: "rgba(200,169,106,0.85)" }}>{t.tr(m.label)}</span>
                 </div>
               ))}
             </div>
@@ -804,7 +804,7 @@ export default function CourseCatalogPage() {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="text-xs text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                  className="text-xs font-semibold transition-colors" style={{ color: "#C8A96A" }}
                 >
                   {t.common.reset}
                 </button>
@@ -824,10 +824,10 @@ export default function CourseCatalogPage() {
                       type="checkbox"
                       checked={filters.categories.includes(key)}
                       onChange={() => toggleCategory(key)}
-                      className="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
+                      className="w-4 h-4 rounded accent-amber-500 cursor-pointer"
                     />
                     <span className="text-base leading-none">{icon}</span>
-                    <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-emerald-600 transition-colors">
+                    <span className="text-sm text-slate-600 dark:text-slate-300 group-hover:text-amber-600 transition-colors">
                       {t.tr(key)}
                     </span>
                     <span className="ml-auto text-[10px] text-slate-400">
@@ -850,8 +850,8 @@ export default function CourseCatalogPage() {
                     onClick={() => toggleLevel(lvl)}
                     className={`pill pill-sm transition-all ${
                       filters.levels.includes(lvl)
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'hover:border-emerald-400'
+                        ? 'bg-[#0B1F3A] border-[#0B1F3A] text-white'
+                        : 'hover:border-amber-400'
                     }`}
                   >
                     {t.tr(LEVEL_LABELS[lvl])}
@@ -876,8 +876,8 @@ export default function CourseCatalogPage() {
                     onClick={() => setPrice(key)}
                     className={`pill pill-sm transition-all ${
                       filters.price === key
-                        ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : 'hover:border-emerald-400'
+                        ? 'bg-[#0B1F3A] border-[#0B1F3A] text-white'
+                        : 'hover:border-amber-400'
                     }`}
                   >
                     {label}
@@ -964,8 +964,8 @@ export default function CourseCatalogPage() {
                 onClick={() => toggleCategory(key)}
                 className={`pill pill-xs transition-all ${
                   filters.categories.includes(key)
-                    ? 'bg-emerald-500 border-emerald-500 text-white'
-                    : 'hover:border-emerald-400'
+                    ? 'text-white bg-[#0B1F3A] border-[#0B1F3A]'
+                    : 'hover:border-amber-400'
                 }`}
               >
                 {icon} {t.tr(key)}

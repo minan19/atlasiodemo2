@@ -30,7 +30,7 @@ interface AIRecommendation {
 }
 
 const MASTERY_COLORS = (m: number) =>
-  m >= 0.8 ? "bg-emerald-500" : m >= 0.5 ? "bg-amber-400" : "bg-rose-500";
+  m >= 0.8 ? "bg-amber-500" : m >= 0.5 ? "bg-amber-400" : "bg-rose-500";
 
 const MASTERY_LABELS = (m: number) =>
   m >= 0.8 ? "Uzman" : m >= 0.5 ? "Gelişiyor" : "Zayıf";
@@ -120,7 +120,7 @@ export default function SkillProfilePage() {
           </div>
           <div className="flex gap-4">
             <div className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-center">
-              <div className={`text-3xl font-extrabold ${overallAccuracy >= 70 ? "text-emerald-600" : overallAccuracy >= 50 ? "text-amber-600" : "text-rose-600"}`}>
+              <div className={`text-3xl font-extrabold ${overallAccuracy >= 70 ? "text-amber-600" : overallAccuracy >= 50 ? "text-amber-600" : "text-rose-600"}`}>
                 {overallAccuracy}%
               </div>
               <div className="text-xs text-slate-500 mt-0.5">{t.tr("Genel Doğruluk")}</div>
@@ -203,13 +203,13 @@ export default function SkillProfilePage() {
         <div className="space-y-4">
           {/* Strengths */}
           {strongTopics.length > 0 && (
-            <div className="glass rounded-2xl border border-emerald-200 bg-emerald-50/30 p-5">
-              <h2 className="mb-3 text-sm font-semibold text-emerald-800">{t.tr("🏆 Güçlü Konular")}</h2>
+            <div className="glass rounded-2xl p-5" style={{ border: "1px solid rgba(200,169,106,0.25)", background: "rgba(200,169,106,0.05)" }}>
+              <h2 className="mb-3 text-sm font-semibold" style={{ color: "#b8933a" }}>{t.tr("🏆 Güçlü Konular")}</h2>
               <div className="space-y-1.5">
                 {strongTopics.map((s) => (
-                  <div key={s.topicId} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm border border-emerald-100">
+                  <div key={s.topicId} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm" style={{ border: "1px solid rgba(200,169,106,0.15)" }}>
                     <span className="font-medium text-slate-700">{s.topicId}</span>
-                    <span className="font-bold text-emerald-600">%{s.accuracy}</span>
+                    <span className="font-bold" style={{ color: "#C8A96A" }}>%{s.accuracy}</span>
                   </div>
                 ))}
               </div>

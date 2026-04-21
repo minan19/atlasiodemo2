@@ -96,7 +96,7 @@ export default function GhostMentorWidget() {
       >
         <span className="text-2xl select-none">{open ? "✕" : "✦"}</span>
         {!open && (
-          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-400 animate-pulse" />
+          <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white animate-pulse" style={{ background:"#C8A96A" }} />
         )}
       </button>
 

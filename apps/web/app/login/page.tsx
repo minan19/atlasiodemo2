@@ -74,95 +74,113 @@ function LoginForm() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="glass p-8 rounded-3xl border border-slate-200 hero">
-        <div className="hero-content space-y-4">
-          <div className="pill w-fit">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            {t.login.heroPill}
+      {/* ── Sol: Hero Panel (her zaman navy) ── */}
+      <div style={{ background:"#0B1F3A", borderRadius:24, padding:32, border:"1px solid rgba(200,169,106,0.2)", position:"relative", overflow:"hidden" }}>
+        {/* Gold radial glow */}
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 20% 80%, rgba(200,169,106,0.12) 0%, transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ position:"relative", display:"flex", flexDirection:"column", gap:20 }}>
+          {/* Pill badge */}
+          <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:"rgba(200,169,106,0.12)", border:"1px solid rgba(200,169,106,0.3)", borderRadius:20, padding:"5px 14px", width:"fit-content" }}>
+            <span style={{ width:6, height:6, borderRadius:"50%", background:"#C8A96A", display:"inline-block" }} />
+            <span style={{ fontSize:12, fontWeight:600, color:"#C8A96A", letterSpacing:"0.03em" }}>{t.login.heroPill}</span>
           </div>
-          <h1 className="text-4xl font-semibold leading-tight">
-            {t.login.heroTitle1}
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-500">
+          {/* Heading */}
+          <div>
+            <h1 style={{ fontFamily:"var(--font-serif, Georgia)", fontSize:36, fontWeight:600, color:"#FAFAF8", lineHeight:1.15, margin:0 }}>
+              {t.login.heroTitle1}
+            </h1>
+            <h1 style={{ fontFamily:"var(--font-serif, Georgia)", fontSize:36, fontWeight:600, fontStyle:"italic", color:"#C8A96A", lineHeight:1.15, margin:0 }}>
               {t.login.heroTitle2}
-            </span>
-          </h1>
-          <p className="text-slate-600 text-lg max-w-xl">
+            </h1>
+          </div>
+          <p style={{ fontSize:15, color:"rgba(250,250,248,0.65)", maxWidth:360, lineHeight:1.6, margin:0 }}>
             {t.login.heroDesc}
           </p>
-          <div className="grid grid-cols-3 gap-3 max-w-xl">
-            <Stat label="Aktif oturum" value="1.2K" accent />
-            <Stat label={t.tr("Başarısız deneme")} value="0.3%" />
-            <Stat label={t.tr("Ortalama oturum süresi")} value="42dk" />
+          {/* Stats */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
+            <LoginStat label={t.tr("Aktif oturum")} value="1.2K" gold />
+            <LoginStat label={t.tr("Başarısız deneme")} value="0.3%" />
+            <LoginStat label={t.tr("Ort. oturum süresi")} value="42dk" />
+          </div>
+          {/* Feature list */}
+          <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:4 }}>
+            {["256-bit SSL şifreleme", "KVKK & GDPR uyumlu", "İki faktörlü kimlik doğrulama"].map(f => (
+              <div key={f} style={{ display:"flex", alignItems:"center", gap:8, fontSize:13, color:"rgba(250,250,248,0.55)" }}>
+                <span style={{ color:"#C8A96A", fontSize:11 }}>✦</span> {t.tr(f)}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="glass p-7 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl">
-        <div className="flex items-center justify-between">
+      {/* ── Sağ: Form Panel ── */}
+      <div style={{ background:"var(--card, #fff)", borderRadius:24, padding:28, border:"1px solid var(--line, #e2e8f0)", boxShadow:"0 8px 40px rgba(11,31,58,0.08)" }}>
+        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:24 }}>
           <div>
-            <h2 className="text-2xl font-semibold">{t.login.formTitle}</h2>
-            <p className="text-sm text-slate-600">{t.login.formSub}</p>
+            <h2 style={{ fontSize:22, fontWeight:700, color:"var(--ink, #0f172a)", margin:0 }}>{t.login.formTitle}</h2>
+            <p style={{ fontSize:13, color:"var(--ink-2, #64748b)", margin:"4px 0 0" }}>{t.login.formSub}</p>
           </div>
-          <span className="pill">2026 UI</span>
+          <span style={{ fontSize:11, fontWeight:600, color:"#C8A96A", background:"rgba(200,169,106,0.10)", border:"1px solid rgba(200,169,106,0.25)", borderRadius:20, padding:"3px 10px" }}>2026</span>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-5 grid gap-4">
-          <label className="space-y-2 text-sm">
-            <span className="text-slate-600">{t.login.email}</span>
+        <form onSubmit={onSubmit} style={{ display:"grid", gap:16 }}>
+          <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.login.email}</span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t.login.emailPh}
-              className="rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
+              style={{ borderRadius:10, border:"1.5px solid var(--line, #e2e8f0)", padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
+              onFocus={e => e.target.style.borderColor="#C8A96A"}
+              onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
             />
           </label>
 
-          <label className="space-y-2 text-sm">
-            <span className="text-slate-600">{t.login.password}</span>
+          <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.login.password}</span>
             <input
+              type="password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={t.login.passwordPh}
-              type="password"
-              className="rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
+              style={{ borderRadius:10, border:"1.5px solid var(--line, #e2e8f0)", padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
+              onFocus={e => e.target.style.borderColor="#C8A96A"}
+              onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
             />
           </label>
 
           <button
             disabled={loading}
-            className="btn-link justify-center text-sm font-semibold disabled:opacity-60"
-            style={{
-              background: loading ? 'var(--panel)' : 'linear-gradient(to right, #10b981, #06b6d4)',
-              color: loading ? 'var(--ink-2)' : '#fff',
-              borderColor: loading ? 'var(--line)' : '#10b981',
-              gap: 8,
-            }}
             type="submit"
+            style={{
+              borderRadius:10, border:"none", padding:"13px 16px",
+              background: loading ? "var(--panel, #f1f5f9)" : "#0B1F3A",
+              color: loading ? "var(--ink-2)" : "#FAFAF8",
+              fontSize:14, fontWeight:700, cursor: loading ? "not-allowed" : "pointer",
+              display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+              transition:"all 0.15s", opacity: loading ? 0.7 : 1,
+              boxShadow: loading ? "none" : "0 4px 20px rgba(11,31,58,0.3)",
+            }}
           >
             {loading && (
-              <span style={{
-                width: 14, height: 14, borderRadius: '50%',
-                border: '2px solid var(--line-accent)',
-                borderTopColor: 'var(--accent)',
-                animation: 'loginSpin 0.7s linear infinite',
-                display: 'inline-block', flexShrink: 0,
-              }} />
+              <span style={{ width:14, height:14, borderRadius:"50%", border:"2px solid rgba(255,255,255,0.3)", borderTopColor:"#C8A96A", animation:"loginSpin 0.7s linear infinite", display:"inline-block", flexShrink:0 }} />
             )}
             {loading ? t.login.loading : t.login.submit}
           </button>
 
-          {error ? <div className="text-sm text-red-600">{error}</div> : null}
+          {error ? <div style={{ fontSize:13, color:"#ef4444", padding:"8px 12px", background:"#fef2f2", borderRadius:8, border:"1px solid #fecaca" }}>{error}</div> : null}
 
-          <div className="flex items-center justify-between text-sm text-slate-500">
-            <p>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", fontSize:13, color:"var(--ink-2, #64748b)" }}>
+            <p style={{ margin:0 }}>
               {t.login.noAccount}{" "}
-              <Link href="/register" className="text-emerald-600 hover:underline font-medium">
+              <Link href="/register" style={{ color:"#C8A96A", fontWeight:600, textDecoration:"none" }}>
                 {t.login.register}
               </Link>
             </p>
-            <Link href="/forgot-password" className="text-slate-500 hover:text-emerald-600 hover:underline">
+            <Link href="/forgot-password" style={{ color:"var(--ink-2, #94a3b8)", textDecoration:"none", fontSize:12 }}>
               {t.login.forgotPassword}
             </Link>
           </div>
@@ -193,15 +211,11 @@ export default function LoginPage() {
   );
 }
 
-function Stat({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
+function LoginStat({ label, value, gold = false }: { label: string; value: string; gold?: boolean }) {
   return (
-    <div
-      className={`rounded-2xl border px-4 py-3 shadow-sm ${
-        accent ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white/80'
-      }`}
-    >
-      <div className="text-xs text-slate-600">{label}</div>
-      <div className="text-lg font-semibold">{value}</div>
+    <div style={{ borderRadius:12, border:`1px solid ${gold ? "rgba(200,169,106,0.4)" : "rgba(255,255,255,0.1)"}`, padding:"10px 12px", background: gold ? "rgba(200,169,106,0.12)" : "rgba(255,255,255,0.05)" }}>
+      <div style={{ fontSize:10, color:"rgba(250,250,248,0.5)", marginBottom:2 }}>{label}</div>
+      <div style={{ fontSize:18, fontWeight:700, color: gold ? "#C8A96A" : "#FAFAF8" }}>{value}</div>
     </div>
   );
 }

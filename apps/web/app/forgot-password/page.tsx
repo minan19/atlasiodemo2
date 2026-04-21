@@ -6,6 +6,13 @@ import { useI18n } from '../_i18n/use-i18n';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
+const INPUT_STYLE: React.CSSProperties = {
+  borderRadius: 10, border: "1.5px solid var(--line, #e2e8f0)",
+  padding: "11px 14px", fontSize: 14, color: "var(--ink, #0f172a)",
+  background: "var(--surface, #fff)", outline: "none", transition: "border-color 0.15s",
+  width: "100%", boxSizing: "border-box",
+};
+
 export default function ForgotPasswordPage() {
   const t = useI18n();
   const [email, setEmail] = useState('');
@@ -17,7 +24,6 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     try {
       const res = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
@@ -38,17 +44,15 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="grid place-items-center min-h-[60vh]">
-        <div className="glass p-8 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl max-w-md w-full text-center space-y-4">
-          <div className="text-5xl">📬</div>
-          <h2 className="text-2xl font-semibold">{t.auth.forgotSuccess}</h2>
-          <p className="text-slate-600">
-            <strong>{email}</strong>
+      <div style={{ display:"grid", placeItems:"center", minHeight:"60vh" }}>
+        <div style={{ background:"var(--card, #fff)", borderRadius:24, padding:40, border:"1px solid var(--line, #e2e8f0)", boxShadow:"0 8px 40px rgba(11,31,58,0.08)", maxWidth:420, width:"100%", textAlign:"center" }}>
+          <div style={{ fontSize:52, marginBottom:16 }}>📬</div>
+          <div style={{ width:48, height:4, background:"#C8A96A", borderRadius:2, margin:"0 auto 20px" }} />
+          <h2 style={{ fontSize:22, fontWeight:700, color:"var(--ink, #0f172a)", margin:"0 0 10px" }}>{t.auth.forgotSuccess}</h2>
+          <p style={{ fontSize:14, color:"var(--ink-2, #64748b)", marginBottom:24 }}>
+            <strong style={{ color:"#0B1F3A" }}>{email}</strong>
           </p>
-          <Link
-            href="/login"
-            className="inline-block mt-2 text-emerald-600 hover:underline font-medium text-sm"
-          >
+          <Link href="/login" style={{ display:"inline-flex", alignItems:"center", gap:6, color:"#C8A96A", fontWeight:600, textDecoration:"none", fontSize:14 }}>
             ← {t.auth.backToLogin}
           </Link>
         </div>
@@ -57,71 +61,77 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-      {/* Sol — Hero */}
-      <div className="glass p-8 rounded-3xl border border-slate-200 hero">
-        <div className="hero-content space-y-4">
-          <div className="pill w-fit">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            {t.auth.forgotPill}
+    <div style={{ display:"grid", gap:24, gridTemplateColumns:"1fr" }} className="lg:grid-cols-2">
+      {/* Sol: Hero */}
+      <div style={{ background:"#0B1F3A", borderRadius:24, padding:32, border:"1px solid rgba(200,169,106,0.2)", position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 30% 70%, rgba(200,169,106,0.12) 0%, transparent 60%)", pointerEvents:"none" }} />
+        <div style={{ position:"relative", display:"flex", flexDirection:"column", gap:20 }}>
+          <div style={{ display:"inline-flex", alignItems:"center", gap:6, background:"rgba(200,169,106,0.12)", border:"1px solid rgba(200,169,106,0.3)", borderRadius:20, padding:"5px 14px", width:"fit-content" }}>
+            <span style={{ fontSize:14 }}>🔑</span>
+            <span style={{ fontSize:12, fontWeight:600, color:"#C8A96A" }}>{t.auth.forgotPill}</span>
           </div>
-          <h1 className="text-4xl font-semibold leading-tight">
-            {t.auth.forgotTitle}
-          </h1>
-          <p className="text-slate-600 text-lg max-w-xl">
+          <div>
+            <h1 style={{ fontFamily:"var(--font-serif, Georgia)", fontSize:34, fontWeight:600, color:"#FAFAF8", lineHeight:1.2, margin:0 }}>
+              {t.auth.forgotTitle}
+            </h1>
+          </div>
+          <p style={{ fontSize:15, color:"rgba(250,250,248,0.65)", maxWidth:340, lineHeight:1.65, margin:0 }}>
             {t.auth.forgotDesc}
           </p>
+          <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:8 }}>
+            {["Güvenli sıfırlama bağlantısı", "15 dakika geçerlilik süresi", "Hesap güvenliğiniz korunur"].map(f => (
+              <div key={f} style={{ display:"flex", alignItems:"center", gap:8, fontSize:13, color:"rgba(250,250,248,0.5)" }}>
+                <span style={{ color:"#C8A96A", fontSize:11 }}>✦</span> {t.tr(f)}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Sağ — Form */}
-      <div className="glass p-7 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl">
-        <div className="mb-5">
-          <h2 className="text-2xl font-semibold">{t.auth.forgotSub}</h2>
-          <p className="text-sm text-slate-600">{t.auth.forgotDesc}</p>
+      {/* Sağ: Form */}
+      <div style={{ background:"var(--card, #fff)", borderRadius:24, padding:28, border:"1px solid var(--line, #e2e8f0)", boxShadow:"0 8px 40px rgba(11,31,58,0.08)" }}>
+        <div style={{ marginBottom:24 }}>
+          <h2 style={{ fontSize:22, fontWeight:700, color:"var(--ink, #0f172a)", margin:0 }}>{t.auth.forgotSub}</h2>
+          <p style={{ fontSize:13, color:"var(--ink-2, #64748b)", margin:"4px 0 0" }}>{t.auth.forgotDesc}</p>
         </div>
 
-        <form onSubmit={onSubmit} className="grid gap-4">
-          <label className="space-y-1 text-sm">
-            <span className="text-slate-600">{t.login.email}</span>
+        <form onSubmit={onSubmit} style={{ display:"grid", gap:16 }}>
+          <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.login.email}</span>
             <input
               required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t.login.emailPh}
-              className="w-full rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
+              style={INPUT_STYLE}
+              onFocus={e => e.target.style.borderColor="#C8A96A"}
+              onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
             />
           </label>
 
           <button
             disabled={loading}
             type="submit"
-            className="btn-link justify-center text-sm font-semibold disabled:opacity-60"
             style={{
-              background: loading ? 'var(--panel)' : 'linear-gradient(to right, #10b981, #06b6d4)',
-              color: loading ? 'var(--ink-2)' : '#fff',
-              borderColor: loading ? 'var(--line)' : '#10b981',
-              gap: 8,
+              borderRadius:10, border:"none", padding:"13px 16px",
+              background: loading ? "var(--panel, #f1f5f9)" : "#0B1F3A",
+              color: loading ? "var(--ink-2)" : "#FAFAF8",
+              fontSize:14, fontWeight:700, cursor: loading ? "not-allowed" : "pointer",
+              display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+              transition:"all 0.15s", opacity: loading ? 0.7 : 1,
+              boxShadow: loading ? "none" : "0 4px 20px rgba(11,31,58,0.3)",
             }}
           >
-            {loading && (
-              <span style={{
-                width: 14, height: 14, borderRadius: '50%',
-                border: '2px solid var(--line-accent)',
-                borderTopColor: 'var(--accent)',
-                animation: 'fgSpin 0.7s linear infinite',
-                display: 'inline-block', flexShrink: 0,
-              }} />
-            )}
+            {loading && <span style={{ width:14, height:14, borderRadius:"50%", border:"2px solid rgba(255,255,255,0.3)", borderTopColor:"#C8A96A", animation:"fgSpin 0.7s linear infinite", display:"inline-block" }} />}
             {loading ? t.auth.forgotLoading : t.auth.forgotSubmit}
           </button>
 
-          {error ? <div className="text-sm text-red-600">{error}</div> : null}
+          {error && <div style={{ fontSize:13, color:"#ef4444", padding:"8px 12px", background:"#fef2f2", borderRadius:8, border:"1px solid #fecaca" }}>{error}</div>}
 
-          <p className="text-center text-sm text-slate-500">
+          <p style={{ textAlign:"center", fontSize:13, color:"var(--ink-2, #64748b)", margin:0 }}>
             {t.auth.rememberPassword}{' '}
-            <Link href="/login" className="text-emerald-600 hover:underline font-medium">
+            <Link href="/login" style={{ color:"#C8A96A", fontWeight:600, textDecoration:"none" }}>
               {t.nav.login}
             </Link>
           </p>
@@ -130,6 +140,7 @@ export default function ForgotPasswordPage() {
 
       <style jsx global>{`
         @keyframes fgSpin { to { transform: rotate(360deg); } }
+        @media (min-width: 1024px) { .lg\\:grid-cols-2 { grid-template-columns: 1.1fr 0.9fr !important; } }
       `}</style>
     </div>
   );

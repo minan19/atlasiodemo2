@@ -7,6 +7,21 @@ import { useI18n } from '../_i18n/use-i18n';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
+const CARD: React.CSSProperties = {
+  background: "var(--card, #fff)",
+  borderRadius: 24, padding: 32,
+  border: "1px solid var(--line, #e2e8f0)",
+  boxShadow: "0 8px 40px rgba(11,31,58,0.08)",
+  maxWidth: 440, width: "100%",
+};
+
+const INPUT: React.CSSProperties = {
+  borderRadius: 10, border: "1.5px solid var(--line, #e2e8f0)",
+  padding: "11px 14px", fontSize: 14, color: "var(--ink, #0f172a)",
+  background: "var(--surface, #fff)", outline: "none",
+  transition: "border-color 0.15s", width: "100%", boxSizing: "border-box",
+};
+
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,12 +36,13 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="glass p-8 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl max-w-md w-full text-center space-y-4">
-        <div className="text-5xl">⚠️</div>
-        <h2 className="text-xl font-semibold text-red-600">{t.common.error}</h2>
-        <p className="text-slate-600">{t.auth.resetSub}</p>
-        <Link href="/forgot-password" className="inline-block text-emerald-600 hover:underline font-medium text-sm">
-          {t.auth.forgotSubmit}
+      <div style={{ ...CARD, textAlign: "center" }}>
+        <div style={{ fontSize:48, marginBottom:16 }}>⚠️</div>
+        <div style={{ width:40, height:3, background:"#C8A96A", borderRadius:2, margin:"0 auto 16px" }} />
+        <h2 style={{ fontSize:20, fontWeight:700, color:"#ef4444", margin:"0 0 8px" }}>{t.common.error}</h2>
+        <p style={{ fontSize:14, color:"var(--ink-2, #64748b)", marginBottom:20 }}>{t.auth.resetSub}</p>
+        <Link href="/forgot-password" style={{ display:"inline-flex", alignItems:"center", gap:6, color:"#C8A96A", fontWeight:600, textDecoration:"none", fontSize:14 }}>
+          {t.auth.forgotSubmit} →
         </Link>
       </div>
     );
@@ -34,12 +50,13 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="glass p-8 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl max-w-md w-full text-center space-y-4">
-        <div className="text-5xl">✅</div>
-        <h2 className="text-2xl font-semibold">{t.auth.resetSuccess}</h2>
-        <p className="text-slate-600">{t.auth.backToLogin}</p>
-        <Link href="/login" className="inline-block mt-2 text-emerald-600 hover:underline font-medium text-sm">
-          {t.auth.backToLogin} →
+      <div style={{ ...CARD, textAlign: "center" }}>
+        <div style={{ fontSize:52, marginBottom:16 }}>✅</div>
+        <div style={{ width:48, height:4, background:"#C8A96A", borderRadius:2, margin:"0 auto 20px" }} />
+        <h2 style={{ fontSize:22, fontWeight:700, color:"var(--ink, #0f172a)", margin:"0 0 8px" }}>{t.auth.resetSuccess}</h2>
+        <p style={{ fontSize:14, color:"var(--ink-2, #64748b)", marginBottom:20 }}>{t.auth.backToLogin}</p>
+        <Link href="/login" style={{ display:"inline-flex", alignItems:"center", gap:6, color:"#C8A96A", fontWeight:600, textDecoration:"none", fontSize:14 }}>
+          ← {t.auth.backToLogin}
         </Link>
       </div>
     );
@@ -48,16 +65,8 @@ function ResetPasswordForm() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
-    if (password.length < 8) {
-      setError(t.register.errorWeak);
-      return;
-    }
-    if (password !== confirm) {
-      setError(t.register.errorMismatch);
-      return;
-    }
-
+    if (password.length < 8) { setError(t.register.errorWeak); return; }
+    if (password !== confirm) { setError(t.register.errorMismatch); return; }
     setLoading(true);
     try {
       const res = await fetch(`${API_URL}/auth/reset-password`, {
@@ -77,71 +86,64 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="glass p-7 rounded-3xl border border-slate-200 bg-white/90 shadow-2xl max-w-md w-full">
-      <div className="mb-5">
-        <h2 className="text-2xl font-semibold">{t.auth.resetTitle}</h2>
-        <p className="text-sm text-slate-600">{t.register.passwordHint}</p>
+    <div style={CARD}>
+      {/* Gold accent bar */}
+      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:24 }}>
+        <div style={{ width:4, height:36, background:"#C8A96A", borderRadius:2, flexShrink:0 }} />
+        <div>
+          <h2 style={{ fontSize:22, fontWeight:700, color:"var(--ink, #0f172a)", margin:0 }}>{t.auth.resetTitle}</h2>
+          <p style={{ fontSize:13, color:"var(--ink-2, #64748b)", margin:"3px 0 0" }}>{t.register.passwordHint}</p>
+        </div>
       </div>
 
-      <form onSubmit={onSubmit} className="grid gap-4">
-        <label className="space-y-1 text-sm">
-          <span className="text-slate-600">{t.auth.newPassword}</span>
+      <form onSubmit={onSubmit} style={{ display:"grid", gap:16 }}>
+        <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
+          <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.auth.newPassword}</span>
           <input
-            required
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            required type="password" value={password}
+            onChange={e => setPassword(e.target.value)}
             placeholder={t.auth.newPasswordPh}
-            className="w-full rounded-xl border border-slate-200 px-3 py-3 shadow-sm focus:border-emerald-400 focus:outline-none bg-white text-slate-900 placeholder:text-slate-400"
+            style={INPUT}
+            onFocus={e => e.target.style.borderColor="#C8A96A"}
+            onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
           />
         </label>
 
-        <label className="space-y-1 text-sm">
-          <span className="text-slate-600">{t.register.confirmPassword}</span>
+        <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
+          <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.register.confirmPassword}</span>
           <input
-            required
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
+            required type="password" value={confirm}
+            onChange={e => setConfirm(e.target.value)}
             placeholder={t.register.confirmPh}
-            className={`w-full rounded-xl border px-3 py-3 shadow-sm focus:outline-none bg-white text-slate-900 placeholder:text-slate-400 ${
-              confirm && confirm !== password
-                ? 'border-red-300 focus:border-red-400'
-                : 'border-slate-200 focus:border-emerald-400'
-            }`}
+            style={{ ...INPUT, borderColor: confirm && confirm !== password ? "#ef4444" : "var(--line, #e2e8f0)" }}
+            onFocus={e => e.target.style.borderColor = confirm && confirm !== password ? "#ef4444" : "#C8A96A"}
+            onBlur={e => e.target.style.borderColor = confirm && confirm !== password ? "#ef4444" : "var(--line, #e2e8f0)"}
           />
           {confirm && confirm !== password && (
-            <span className="text-xs text-red-500">{t.register.errorMismatch}</span>
+            <span style={{ fontSize:12, color:"#ef4444" }}>{t.register.errorMismatch}</span>
           )}
         </label>
 
         <button
-          disabled={loading}
-          type="submit"
-          className="btn-link justify-center text-sm font-semibold disabled:opacity-60"
+          disabled={loading} type="submit"
           style={{
-            background: loading ? 'var(--panel)' : 'linear-gradient(to right, #10b981, #06b6d4)',
-            color: loading ? 'var(--ink-2)' : '#fff',
-            borderColor: loading ? 'var(--line)' : '#10b981',
-            gap: 8,
+            borderRadius:10, border:"none", padding:"13px 16px",
+            background: loading ? "var(--panel, #f1f5f9)" : "#0B1F3A",
+            color: loading ? "var(--ink-2)" : "#FAFAF8",
+            fontSize:14, fontWeight:700, cursor: loading ? "not-allowed" : "pointer",
+            display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+            transition:"all 0.15s", opacity: loading ? 0.7 : 1,
+            boxShadow: loading ? "none" : "0 4px 20px rgba(11,31,58,0.3)",
           }}
         >
-          {loading && (
-            <span style={{
-              width: 14, height: 14, borderRadius: '50%',
-              border: '2px solid var(--line-accent)',
-              borderTopColor: 'var(--accent)',
-              animation: 'rpSpin 0.7s linear infinite',
-              display: 'inline-block', flexShrink: 0,
-            }} />
-          )}
+          {loading && <span style={{ width:14, height:14, borderRadius:"50%", border:"2px solid rgba(255,255,255,0.3)", borderTopColor:"#C8A96A", animation:"rpSpin 0.7s linear infinite", display:"inline-block" }} />}
           {loading ? t.auth.resetLoading : t.auth.resetSubmit}
         </button>
 
-        {error ? <div className="text-sm text-red-600">{error}</div> : null}
+        {error && <div style={{ fontSize:13, color:"#ef4444", padding:"8px 12px", background:"#fef2f2", borderRadius:8, border:"1px solid #fecaca" }}>{error}</div>}
 
-        <p className="text-center text-sm text-slate-500">
-          <Link href="/forgot-password" className="text-emerald-600 hover:underline font-medium">
+        <p style={{ textAlign:"center", fontSize:13, color:"var(--ink-2, #64748b)", margin:0 }}>
+          <Link href="/forgot-password" style={{ color:"#C8A96A", fontWeight:600, textDecoration:"none" }}>
             {t.auth.forgotSubmit}
           </Link>
         </p>
@@ -156,8 +158,8 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="grid place-items-center min-h-[60vh]">
-      <Suspense fallback={<div className="text-slate-500">…</div>}>
+    <div style={{ display:"grid", placeItems:"center", minHeight:"60vh", padding:"24px 16px" }}>
+      <Suspense fallback={<div style={{ color:"var(--ink-2)" }}>…</div>}>
         <ResetPasswordForm />
       </Suspense>
     </div>

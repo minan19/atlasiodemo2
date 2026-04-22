@@ -340,3 +340,59 @@ Kullanıcıdan onay sonrası seçenek:
 1. E2E auth smoke test — Docker compose up + login/refresh/logout akışı
 2. Commit + final preview testi (RU/DE/AR dilleri)
 3. İsteğe bağlı: DE/AR/RU 2. parti native genişletme
+
+### 2026-04-22 — E2E auth smoke + commit (devam)
+
+**E2E auth smoke test (TAMAMLANDI, 6/6 adım geçti):**
+- `/tmp/smoke-auth.sh` — register → login → /auth/me → refresh → logout → revoked-refresh=401
+- DB bağlantı sorunu çözüldü: `.env` port `5432` → `5433` (Docker Postgres)
+- Prisma schema drift düzeltildi: `pnpm --filter api prisma db push --accept-data-loss` (User tablosundaki eksik sütunlar eklendi)
+- Sonuç: Argon2 + JWT rotation + Redis refresh revocation uçtan uca doğrulandı (production-grade)
+
+**Commit: `b5cdebd` — feat: auth hardening + i18n Pass 9-10 + gitignore hygiene**
+- 25 dosya, +3418 / -634 satır
+- `middleware.ts → proxy.ts` (Next.js 16 rename)
+- `api/client.ts`: `logout()` + `clearTokens()` public helper
+- Pass 9-10 i18n (5 dil × relative time + auth feature lists + proctoring UI)
+- `admin/proctoring` DECISION_BADGE `tr` param fix
+- `.gitignore`: `**/tsconfig.tsbuildinfo` hijyeni
+
+**Untracked (commit dışı bırakıldı):**
+- `apps/web/public/hybrid-preview.html`, `apps/web/public/logo-options.html` — önceki logo preview artifact'leri, bu oturumla ilgisiz
+
+**Sıradaki oturumda:**
+1. DE/AR/RU 2. parti native genişletme (EN'de 2333, DE 546, AR 543, RU 724 anahtar — fark büyük)
+2. Final preview test (manuel tarayıcı — RU/DE/AR görsel kontrol)
+3. TopNav avatar dropdown'a logout butonu ekleme (şu an sadece /profile'da)
+
+### 2026-04-22 (devam) — Pass 11: DE/AR/RU en sık kullanılan 284 anahtar
+
+**Analiz:**
+- Codebase'deki en sık kullanılan top 500 `t.tr("...")` anahtar grep ile çıkarıldı
+- Her dil için EN'de var ama hedef dilde eksik anahtarlar tespit edildi
+- DE: 351 eksik, AR: 351 eksik, RU: 338 eksik (top 500 içinde)
+- Uniq birleştirme: 284 benzersiz anahtar EN referanslı olarak çevrildi
+
+**Çeviri sonuçları (5 dil toplam):**
+- DE: 573 → **857 anahtar** (+284)
+- AR: 570 → **854 anahtar** (+284)
+- RU: 750 → **1021 anahtar** (+271; 13 zaten vardı)
+- EN: 2349 (değişmedi), KK: 580 (değişmedi)
+- Toplam +839 çeviri; `flat-translations.ts` 5223 → 6069 satır
+
+**Kapsam örnekleri:**
+- Ortak fiiller/durumlar: "Çıkış yap", "Kamerayı Kapat/Aç", "Katıl", "Oluştur", "Aktifleştir"
+- Emoji'li UI anahtarları: "🧠 Akıllı Tahta", "🚀 Başlat", "🔁 Tekrar Bölümü (A-B)", "✋ El Kaldıranlar"
+- Tam cümleler: "⚠ Demo verisi gösteriliyor...", "Ödemeler yönetici onayıyla kesinleşir..."
+- Form placeholder'ları: "örn. Hücre Biyolojisi", "Ör: usr_12345", "Örn: Fotosentez için zihin haritası..."
+- Uyarı/bilgi metinleri: "ℹ️ Mikrofon erişimi gereklidir...", "İşlem başarısız"
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key (TS1117 check passed)
+- Her 3 dil için unique-key scan temiz
+
+**Sıradaki:**
+1. Pass 11 commit
+2. Final preview test (tarayıcıda RU/DE/AR)
+3. TopNav avatar dropdown logout

@@ -6,7 +6,7 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { useRole, UserRole } from './role-context';
 import { BrandLogo } from './brand-logo';
 import { useI18n } from '../_i18n/use-i18n';
-import { api } from '../api/client';
+import { api, logout } from '../api/client';
 import { useTheme } from './theme-provider';
 import { NotificationBell } from './notification-bell';
 import { CommandPalette } from './command-palette';
@@ -238,6 +238,25 @@ export function TopNav() {
               >
                 {currentUser?.name?.[0]?.toUpperCase() ?? 'U'}
               </Link>
+              {/* Logout — backend'e /auth/logout çağırır, refresh token'ı Redis'te iptal eder */}
+              <button
+                onClick={() => { logout(); }}
+                className="theme-toggle"
+                aria-label={t.tr("Çıkış yap")}
+                data-tip={t.tr("Çıkış yap")}
+                type="button"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </>
           ) : (
             <Link href="/login" className="nav-login-btn">{t.nav.login}</Link>

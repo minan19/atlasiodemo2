@@ -34,7 +34,7 @@ export function EnrollButton({ courseId }: Props) {
 
   if (done) {
     return (
-      <span className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+      <span className="inline-flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "rgba(200,169,106,0.1)", border: "1px solid rgba(200,169,106,0.3)", color: "#C8A96A" }}>
         ✓ Kayıt tamamlandı
       </span>
     );

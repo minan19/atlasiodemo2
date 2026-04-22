@@ -283,7 +283,7 @@ export default function AdminPaymentsPage() {
             {t.tr("Hak ediş oluştur")}
           </button>
         </div>
-        {message ? <p className="text-xs text-emerald-600">{message}</p> : null}
+        {message ? <p className="text-xs text-amber-600">{message}</p> : null}
         {error ? <p className="text-xs text-rose-600">{error}</p> : null}
       </section>
 
@@ -341,7 +341,7 @@ export default function AdminPaymentsPage() {
       <section className="glass rounded-2xl border border-slate-200 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold flex items-center gap-2">
-            <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-cyan-400 inline-block" />
+            <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
             {instructors.find((item) => item.id === selectedInstructorId)?.name ?? t.tr('Seçili eğitmen')}
           </h2>
           <span className="pill text-xs">{range.start} – {range.end}</span>
@@ -379,7 +379,7 @@ export default function AdminPaymentsPage() {
 }
 
 const METRIC_VARIANTS = [
-  { bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200', val: 'text-emerald-700', icon: '💰' },
+  { bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200', val: 'text-amber-700', icon: '💰' },
   { bg: 'bg-gradient-to-br from-blue-50 to-blue-100/50 border-blue-200', val: 'text-blue-700', icon: '📊' },
   { bg: 'bg-gradient-to-br from-violet-50 to-violet-100/50 border-violet-200', val: 'text-violet-700', icon: '✅' },
 ];
@@ -401,9 +401,9 @@ function StatusBadge({ status, tr }: { status: string; tr?: (s: string) => strin
   const translate = tr ?? ((s: string) => s);
   const config: Record<string, { label: string; tone: string }> = {
     PENDING: { label: translate('Bekliyor'), tone: 'bg-yellow-100 text-yellow-700' },
-    PAID: { label: translate('Ödendi'), tone: 'bg-emerald-100 text-emerald-700' },
+    PAID: { label: translate('Ödendi'), tone: 'bg-amber-100 text-amber-700' },
     CANCELLED: { label: translate('İptal'), tone: 'bg-rose-100 text-rose-700' },
-    APPROVED: { label: translate('Onaylandı'), tone: 'bg-emerald-100 text-emerald-700' },
+    APPROVED: { label: translate('Onaylandı'), tone: 'bg-amber-100 text-amber-700' },
     REJECTED: { label: translate('Reddedildi'), tone: 'bg-rose-100 text-rose-700' },
   };
   const badge = config[status] ?? { label: status, tone: 'bg-slate-100 text-slate-600' };

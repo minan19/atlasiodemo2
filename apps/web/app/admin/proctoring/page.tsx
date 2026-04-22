@@ -525,7 +525,7 @@ export default function ProctoringDashboardPage() {
                         <span style={{ fontSize: 13, fontWeight: 700, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {s.User?.name ?? s.User?.email ?? s.userId.slice(0, 12)}
                         </span>
-                        {DECISION_BADGE(s.aiDecision)}
+                        {DECISION_BADGE(s.aiDecision, t.tr)}
                       </div>
                       <div style={{ fontSize: 11, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {s.User?.email} · {new Date(s.createdAt).toLocaleString("tr-TR")}
@@ -621,7 +621,7 @@ export default function ProctoringDashboardPage() {
                     },
                     {
                       label: "AI Karar",
-                      value: DECISION_BADGE(selected.aiDecision) ?? <span style={{ color: "var(--muted)", fontSize: 12 }}>—</span>,
+                      value: DECISION_BADGE(selected.aiDecision, t.tr) ?? <span style={{ color: "var(--muted)", fontSize: 12 }}>—</span>,
                     },
                   ].map(({ label, value }) => (
                     <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12 }}>

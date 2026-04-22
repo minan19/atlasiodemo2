@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes that require authentication
+// ─── Routes that require authentication ──────────────────────────────────────
 const PROTECTED_PREFIXES = [
   '/dashboard',
   '/admin',
@@ -32,16 +32,33 @@ const ADMIN_PREFIXES = ['/dashboard', '/admin'];
 // Routes that only instructors+ can access
 const INSTRUCTOR_PREFIXES = ['/instructor'];
 
-export function middleware(request: NextRequest) {
+/**
+ * Next.js 16 Proxy — formerly `middleware.ts`.
+ * Renamed in Next.js 16 (deprecation of `middleware.ts`) to clarify that this
+ * sits at the network boundary. Runs before the cache on matching routes.
+ *
+ * Migration notes:
+ *  - Function renamed `middleware` → `proxy`
+ *  - File renamed `middleware.ts` → `proxy.ts`
+ *  - Node.js runtime set explicitly (Next 16 proxy runs on full Node.js)
+ *  - CVE-2025-29927: `x-middleware-subrequest` header bypass doesn't apply to `proxy.ts`
+ *
+ * Security:
+ *  - Dev bypass is OPT-IN via `NEXT_PUBLIC_SKIP_AUTH=1` (NOT NODE_ENV).
+ *    Dev builds deployed to prod with default config stay protected.
+ *  - Middleware/proxy is defense-in-depth ONLY — real auth happens at the API
+ *    layer (NestJS JWT guards). Do not rely on this cookie check alone.
+ */
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Dev bypass — API sunucusu olmadan tüm sayfalara erişim
-  if (process.env.NODE_ENV === 'development') return NextResponse.next();
+  // Opt-in dev bypass — sadece NEXT_PUBLIC_SKIP_AUTH=1 ayarlandığında auth devre dışı.
+  if (process.env.NEXT_PUBLIC_SKIP_AUTH === '1') return NextResponse.next();
 
   const isProtected = PROTECTED_PREFIXES.some(p => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
-  // Check auth cookie (set on login, cleared on logout)
+  // Check auth cookie (set on login, cleared on logout) — presence check only
   const authCookie = request.cookies.get('atlasio_auth');
   if (!authCookie?.value) {
     const loginUrl = new URL('/login', request.url);
@@ -49,7 +66,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Role-based guard
+  // Role-based guard (role written to cookie on login)
   const role = request.cookies.get('atlasio_role')?.value ?? 'student';
 
   const isAdminRoute = ADMIN_PREFIXES.some(p => pathname.startsWith(p));
@@ -66,6 +83,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+  runtime: 'nodejs', // Next.js 16 proxy.ts requires explicit Node.js runtime
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico|login|register|forgot-password|reset-password|verify-email|api-health).*)',
   ],

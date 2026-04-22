@@ -123,14 +123,20 @@ const HEALTH_METRICS = [
 // Helpers
 // ---------------------------------------------------------------------------
 
-function relTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return 'Az önce';
-  if (m < 60) return `${m} dk önce`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} sa önce`;
-  return `${Math.floor(h / 24)} gün önce`;
+/**
+ * Relative time formatter factory — i18n-aware.
+ * Module-level function'ı i18n'e uygun hale getirmek için factory pattern.
+ */
+function makeRelTime(tr: (s: string) => string) {
+  return (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60_000);
+    if (m < 1) return tr('Az önce');
+    if (m < 60) return `${m} ${tr('dk önce')}`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} ${tr('sa önce')}`;
+    return `${Math.floor(h / 24)} ${tr('gün önce')}`;
+  };
 }
 
 function metaSummary(meta?: Record<string, unknown>): string {
@@ -158,7 +164,7 @@ function actionColor(action: string): string {
   if (action.includes('error') || action.includes('fail'))
     return 'bg-rose-100 text-rose-700';
   if (action.includes('automation') || action.includes('tick'))
-    return 'bg-emerald-100 text-emerald-700';
+    return 'bg-amber-100 text-amber-700';
   return 'bg-blue-100 text-blue-700';
 }
 
@@ -168,6 +174,7 @@ function actionColor(action: string): string {
 
 export default function AdminAutomationPage() {
   const t = useI18n();
+  const relTime = makeRelTime(t.tr);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -275,14 +282,14 @@ export default function AdminAutomationPage() {
                   </span>
                 </div>
                 {/* ACTIVE badge */}
-                <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                <span className="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold" style={{ background: "rgba(200,169,106,0.15)", color: "#C8A96A" }}>
+                  <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
                   {t.tr("AKTİF")}
                 </span>
               </div>
 
               {/* Cron expression */}
-              <code className="block rounded-lg bg-slate-900 text-emerald-400 px-3 py-1.5 text-xs font-mono tracking-wide">
+              <code className="block rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-mono tracking-wide" style={{ color: "#C8A96A" }}>
                 {job.cron}
               </code>
 

@@ -22,12 +22,43 @@ function saveTokens(access: string, refresh: string) {
   localStorage.setItem('refreshToken', refresh);
 }
 
-function clearTokens() {
+/**
+ * Tüm oturum kalıntılarını temizler (localStorage + middleware cookie'leri).
+ * Dikkat: Backend'e logout çağrısı yapmaz — sadece frontend temizliği.
+ * Refresh token'ı Redis'ten iptal etmek için `logout()` kullanın.
+ */
+export function clearTokens() {
+  if (typeof window === 'undefined') return;
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
-  // Middleware cookie'lerini de temizle
   document.cookie = 'atlasio_auth=; path=/; max-age=0';
   document.cookie = 'atlasio_role=; path=/; max-age=0';
+}
+
+/**
+ * Tam çıkış akışı: backend'e /auth/logout çağırır (refresh token'ı Redis'te iptal eder),
+ * sonra frontend'deki tüm tokenleri siler. `redirect` false değilse /login'e yönlendirir.
+ * Backend erişilemese bile frontend temizliği garanti.
+ */
+export async function logout(options: { redirect?: boolean } = {}): Promise<void> {
+  const { redirect = true } = options;
+  const refreshToken = getRefreshToken();
+
+  // Backend'de refresh token'ı iptal et (hata olsa bile devam)
+  if (refreshToken) {
+    try {
+      await fetch(`${BASE}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Tenant-ID': TENANT },
+        body: JSON.stringify({ refreshToken }),
+      });
+    } catch {
+      // Backend erişilemez olsa da devam — en azından frontend state'i temizlenmeli
+    }
+  }
+
+  clearTokens();
+  if (redirect) redirectToLogin();
 }
 
 function redirectToLogin() {

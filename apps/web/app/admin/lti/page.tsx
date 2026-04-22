@@ -449,12 +449,12 @@ function ToolModal({
   };
 
   const fields = [
-    { key: "name", label: "Araç Adı *", placeholder: "ör. Khan Academy LTI", icon: "plug" },
-    { key: "clientId", label: "Client ID *", placeholder: "ör. khanacademy-001", icon: "key" },
-    { key: "issuer", label: "Issuer (Platform URL) *", placeholder: "https://www.khanacademy.org", icon: "globe" },
-    { key: "loginUrl", label: "OIDC Login URL *", placeholder: "https://…/lti/login", icon: "link" },
-    { key: "launchUrl", label: "Launch URL *", placeholder: "https://…/lti/launch", icon: "rocket" },
-    { key: "jwksUrl", label: "JWKS URL (opsiyonel)", placeholder: "https://…/lti/jwks", icon: "shield" },
+    { key: "name", label: t.tr("Araç Adı *"), placeholder: t.tr("ör. Khan Academy LTI"), icon: "plug" },
+    { key: "clientId", label: t.tr("Client ID *"), placeholder: t.tr("ör. khanacademy-001"), icon: "key" },
+    { key: "issuer", label: t.tr("Issuer (Platform URL) *"), placeholder: "https://www.khanacademy.org", icon: "globe" },
+    { key: "loginUrl", label: t.tr("OIDC Login URL *"), placeholder: "https://…/lti/login", icon: "link" },
+    { key: "launchUrl", label: t.tr("Launch URL *"), placeholder: "https://…/lti/launch", icon: "rocket" },
+    { key: "jwksUrl", label: t.tr("JWKS URL (opsiyonel)"), placeholder: "https://…/lti/jwks", icon: "shield" },
   ] as const;
 
   return (
@@ -750,8 +750,8 @@ export default function LtiAdminPage() {
           {/* Stats */}
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
             {[
-              { label: "Toplam Araç", value: tools.length, icon: "plug", color: "var(--accent)" },
-              { label: "Aktif", value: activeCount, icon: "check", color: "#22c55e" },
+              { label: t.tr("Toplam Araç"), value: tools.length, icon: "plug", color: "var(--accent)" },
+              { label: t.tr("Aktif"), value: activeCount, icon: "check", color: "#22c55e" },
               { label: "Deployment", value: totalDeployments, icon: "rocket", color: "var(--accent-3)" },
             ].map((s) => (
               <div key={t.tr(s.label)} style={{ display: "flex", alignItems: "center", gap: 10 }}>

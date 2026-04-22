@@ -51,7 +51,7 @@ export function CourseActions({ courseId }: Props) {
     <div className="flex gap-3 flex-wrap items-center">
       {/* Kayıt durumuna göre buton */}
       {state === 'enrolled' && (
-        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "rgba(200,169,106,0.1)", border: "1px solid rgba(200,169,106,0.3)", color: "#C8A96A" }}>
           ✓ Kayıtlısınız
         </span>
       )}
@@ -82,7 +82,7 @@ export function CourseActions({ courseId }: Props) {
 
       {/* Kayıtlarım linki — zaten kayıtlıysa */}
       {(state === 'enrolled' || state === 'completed') && (
-        <Link href="/my-courses" className="text-xs text-emerald-600 hover:underline font-medium">
+        <Link href="/my-courses" className="text-xs hover:underline font-medium" style={{ color: "#C8A96A" }}>
           Kayıtlarıma git →
         </Link>
       )}

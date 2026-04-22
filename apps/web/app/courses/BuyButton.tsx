@@ -45,7 +45,7 @@ export function BuyButton({ courseId }: Props) {
       <button
         onClick={handleBuy}
         disabled={busy}
-        className="px-4 py-2 rounded-lg border bg-emerald-600 text-white hover:bg-emerald-700"
+        className="px-4 py-2 rounded-lg border text-white" style={{ background: "#0B1F3A" }}
       >
         {busy ? "Yönlendiriliyor..." : "Satın al"}
       </button>

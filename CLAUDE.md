@@ -247,3 +247,96 @@ Kullanıcıdan onay sonrası seçenek:
 - Kalan sarılmamış sayfalar: admin/alarms, admin/proctoring, admin/security, admin/automation, admin/lti, admin/approvals, admin/volunteer, payments/success vb.
 - Commit + final preview testi (RU/DE/AR dilleri)
 - İsteğe bağlı: RU bloğunu da genişlet (şu an en kapsamlı ama hâlâ eksikler var)
+
+### 2026-04-21 — Emerald migrasyonu tamamlandı + CSS kontrast fix + 3 kullanıcı sorunu
+
+**Emerald → Navy/Gold/Amber migrasyonu TAMAMLANDI:**
+- Tüm `.tsx` dosyalarında `emerald` sıfır kaldı (grep sonucu: 0 dosya)
+- Son batch: instructor/analytics, live, admin/ai-safety, admin/ai-agents, pay, courses/[id], whiteboard/smartboard, admin/volunteer
+- Commit: `8204a1f`
+
+**CSS kontrast fix:**
+- `.shell-header .back-btn`: `background: rgba(255,255,255,0.08)` + `color: rgba(255,255,255,0.75)` — açık modda koyu lacivert nav üzerinde okunur hale getirildi
+- `globals.css` CSS değişkenleri: `--brand-c`, `--accent-2`, `--brand-grad`, `--success`, `.hero-live strong` → emerald → gold/amber
+- Commit: `253b316`
+
+**Kullanıcının 3 sorusu:**
+1. **Açık mod kontrast** → DÜZELTİLDİ (yukarıda)
+2. **Dil sorunu (DE/AR/RU/KK karışık)** → Kök neden: bu dillerde binlerce anahtar eksik. EN fallback var ama TR'ye düşen anahtarlar da var. Çözüm seçenekleri: A) Manuel native çeviri, B) Makine çevirisi batch, C) Kritik 100 UI anahtarı önce. Kullanıcı kararı bekliyor.
+3. **Gerçek auth** → Login/Register sayfaları ZATEN API'ye bağlı (`/auth/login`, `/auth/register` + localStorage token). Middleware dev bypass kaldırılmalı, token refresh akışı eklenmeli, e-posta doğrulama kontrol edilmeli. Bir sonraki oturumda uçtan uca test yapılabilir.
+
+**Sıradaki adımlar (öncelik sırasıyla):**
+1. **Gerçek auth testi** — Backend başlatıp login → token → protected page akışını doğrula
+2. **Middleware dev bypass kaldırma** — Production-ready auth
+3. **Token refresh + logout** — `/auth/refresh` endpoint'ini frontend'e bağla
+4. **Dil sorunu** — Kullanıcı kararına göre (A/B/C yukarıda)
+5. **i18n sarılmamış sayfalar** — admin/proctoring, admin/security vb.
+
+### 2026-04-21 (devam) — Auth hardening + Critical UI i18n Pass 8
+
+**Auth production-ready (tamamlandı):**
+- `apps/web/app/api/client.ts` → `logout()` + `clearTokens()` public export
+  - `logout()` backend'e `/auth/logout` POST atıp refresh token'ı Redis'ten iptal eder, sonra localStorage + cookies temizler, /login'e yönlendirir
+  - Backend erişilmezse bile frontend temizliği garanti
+- `apps/web/middleware.ts` → `NODE_ENV === 'development'` bypass **kaldırıldı**
+  - Yeni davranış: opt-in `NEXT_PUBLIC_SKIP_AUTH=1` env var ile bypass (default: auth zorunlu)
+  - Eski davranış CVE-2025-29927 pattern'ine yakın güvenlik sorunuydu (dev build prod'a deploy edilirse tüm sayfalar halka açık olurdu)
+- `apps/web/app/profile/page.tsx` → logout butonu yeni helper kullanır (inline `localStorage.remove` pattern'i silindi)
+- Backend auth (NestJS, `auth.service.ts`) zaten production-grade: Argon2 + JWT rotation + Redis refresh revocation + IP rate-limit + audit log + email verification + forgot-password
+- Frontend `api/client.ts` 401 → refresh → retry → logout fallback zaten çalışıyor (mutex'li)
+
+**Critical UI i18n Pass 8 (tamamlandı):**
+- Top-120 TR anahtarı codebase'den `grep -oE 't\.tr\("..."\)' | sort | uniq -c | sort -rn` ile çıkarıldı
+- **DE: +77 native çeviri** (546 toplam), **AR: +77** (543), **RU: +68** (724)
+- Eklenen anahtarlar: "Kayıt", "katılımcı", "Yükleniyor…", "Tahta", "Oturum", "Reddet", "Yazdır", "Söz Ver", "Söz Al", "Kamera Kapalı", "AI Asistan", "— Eğitmen seçin —", "Sonuç bulunamadı", "Tümü →", "Tüm zamanlar", "Tespit Edilen Sorunlar", "Tamamlama", "Tahta Kilitli/Açık", "Sürükle", "Süresi Dolmuş", "Süre:", "Süre doldu", "Soru…", "Soru Sayısı", "Yeni API Anahtarı", "Uyarı", "Yönetici Merkezi", vd.
+- flat-translations.ts 4850 → 5076 satır
+- 0 TS hatası, 0 duplicate key (TS1117 check passed)
+
+**Kalan i18n micro-fix'ler (tamamlandı):**
+- `admin/lti/page.tsx` → `fields` array + stats array module-local inline sarıldı (`t.tr(label)` + `t.tr(placeholder)`)
+- `admin/alarms` → FALSE POSITIVE (BADGE_LABEL + tabs zaten render site'ta `t.tr()` ile sarılı)
+- `admin/security/page.tsx` + `admin/automation/page.tsx` → time-format template literals (`${m} dk önce`) → module-level function, `t` scope'ta yok; refactor gerekli ama düşük impact (admin-only, relative time)
+- `admin/proctoring/page.tsx` → 13 string kaldı (mock isimler + gerçek UI karışık); sonraki oturumda
+
+**Sonraki oturumda:**
+1. **Gerçek uçtan uca auth test** — backend başlat (`pnpm --filter api dev`), Redis/Postgres up, login → protected page → logout döngüsü
+2. **TopNav'e logout menüsü** — şu an sadece /profile'da; avatar'a hover menü ekle
+3. **Next.js 16 `middleware.ts` → `proxy.ts` migration** — deprecated ama çalışıyor; codemod: `npx @next/codemod@latest middleware-to-proxy`
+4. **Kalan i18n micro-fix**:
+   - `admin/security` + `admin/automation` time-format → factory fn `makeTimeAgo(t)` pattern
+   - `admin/proctoring` 13 string (mock isimleri hariç)
+5. **DE/AR/RU daha geniş native çeviri** — şu an 543-724 anahtar/blok, EN 2333; ikinci 100 UI turunda genişlet
+
+### 2026-04-21 (devam 2) — Pass 9-10 i18n + .gitignore hygiene + proctoring fix
+
+**Pass 9 — Relative time anahtarları (5 dile eklendi):**
+- `Az önce`, `dk önce`, `sa önce`, `gün önce` → EN/DE/AR/RU/KK (20 çeviri)
+- `admin/security` + `admin/automation` sayfalarında `makeRelTime(tr)` factory pattern'ine çevrildi
+- Module-level `relTime` fn → render-time `tr`-aware fn
+
+**admin/proctoring DECISION_BADGE düzeltmesi:**
+- `DECISION_BADGE(aiDecision)` → `DECISION_BADGE(aiDecision, t.tr)` (2 call site)
+- Şüpheli/Bayraklı/Temiz rozet etiketleri artık çevrilebilir
+
+**Pass 10 — Auth feature lists + proctoring UI (5 dile eklendi):**
+- 24 EN anahtarı (auth login/register/forgot-password feature lists + proctoring UI)
+- 23 DE / 23 AR / 22 RU / 13 KK native çevirisi
+- Önemli yeni anahtarlar: "Güvenli sıfırlama bağlantısı", "256-bit SSL şifreleme", "KVKK & GDPR uyumlu", "İki faktörlü kimlik doğrulama", "Proctoring Dashboard", "Filtre", "Toplam Oturum", "Düşük/Orta/Yüksek Risk (...)", "TrustScore Yenile" vb.
+
+**Kalan sarılmamış sayfalar kontrolü:**
+- admin/alarms, admin/approvals, admin/volunteer, payments/success, payments/cancel, forgot-password, reset-password, verify-email, login, register → **HEPSİ TEMİZ** (module-level data render site'ta sarılmış)
+- CLAUDE.md'deki eski "sarılmamış sayfalar" listesi yanlışmış
+
+**.gitignore hijyeni:**
+- `**/tsconfig.tsbuildinfo` + `**/*.tsbuildinfo` eklendi (TS incremental build cache)
+- `apps/web/tsconfig.tsbuildinfo` index'ten çıkarıldı (`git rm --cached`)
+- `dump.rdb` + `**/dist/` + `**/node_modules/` zaten kapsamda
+
+**Sonuç:**
+- 0 TS hatası
+- Toplam `t.tr(...)` çağrısı değişmedi (~2147) — bu oturum yeni sarma değil, eksikleri kapattı
+
+**Sıradaki:**
+1. E2E auth smoke test — Docker compose up + login/refresh/logout akışı
+2. Commit + final preview testi (RU/DE/AR dilleri)
+3. İsteğe bağlı: DE/AR/RU 2. parti native genişletme

@@ -74,10 +74,10 @@ export default function AIContentStudioPage() {
       const res = await fetch(`${API}${endpoint}`, {
         method: "POST", headers: authHeaders(), body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error(`Hata ${res.status}`);
+      if (!res.ok) throw new Error(`${t.tr("Hata")} ${res.status}`);
       setResult(await res.json());
     } catch (e) {
-      setError(e instanceof Error ? e.message : "İstek başarısız");
+      setError(e instanceof Error ? e.message : t.tr("İstek başarısız"));
     } finally { setLoading(false); }
   }
 
@@ -131,24 +131,24 @@ export default function AIContentStudioPage() {
             {tab === "generate" && (
               <>
                 <div>
-                  <label className="label-sm">Konu</label>
+                  <label className="label-sm">{t.tr("Konu")}</label>
                   <input className="input mt-1" placeholder={t.tr("örn. Fotosentez")} value={genTopic} onChange={(e) => setGenTopic(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="label-sm">{t.tr("İçerik Türü")}</label>
                     <select className="input mt-1" value={genType} onChange={(e) => setGenType(e.target.value as typeof genType)}>
-                      <option value="lesson">Ders</option>
+                      <option value="lesson">{t.tr("Ders")}</option>
                       <option value="quiz">Quiz</option>
                       <option value="course_outline">{t.tr("Kurs Planı")}</option>
                       <option value="summary">{t.tr("Özet")}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="label-sm">Zorluk</label>
+                    <label className="label-sm">{t.tr("Zorluk")}</label>
                     <select className="input mt-1" value={genDiff} onChange={(e) => setGenDiff(Number(e.target.value) as 1 | 2 | 3)}>
                       <option value={1}>{t.tr("Başlangıç")}</option>
-                      <option value={2}>Orta</option>
+                      <option value={2}>{t.tr("Orta")}</option>
                       <option value={3}>{t.tr("İleri")}</option>
                     </select>
                   </div>
@@ -162,7 +162,7 @@ export default function AIContentStudioPage() {
                   ))}
                 </div>
                 <button disabled={loading || !genTopic.trim()} onClick={() => run("/ai/content/generate", { topic: genTopic, type: genType, language: genLang, difficulty: genDiff })}
-                  className="btn btn-primary w-full">{loading ? "Üretiyor…" : "✦ İçerik Oluştur"}</button>
+                  className="btn btn-primary w-full">{loading ? t.tr("Üretiyor…") : t.tr("✦ İçerik Oluştur")}</button>
               </>
             )}
 
@@ -176,31 +176,31 @@ export default function AIContentStudioPage() {
                   {(["short", "medium", "long"] as const).map((l) => (
                     <button key={l} onClick={() => setExpLen(l)}
                       className={`flex-1 rounded-xl py-1.5 text-xs font-semibold transition-all ${expLen === l ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600"}`}>
-                      {l === "short" ? "Kısa" : l === "medium" ? "Orta" : "Uzun"}
+                      {l === "short" ? t.tr("Kısa") : l === "medium" ? t.tr("Orta") : t.tr("Uzun")}
                     </button>
                   ))}
                 </div>
                 <button disabled={loading || !expText.trim()} onClick={() => run("/ai/content/expand", { text: expText, targetLength: expLen, language: "tr" })}
-                  className="btn btn-primary w-full">{loading ? "Genişletiyor…" : "↔ Genişlet"}</button>
+                  className="btn btn-primary w-full">{loading ? t.tr("Genişletiyor…") : t.tr("↔ Genişlet")}</button>
               </>
             )}
 
             {tab === "rewrite" && (
               <>
                 <div>
-                  <label className="label-sm">Metin</label>
+                  <label className="label-sm">{t.tr("Metin")}</label>
                   <textarea className="input mt-1 min-h-[120px] resize-y" placeholder={t.tr("Yeniden yazmak istediğiniz metni girin…")} value={rwText} onChange={(e) => setRwText(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {(["formal", "casual", "academic", "simple"] as const).map((tone) => (
                     <button key={tone} onClick={() => setRwTone(tone)}
                       className={`rounded-xl py-2 text-xs font-semibold transition-all ${rwTone === tone ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
-                      {tone === "formal" ? "Resmi" : tone === "casual" ? "Sade" : tone === "academic" ? "Akademik" : "Basit"}
+                      {tone === "formal" ? t.tr("Resmi") : tone === "casual" ? t.tr("Sade") : tone === "academic" ? t.tr("Akademik") : t.tr("Basit")}
                     </button>
                   ))}
                 </div>
                 <button disabled={loading || !rwText.trim()} onClick={() => run("/ai/content/rewrite", { text: rwText, tone: rwTone, language: "tr" })}
-                  className="btn btn-primary w-full">{loading ? "Yazıyor…" : "✏️ Yeniden Yaz"}</button>
+                  className="btn btn-primary w-full">{loading ? t.tr("Yazıyor…") : t.tr("✏️ Yeniden Yaz")}</button>
               </>
             )}
 
@@ -223,7 +223,7 @@ export default function AIContentStudioPage() {
                 <button disabled={loading || !bulkTopics.trim()} onClick={() => run("/ai/content/bulk-generate", {
                   topics: bulkTopics.split("\n").map(s => s.trim()).filter(Boolean).slice(0, 10),
                   type: bulkType, language: "tr", difficulty: 2,
-                })} className="btn btn-primary w-full">{loading ? "Üretiyor…" : "⚡ Toplu Üret"}</button>
+                })} className="btn btn-primary w-full">{loading ? t.tr("Üretiyor…") : t.tr("⚡ Toplu Üret")}</button>
               </>
             )}
 
@@ -359,7 +359,7 @@ export default function AIContentStudioPage() {
                       {Array.isArray(r.objectives) && (
                         <div>
                           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Hedefler</h3>
-                          <ul className="space-y-1">{r.objectives.map((o: unknown, i: number) => <li key={i} className="flex gap-2 text-sm"><span className="text-emerald-500">✓</span>{String(o)}</li>)}</ul>
+                          <ul className="space-y-1">{r.objectives.map((o: unknown, i: number) => <li key={i} className="flex gap-2 text-sm"><span style={{ color: "#C8A96A" }}>✓</span>{String(o)}</li>)}</ul>
                         </div>
                       )}
                       {Array.isArray(r.sections) && r.sections.map((s: { heading: string; content: string }, i: number) => (
@@ -372,7 +372,7 @@ export default function AIContentStudioPage() {
                         <div key={i} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                           <p className="text-sm font-semibold text-slate-800 mb-2">{i + 1}. {q.stem}</p>
                           <div className="space-y-1 mb-2">{q.choices.map((c: string, ci: number) => (
-                            <div key={ci} className={`rounded-lg px-3 py-1.5 text-sm ${ci === q.correctIndex ? "bg-emerald-100 text-emerald-800 font-semibold" : "bg-white text-slate-600"}`}>
+                            <div key={ci} className={`rounded-lg px-3 py-1.5 text-sm ${ci === q.correctIndex ? "bg-amber-100 text-amber-800 font-semibold" : "bg-white text-slate-600"}`}>
                               {String.fromCharCode(65 + ci)}. {c}
                             </div>
                           ))}</div>

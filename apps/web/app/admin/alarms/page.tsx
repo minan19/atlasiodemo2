@@ -224,7 +224,7 @@ export default function AdminAlarmsPage() {
                 <summary className="text-xs text-slate-500 cursor-pointer select-none hover:text-slate-700">
                   {t.tr("Meta verisini göster")}
                 </summary>
-                <pre className="mt-1 text-xs bg-slate-900 text-emerald-400 rounded-lg p-3 overflow-auto font-mono">
+                <pre className="mt-1 text-xs bg-slate-900 rounded-lg p-3 overflow-auto font-mono" style={{ color: "#C8A96A" }}>
                   {JSON.stringify(alarm.meta, null, 2)}
                 </pre>
               </details>

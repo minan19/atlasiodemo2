@@ -2110,6 +2110,44 @@
         ]
       }
     },
+    "/lti/jwks": {
+      "get": {
+        "operationId": "LtiController_getJwks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lti"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/lti/oidc-login": {
+      "post": {
+        "operationId": "LtiController_oidcLogin",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "lti"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
     "/lti/tools/{id}/deployments": {
       "get": {
         "operationId": "LtiController_deployments",
@@ -2655,6 +2693,34 @@
         ]
       }
     },
+    "/live/sessions/{id}/breakout-rooms": {
+      "post": {
+        "operationId": "LiveController_createBreakoutRooms",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "live"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
     "/instructor-payments/me/summary": {
       "get": {
         "operationId": "InstructorPaymentsController_summary",
@@ -3069,6 +3135,446 @@
         ]
       }
     },
+    "/ai/events": {
+      "post": {
+        "operationId": "AIModuleController_recordEvent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/recommendations": {
+      "post": {
+        "operationId": "AIModuleController_createRecommendation",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AIModuleController_getRecommendations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/content/generate": {
+      "post": {
+        "operationId": "AIModuleController_generateContent",
+        "summary": "Generate structured AI educational content",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topic",
+                  "type"
+                ],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "example": "Photosynthesis"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "lesson",
+                      "quiz",
+                      "course_outline",
+                      "summary"
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "en"
+                  },
+                  "difficulty": {
+                    "type": "number",
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "default": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Generated content returned"
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/content/expand": {
+      "post": {
+        "operationId": "AIModuleController_expandContent",
+        "summary": "Magic Expand — short text → full educational content",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "Photosynthesis converts light to energy."
+                  },
+                  "targetLength": {
+                    "type": "string",
+                    "enum": [
+                      "short",
+                      "medium",
+                      "long"
+                    ],
+                    "default": "medium"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/content/rewrite": {
+      "post": {
+        "operationId": "AIModuleController_rewriteContent",
+        "summary": "Magic Write — rewrite content with specified tone",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "tone": {
+                    "type": "string",
+                    "enum": [
+                      "formal",
+                      "casual",
+                      "academic",
+                      "simple"
+                    ],
+                    "default": "formal"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/content/bulk-generate": {
+      "post": {
+        "operationId": "AIModuleController_bulkGenerate",
+        "summary": "Bulk Create — generate content for multiple topics at once (max 10)",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topics",
+                  "type"
+                ],
+                "properties": {
+                  "topics": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "example": [
+                      "Photosynthesis",
+                      "Cell Division"
+                    ]
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "lesson",
+                      "quiz",
+                      "course_outline",
+                      "summary"
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  },
+                  "difficulty": {
+                    "type": "number",
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "default": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/presentation/generate": {
+      "post": {
+        "operationId": "AIModuleController_generatePresentation",
+        "summary": "Magic Design — generate full slide deck from topic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topic"
+                ],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "example": "Machine Learning Basics"
+                  },
+                  "slideCount": {
+                    "type": "number",
+                    "default": 8,
+                    "minimum": 3,
+                    "maximum": 20
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  },
+                  "difficulty": {
+                    "type": "number",
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ],
+                    "default": 2
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai/mind-map": {
+      "post": {
+        "operationId": "AIModuleController_generateMindMap",
+        "summary": "Generate AI mind map for a topic",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topic"
+                ],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "example": "Photosynthesis"
+                  },
+                  "depth": {
+                    "type": "number",
+                    "default": 2,
+                    "minimum": 1,
+                    "maximum": 4
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
     "/proctor/sessions": {
       "post": {
         "operationId": "ProctoringController_start",
@@ -3140,6 +3646,25 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "proctoring"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/proctor/sessions/all": {
+      "get": {
+        "operationId": "ProctoringController_getAllSessions",
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -3233,7 +3758,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3301,7 +3826,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3345,7 +3870,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3374,7 +3899,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3403,7 +3928,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3431,7 +3956,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3467,7 +3992,7 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
         ],
         "security": [
           {
@@ -3511,7 +4036,59 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/whiteboard/{sessionId}/ai-assist": {
+      "post": {
+        "operationId": "WhiteboardController_aiAssist",
+        "summary": "Get AI-generated whiteboard content suggestion",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "prompt"
+                ],
+                "properties": {
+                  "prompt": {
+                    "type": "string",
+                    "example": "Draw a mind map for photosynthesis"
+                  },
+                  "context": {
+                    "type": "string",
+                    "example": "Current board has a title and two shapes"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "AI suggestion with whiteboard actions returned"
+          }
+        },
+        "tags": [
+          "smartboard"
         ],
         "security": [
           {
@@ -3595,7 +4172,214 @@
           }
         },
         "tags": [
-          "whiteboard"
+          "smartboard"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/whiteboard/{sessionId}/grant": {
+      "post": {
+        "operationId": "WhiteboardController_grantWrite",
+        "summary": "Grant write permission to a user for this whiteboard session",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "targetUserId"
+                ],
+                "properties": {
+                  "targetUserId": {
+                    "type": "string",
+                    "example": "user-uuid-here"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Write access granted"
+          }
+        },
+        "tags": [
+          "smartboard"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/whiteboard/{sessionId}/revoke": {
+      "post": {
+        "operationId": "WhiteboardController_revokeWrite",
+        "summary": "Revoke write permission from a user for this whiteboard session",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "targetUserId"
+                ],
+                "properties": {
+                  "targetUserId": {
+                    "type": "string",
+                    "example": "user-uuid-here"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Write access revoked"
+          }
+        },
+        "tags": [
+          "smartboard"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/whiteboard/{sessionId}/summarize": {
+      "post": {
+        "operationId": "WhiteboardController_summarize",
+        "summary": "Magic Switch — convert whiteboard content to structured lesson document",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Structured lesson document returned"
+          }
+        },
+        "tags": [
+          "smartboard"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/whiteboard/{sessionId}/sticky-notes": {
+      "post": {
+        "operationId": "WhiteboardController_stickyNotes",
+        "summary": "AI Brainstorm — generate sticky note ideas for a topic",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "topic"
+                ],
+                "properties": {
+                  "topic": {
+                    "type": "string",
+                    "example": "Photosynthesis"
+                  },
+                  "count": {
+                    "type": "number",
+                    "default": 6,
+                    "minimum": 2,
+                    "maximum": 12
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "tr",
+                      "en"
+                    ],
+                    "default": "tr"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sticky note ideas returned"
+          }
+        },
+        "tags": [
+          "smartboard"
         ],
         "security": [
           {
@@ -3853,6 +4637,48 @@
             "description": ""
           }
         }
+      }
+    },
+    "/instructor/classes/{classId}/ai-summary": {
+      "get": {
+        "operationId": "InstructorInsightsController_getAiSummary",
+        "summary": "Get AI-generated narrative summary for a class",
+        "parameters": [
+          {
+            "name": "classId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "window",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "enum": [
+                "7d",
+                "30d",
+                "90d"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "AI narrative summary with risks and recommendations"
+          }
+        },
+        "tags": [
+          "instructor-insights"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
       }
     },
     "/instructor/classes/{classId}/insights": {
@@ -4279,6 +5105,1389 @@
           }
         ]
       }
+    },
+    "/sso/providers": {
+      "post": {
+        "operationId": "SsoController_createProvider",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "SsoController_listProviders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/sso/providers/{id}": {
+      "get": {
+        "operationId": "SsoController_getProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "SsoController_updateProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "SsoController_deleteProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/sso/tenant/{tenantSlug}/providers": {
+      "get": {
+        "operationId": "SsoController_publicProviders",
+        "parameters": [
+          {
+            "name": "tenantSlug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ]
+      }
+    },
+    "/sso/oidc/init/{providerId}": {
+      "get": {
+        "operationId": "SsoController_initiateOidc",
+        "parameters": [
+          {
+            "name": "providerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ]
+      }
+    },
+    "/sso/oidc/callback": {
+      "get": {
+        "operationId": "SsoController_oidcCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ]
+      }
+    },
+    "/sso/saml/init/{providerId}": {
+      "get": {
+        "operationId": "SsoController_initiateSaml",
+        "parameters": [
+          {
+            "name": "providerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ]
+      }
+    },
+    "/sso/saml/acs": {
+      "post": {
+        "operationId": "SsoController_samlAcs",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ]
+      }
+    },
+    "/sso/me/links": {
+      "get": {
+        "operationId": "SsoController_getUserLinks",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/sso/me/links/{linkId}": {
+      "delete": {
+        "operationId": "SsoController_unlinkSso",
+        "parameters": [
+          {
+            "name": "linkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "sso"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/emit": {
+      "post": {
+        "operationId": "EventStreamController_emitEvent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmitEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/events": {
+      "get": {
+        "operationId": "EventStreamController_getEvents",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "objectType",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/analytics": {
+      "get": {
+        "operationId": "EventStreamController_getAnalytics",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/realtime": {
+      "get": {
+        "operationId": "EventStreamController_getRealtimeCounts",
+        "parameters": [
+          {
+            "name": "date",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/export/xapi": {
+      "get": {
+        "operationId": "EventStreamController_exportXApi",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/export/caliper": {
+      "get": {
+        "operationId": "EventStreamController_exportCaliper",
+        "parameters": [
+          {
+            "name": "from",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/event-stream/forward-lrs": {
+      "post": {
+        "operationId": "EventStreamController_forwardToLrs",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForwardLrsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "event-stream"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai-safety/check-input": {
+      "post": {
+        "operationId": "AiSafetyController_checkInput",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-safety"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai-safety/check-output": {
+      "post": {
+        "operationId": "AiSafetyController_checkOutput",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-safety"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai-safety/mask-pii": {
+      "post": {
+        "operationId": "AiSafetyController_maskPii",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-safety"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai-safety/check-model": {
+      "post": {
+        "operationId": "AiSafetyController_checkModelAccess",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelAccessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-safety"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/ai-safety/stats": {
+      "get": {
+        "operationId": "AiSafetyController_getSafetyStats",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-safety"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/me/profile": {
+      "get": {
+        "operationId": "RecommendationController_myProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/me": {
+      "get": {
+        "operationId": "RecommendationController_myRecommendations",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/students/{userId}/profile": {
+      "get": {
+        "operationId": "RecommendationController_studentProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/students/{userId}/compute": {
+      "post": {
+        "operationId": "RecommendationController_computeStudentProfile",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/content-insights": {
+      "get": {
+        "operationId": "RecommendationController_contentInsights",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/recommendations/at-risk": {
+      "get": {
+        "operationId": "RecommendationController_atRiskStudents",
+        "parameters": [
+          {
+            "name": "threshold",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "recommendations"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/lti/launch": {
+      "post": {
+        "operationId": "ConnectorsController_ltiLaunch",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/lti/grade": {
+      "post": {
+        "operationId": "ConnectorsController_ltiGrade",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/oneroster/import": {
+      "post": {
+        "operationId": "ConnectorsController_oneRosterImport",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/oneroster/export": {
+      "get": {
+        "operationId": "ConnectorsController_oneRosterExport",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/qti/import": {
+      "post": {
+        "operationId": "ConnectorsController_qtiImport",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/qti/export": {
+      "get": {
+        "operationId": "ConnectorsController_qtiExport",
+        "parameters": [
+          {
+            "name": "topicId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/connectors/badges/issue/{certificationId}": {
+      "post": {
+        "operationId": "ConnectorsController_issueBadge",
+        "parameters": [
+          {
+            "name": "certificationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "connectors"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/observability/health-score": {
+      "get": {
+        "operationId": "ObservabilityController_healthScore",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "observability"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/observability/drift": {
+      "get": {
+        "operationId": "ObservabilityController_driftAlerts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "observability"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/observability/compliance": {
+      "get": {
+        "operationId": "ObservabilityController_compliance",
+        "parameters": [
+          {
+            "name": "days",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "observability"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/observability/tenant-dashboard": {
+      "get": {
+        "operationId": "ObservabilityController_tenantDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "observability"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/observability/latency": {
+      "get": {
+        "operationId": "ObservabilityController_latency",
+        "parameters": [
+          {
+            "name": "service",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "operation",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "observability"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/gamification/me": {
+      "get": {
+        "operationId": "GamificationController_getMyStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "gamification"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/gamification/leaderboard": {
+      "get": {
+        "operationId": "GamificationController_getLeaderboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "gamification"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/departments": {
+      "post": {
+        "operationId": "DepartmentsController_createDepartment",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "departments"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/departments/me": {
+      "get": {
+        "operationId": "DepartmentsController_getMyDepartments",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "departments"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/departments/{id}/instructors": {
+      "post": {
+        "operationId": "DepartmentsController_addInstructor",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "departments"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/guardians/link-student": {
+      "post": {
+        "operationId": "GuardiansController_linkStudent",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "guardians"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/guardians/my-students": {
+      "get": {
+        "operationId": "GuardiansController_getMyStudents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "guardians"
+        ],
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/smart-classroom/{liveSessionId}": {
+      "get": {
+        "operationId": "SmartClassroomController_getStatus",
+        "parameters": [
+          {
+            "name": "liveSessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/smart-classroom/{liveSessionId}/control": {
+      "post": {
+        "operationId": "SmartClassroomController_updateEnv",
+        "parameters": [
+          {
+            "name": "liveSessionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/math-engine/solve": {
+      "post": {
+        "operationId": "MathEngineController_solve",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/math-engine/matrix": {
+      "post": {
+        "operationId": "MathEngineController_calculateMatrix",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/language-lab/analyze-speech": {
+      "post": {
+        "operationId": "LanguageLabController_analyzeSpeech",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/language-lab/history": {
+      "get": {
+        "operationId": "LanguageLabController_getHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/language-lab/live-transcription": {
+      "post": {
+        "operationId": "LanguageLabController_transcribeLiveStream",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -4480,6 +6689,14 @@
         "type": "object",
         "properties": {}
       },
+      "LearningEventDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "RecommendationDto": {
+        "type": "object",
+        "properties": {}
+      },
       "StartProctorSessionDto": {
         "type": "object",
         "properties": {}
@@ -4533,6 +6750,22 @@
         "properties": {}
       },
       "NextAdaptiveDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "EmitEventDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ForwardLrsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SafetyCheckDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ModelAccessDto": {
         "type": "object",
         "properties": {}
       }

@@ -78,7 +78,7 @@ function StatusBadge({ status }: { status: string }) {
   const t = useI18n();
   const map: Record<string, { label: string; cls: string }> = {
     PENDING:  { label: 'Bekliyor',    cls: 'bg-amber-100 text-amber-700' },
-    APPROVED: { label: 'Onaylandı',   cls: 'bg-emerald-100 text-emerald-700' },
+    APPROVED: { label: 'Onaylandı',   cls: 'bg-amber-100 text-amber-700' },
     REJECTED: { label: 'Reddedildi',  cls: 'bg-rose-100 text-rose-700' },
   };
   const { label, cls } = map[status] ?? { label: status, cls: 'bg-slate-100 text-slate-600' };
@@ -162,7 +162,7 @@ export default function AdminApprovalsPage() {
 
   const STATS = [
     { label: 'Bekliyor',   value: pendingCount,  bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200',     val: 'text-amber-700',   icon: '⏳' },
-    { label: 'Onaylanan',  value: approvedCount, bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200', val: 'text-emerald-700', icon: '✓' },
+    { label: 'Onaylanan',  value: approvedCount, bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200', val: 'text-amber-700', icon: '✓' },
     { label: 'Reddedilen', value: rejectedCount, bg: 'bg-gradient-to-br from-rose-50 to-rose-100/50 border-rose-200',         val: 'text-rose-700',    icon: '✗' },
   ];
 
@@ -209,7 +209,7 @@ export default function AdminApprovalsPage() {
                 onClick={() => setFilter(tab.value)}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   filter === tab.value
-                    ? 'bg-emerald-600 text-white shadow-sm'
+                    ? 'text-white shadow-sm bg-[#0B1F3A]'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -222,7 +222,7 @@ export default function AdminApprovalsPage() {
           </button>
         </div>
 
-        {message && <p className="text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">{message}</p>}
+        {message && <p className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">{message}</p>}
         {error   && <p className="text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2">{error}</p>}
         {isDemo  && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
@@ -270,7 +270,7 @@ export default function AdminApprovalsPage() {
                     {item.Course && <span>📚 {t.tr(item.Course.title)}</span>}
                     <span>📅 {fmtDate(item.submittedAt)}</span>
                     {item.suggestedAmount && (
-                      <span className="font-semibold text-emerald-700">💰 {item.suggestedAmount}</span>
+                      <span className="font-semibold text-amber-700">💰 {item.suggestedAmount}</span>
                     )}
                   </div>
                   {item.notes && (
@@ -283,7 +283,7 @@ export default function AdminApprovalsPage() {
                     <button
                       onClick={() => handleAction(item.id, 'APPROVED')}
                       disabled={busy}
-                      className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-60"
+                      className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition disabled:opacity-60"
                     >
                       {t.tr("Onayla")}
                     </button>

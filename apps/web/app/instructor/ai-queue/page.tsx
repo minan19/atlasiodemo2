@@ -42,7 +42,7 @@ const DEMO_DRAFTS: Draft[] = [
 
 function StatusBadge({ status, tr }: { status: string; tr: (s: string) => string }) {
   if (status === "APPROVED")
-    return <span className="pill text-xs bg-emerald-100 text-emerald-700 border border-emerald-300">{tr("Onaylı")}</span>;
+    return <span className="pill text-xs bg-amber-100 text-amber-700 border border-amber-300">{tr("Onaylı")}</span>;
   if (status === "REJECTED")
     return <span className="pill text-xs bg-rose-100 text-rose-700 border border-rose-300">{tr("Reddedildi")}</span>;
   return <span className="pill text-xs bg-amber-100 text-amber-700 border border-amber-300">{tr("Bekliyor")}</span>;
@@ -91,8 +91,8 @@ export default function AiQueuePage() {
           <div className="text-2xl font-bold text-amber-700">{pendingCount}</div>
           <div className="text-xs text-slate-500 mt-1">{t.tr("Bekleyen")}</div>
         </div>
-        <div className="rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100/50 p-4 text-center shadow-sm">
-          <div className="text-2xl font-bold text-emerald-700">{approvedCount}</div>
+        <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/50 p-4 text-center shadow-sm">
+          <div className="text-2xl font-bold text-amber-700">{approvedCount}</div>
           <div className="text-xs text-slate-500 mt-1">{t.tr("Onaylı")}</div>
         </div>
       </div>
@@ -165,12 +165,12 @@ export default function AiQueuePage() {
                   key={c.id}
                   className={`rounded-xl border px-3 py-2.5 text-sm flex items-center gap-2 transition-colors ${
                     c.isCorrect
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                      ? "border-amber-300 bg-amber-50 text-amber-800"
                       : "border-slate-200 bg-slate-50 text-slate-700"
                   }`}
                 >
                   {c.isCorrect ? (
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">✓</span>
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full text-white flex items-center justify-center text-xs font-bold" style={{ background: "#C8A96A" }}>✓</span>
                   ) : (
                     <span className="flex-shrink-0 w-5 h-5 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs">○</span>
                   )}
@@ -182,7 +182,7 @@ export default function AiQueuePage() {
             {/* Footer Actions */}
             <div className="flex items-center gap-3 pt-1 border-t border-slate-100">
               <button
-                className="btn-link text-emerald-700 border-emerald-300 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-link text-amber-700 border-amber-300 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={busy}
                 onClick={() => action("/quiz/ai/approve", d.id)}
               >

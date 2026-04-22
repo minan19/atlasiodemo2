@@ -67,20 +67,28 @@ const SEVERITY_LABELS: Record<Severity, string> = {
   critical: 'Kritik', warning: 'Uyarı', info: 'Bilgi',
 };
 
-function relTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return 'Az önce';
-  if (m < 60) return `${m} dk önce`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h} sa önce`;
-  return `${Math.floor(h / 24)} gün önce`;
+/**
+ * Relative time formatter factory — i18n-aware.
+ * Returns a function that formats ISO timestamps using the caller's `tr()` helper.
+ * Module-level function'ı i18n'e uygun hale getirmek için factory pattern.
+ */
+function makeRelTime(tr: (s: string) => string) {
+  return (iso: string): string => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60_000);
+    if (m < 1) return tr('Az önce');
+    if (m < 60) return `${m} ${tr('dk önce')}`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} ${tr('sa önce')}`;
+    return `${Math.floor(h / 24)} ${tr('gün önce')}`;
+  };
 }
 
 type FilterTab = 'all' | Severity;
 
 export default function AdminSecurityPage() {
   const t = useI18n();
+  const relTime = makeRelTime(t.tr);
   const [alarmFilter, setAlarmFilter] = useState<FilterTab>('all');
 
   const { data: alarmData, isLoading: alarmLoading, mutate: reloadAlarms } = useSWR<Alarm[]>(

@@ -180,7 +180,7 @@ export default function InstructorEarningsPage() {
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {t.instructor.earnings}
               </h1>
-              <span className="pill bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
+              <span className="pill bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                 {t.roles.instructor}
               </span>
             </div>
@@ -208,7 +208,7 @@ export default function InstructorEarningsPage() {
               disabled={busy}
               className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 rangeDays === days
-                  ? 'bg-emerald-600 text-white shadow-sm'
+                  ? 'text-white shadow-sm bg-[#0B1F3A]'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
               }`}
             >
@@ -228,8 +228,8 @@ export default function InstructorEarningsPage() {
           icon="💰"
           label={t.tr("Hak ediş")}
           value={displaySummary ? formatCurrency(displaySummary.payoutAmount) : '—'}
-          gradient="from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20"
-          trendColor="text-emerald-600 dark:text-emerald-400"
+          gradient="from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20"
+          trendColor="text-amber-600 dark:text-amber-400"
           trendLabel={displaySummary ? `${displaySummary.completedEnrollments} tamamlanan` : 'veri bekleniyor'}
         />
         <MetricCard
@@ -268,7 +268,7 @@ export default function InstructorEarningsPage() {
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-700">
                   <div
-                    className="h-1.5 rounded-full bg-emerald-400 dark:bg-emerald-500 transition-all duration-500"
+                    className="h-1.5 rounded-full bg-amber-400 dark:bg-amber-500 transition-all duration-500"
                     style={{ width: displaySummary ? barWidth(val) : '0%' }}
                   />
                 </div>
@@ -286,7 +286,7 @@ export default function InstructorEarningsPage() {
               : 'Dönem seçip "Yenile" düğmesine tıklayarak gelir bilgilerinizi görüntüleyebilirsiniz.'}
           </p>
           {displaySummary && (
-            <div className="mt-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-300 space-y-1">
+            <div className="mt-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-xs text-amber-700 dark:text-amber-300 space-y-1">
               <div>{t.tr("Kişi başı ücret")}: {formatCurrency(displaySummary.perEnrollmentFee)}</div>
               <div>{t.tr("Gelir paylaşım oranı")}: %{(Number(displaySummary.revenueShare) * 100).toFixed(0)}</div>
             </div>
@@ -339,7 +339,7 @@ export default function InstructorEarningsPage() {
                   <div className="text-xs text-slate-500 dark:text-slate-400">
                     {dateLabel(row.periodStart)} – {dateLabel(row.periodEnd)}
                   </div>
-                  <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                  <div className="text-lg font-bold text-amber-600 dark:text-amber-400">
                     {formatCurrency(row.amount)}
                   </div>
                   <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -402,7 +402,7 @@ function StatusBadge({ status }: { status: string }) {
     },
     PAID: {
       label: 'Ödendi',
-      tone: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+      tone: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
     },
     CANCELLED: {
       label: 'İptal',

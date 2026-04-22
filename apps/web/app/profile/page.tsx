@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { api } from '../api/client';
+import { api, logout } from '../api/client';
 import { useI18n } from '../_i18n/use-i18n';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1102,13 +1102,7 @@ export default function ProfilePage() {
         <h2 className="font-semibold text-rose-800">{t.tr("Diğer işlemler")}</h2>
         <div className="flex flex-wrap gap-3 text-sm">
           <button
-            onClick={() => {
-              localStorage.removeItem('accessToken');
-              localStorage.removeItem('refreshToken');
-              document.cookie = 'atlasio_auth=; path=/; max-age=0';
-              document.cookie = 'atlasio_role=; path=/; max-age=0';
-              window.location.href = '/login';
-            }}
+            onClick={() => { logout(); }}
             className="btn-link border-rose-200 text-rose-700 hover:bg-rose-50"
           >
             {t.tr("Çıkış yap")}

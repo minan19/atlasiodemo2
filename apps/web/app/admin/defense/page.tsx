@@ -598,7 +598,7 @@ export default function DefenseDashboardPage() {
 
                         {/* Resolved badge */}
                         {event.resolved && (
-                          <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+                          <span className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: "rgba(200,169,106,0.15)", border: "1px solid rgba(200,169,106,0.3)", color: "#C8A96A" }}>
                             {t.tr("✓ Çözümlendi")}
                           </span>
                         )}

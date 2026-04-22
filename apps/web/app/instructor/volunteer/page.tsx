@@ -127,7 +127,7 @@ export default function InstructorVolunteerPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="mb-3 flex items-center gap-2">
-              <span className="pill bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1">
+              <span className="pill bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1">
                 {t.roles.instructor}
               </span>
             </div>
@@ -150,7 +150,7 @@ export default function InstructorVolunteerPage() {
         <section className="glass rounded-3xl p-6">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-violet-400 inline-block" />
+              <span className="w-1 h-5 rounded-full inline-block" style={{ background: "#C8A96A" }} />
               {t.tr("Eğitmen Değer Skoru")}
             </h2>
             {score.record ? (
@@ -197,7 +197,7 @@ export default function InstructorVolunteerPage() {
 
             {/* Stat chips */}
             <div className="flex flex-wrap gap-3">
-              <ValueCard label={t.tr("Onaylı Katkı")} value={`${score.summary.approvedCount}`} unit={t.tr("içerik")} color="emerald" />
+              <ValueCard label={t.tr("Onaylı Katkı")} value={`${score.summary.approvedCount}`} unit={t.tr("içerik")} color="amber" />
               <ValueCard label="Geri Bildirim" value={`${score.summary.feedbackCount}`} unit="yorum" color="violet" />
               <ValueCard label="Ortalama Puan" value={Number(score.summary.averageRating).toFixed(1)} unit="/ 5" color="amber" />
             </div>
@@ -230,14 +230,14 @@ export default function InstructorVolunteerPage() {
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
             placeholder={t.tr("Başlık *")}
             value={t.tr(form.title)}
             onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
             required
           />
           <textarea
-            className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
             placeholder={t.tr("Açıklama")}
             value={t.tr(form.description)}
             onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
@@ -246,13 +246,13 @@ export default function InstructorVolunteerPage() {
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <input
               placeholder={t.tr("İçerik türü (örn. Ek video)")}
-              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
               value={form.contentType}
               onChange={(e) => setForm((prev) => ({ ...prev, contentType: e.target.value }))}
             />
             <input
               placeholder="URL / kaynak"
-              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
               value={form.resourceUrl}
               onChange={(e) => setForm((prev) => ({ ...prev, resourceUrl: e.target.value }))}
             />
@@ -262,7 +262,7 @@ export default function InstructorVolunteerPage() {
               İlgili kurs (opsiyonel)
             </label>
             <select
-              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
               value={form.courseId}
               onChange={(e) => setForm((prev) => ({ ...prev, courseId: e.target.value }))}
             >
@@ -286,7 +286,7 @@ export default function InstructorVolunteerPage() {
         </form>
 
         {statusMessage ? (
-          <p className="mt-3 inline-block rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-medium text-emerald-700">
+          <p className="mt-3 inline-block rounded-full bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-700">
             {statusMessage}
           </p>
         ) : null}
@@ -339,10 +339,10 @@ function ValueCard({
   label: string;
   value: string;
   unit: string;
-  color: 'emerald' | 'violet' | 'amber';
+  color: 'gold' | 'violet' | 'amber';
 }) {
   const styles: Record<string, { bg: string; val: string }> = {
-    emerald: { bg: 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 border-emerald-200', val: 'text-emerald-700' },
+    gold:    { bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200', val: 'text-amber-700' },
     violet:  { bg: 'bg-gradient-to-br from-violet-50 to-violet-100/50 border-violet-200',   val: 'text-violet-700'  },
     amber:   { bg: 'bg-gradient-to-br from-amber-50 to-amber-100/50 border-amber-200',       val: 'text-amber-700'   },
   };
@@ -365,7 +365,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: 'bg-amber-100 text-amber-700',
-  APPROVED: 'bg-emerald-100 text-emerald-700',
+  APPROVED: 'bg-amber-100 text-amber-700',
   REJECTED: 'bg-rose-100 text-rose-700',
   DRAFT: 'bg-slate-100 text-slate-600',
 };

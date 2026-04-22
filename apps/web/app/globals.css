@@ -549,20 +549,27 @@ img, svg { display: block; }
   height: auto;
 }
 
-/* ── Cormorant Garamond wordmark ── */
+/* ── Cormorant Garamond wordmark ──
+   Altın oran (φ = 1.618) tipografi ölçeği:
+   22px × φ = 35.6 → 36px. Logonun görsel yüksekliğiyle (≈37.5px) eşleşir,
+   cap-height ~26-28px italic Cormorant ile güçlü masthead etkisi. */
 .brand-wordmark {
   font-family: var(--font-serif, 'Cormorant Garamond', serif);
-  font-size: 22px;
+  font-size: 36px;
   font-weight: 600;
   font-style: italic;
   color: var(--ink);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   line-height: 1;
   user-select: none;
 }
 .brand-wordmark em {
   color: #C8A96A;
   font-style: italic;
+}
+/* Responsive — tablet altında bir φ basamağı küçült (36 / φ = 22.25 → 24px) */
+@media (max-width: 640px) {
+  .brand-wordmark { font-size: 24px; letter-spacing: 0.4px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════

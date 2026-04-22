@@ -29,6 +29,8 @@ export function TopNav() {
   const t = useI18n();
   const { theme, toggle: toggleTheme } = useTheme();
   const [cmdOpen, setCmdOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Global Cmd+K / Ctrl+K listener
   useEffect(() => {
@@ -41,6 +43,30 @@ export function TopNav() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
+
+  // User menu: close on outside click + Escape
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setUserMenuOpen(false);
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [userMenuOpen]);
+
+  // Close menu on navigation
+  useEffect(() => {
+    setUserMenuOpen(false);
+  }, [pathname]);
 
   // Giriş durumu + gerçek kullanıcı bilgisi
   useEffect(() => {
@@ -229,34 +255,126 @@ export function TopNav() {
                 </Link>
               )}
               <Link href="/my-courses" className="btn-link text-xs hidden sm:inline-flex">{t.nav.myCourses}</Link>
-              {/* User avatar + profile link */}
-              <Link
-                href="/profile"
-                className="nav-user-avatar"
-                data-tip={currentUser?.name ?? t.nav.profile}
-                aria-label={t.nav.profile}
-              >
-                {currentUser?.name?.[0]?.toUpperCase() ?? 'U'}
-              </Link>
-              {/* Logout — backend'e /auth/logout çağırır, refresh token'ı Redis'te iptal eder */}
-              <button
-                onClick={() => { logout(); }}
-                className="theme-toggle"
-                aria-label={t.tr("Çıkış yap")}
-                data-tip={t.tr("Çıkış yap")}
-                type="button"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  aria-hidden="true"
+              {/* User avatar dropdown: Profile + My Courses + Logout */}
+              <div ref={userMenuRef} style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="nav-user-avatar"
+                  data-tip={currentUser?.name ?? t.nav.profile}
+                  aria-label={currentUser?.name ?? t.nav.profile}
+                  aria-haspopup="menu"
+                  aria-expanded={userMenuOpen}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+                  {currentUser?.name?.[0]?.toUpperCase() ?? 'U'}
+                </button>
+                {userMenuOpen && (
+                  <div
+                    role="menu"
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 8px)',
+                      right: 0,
+                      minWidth: 220,
+                      background: 'var(--surface, #fff)',
+                      border: '1px solid var(--border, rgba(0,0,0,0.08))',
+                      borderRadius: 12,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)',
+                      padding: 6,
+                      zIndex: 1000,
+                    }}
+                  >
+                    {/* Current user info */}
+                    <div
+                      style={{
+                        padding: '8px 12px 10px',
+                        borderBottom: '1px solid var(--border, rgba(0,0,0,0.08))',
+                        marginBottom: 4,
+                      }}
+                    >
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text, #0b1020)' }}>
+                        {currentUser?.name ?? t.nav.profile}
+                      </div>
+                      {currentUser?.role && (
+                        <div style={{ fontSize: 11, opacity: 0.65, marginTop: 2 }}>
+                          {currentUser.role}
+                        </div>
+                      )}
+                    </div>
+                    <Link
+                      href="/profile"
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        color: 'var(--text, #0b1020)',
+                        textDecoration: 'none',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hover, rgba(0,0,0,0.04))'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      {t.nav.profile}
+                    </Link>
+                    <Link
+                      href="/my-courses"
+                      role="menuitem"
+                      onClick={() => setUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        color: 'var(--text, #0b1020)',
+                        textDecoration: 'none',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--hover, rgba(0,0,0,0.04))'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      {t.nav.myCourses}
+                    </Link>
+                    <div style={{ height: 1, background: 'var(--border, rgba(0,0,0,0.08))', margin: '4px 8px' }} />
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => { setUserMenuOpen(false); logout(); }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        color: '#b42318',
+                        background: 'transparent',
+                        border: 'none',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(180,35,24,0.08)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      {t.tr("Çıkış yap")}
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <Link href="/login" className="nav-login-btn">{t.nav.login}</Link>

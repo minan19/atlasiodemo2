@@ -570,6 +570,7 @@ function TranscriptionTab() {
 // ═══════════════════════════════════════════════════════════════
 
 function HistoryTab() {
+  const t = useI18n();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -642,12 +643,12 @@ function HistoryTab() {
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="space-y-0.5">
-          <h2 className="text-lg font-bold text-slate-800">Geçmiş Kayıtlar</h2>
-          <p className="text-sm text-slate-500">Tüm konuşma analizi geçmişin burada listelenir.</p>
+          <h2 className="text-lg font-bold text-slate-800">{t.tr("Geçmiş Kayıtlar")}</h2>
+          <p className="text-sm text-slate-500">{t.tr("Tüm konuşma analizi geçmişin burada listelenir.")}</p>
         </div>
         {isDemo && (
           <span className="pill pill-sm" style={{ background: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.3)', color: '#b45309' }}>
-            ⚡ Demo verisi
+            {t.tr("⚡ Demo verisi")}
           </span>
         )}
       </div>

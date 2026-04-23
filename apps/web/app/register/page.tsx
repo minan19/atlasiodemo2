@@ -120,30 +120,71 @@ export default function RegisterPage() {
         </div>
 
         <form onSubmit={onSubmit} style={{ display:"grid", gap:14 }}>
-          {[
-            { key:"name",    label:t.register.name,            placeholder:t.register.namePh,     value:name,     setter:setName,    type:"text",     required:false },
-            { key:"email",   label:t.register.email,           placeholder:t.register.emailPh,    value:email,    setter:setEmail,   type:"email",    required:true },
-            { key:"pass",    label:t.register.password,        placeholder:t.register.passwordPh, value:password, setter:setPassword,type:"password", required:true },
-          ].map(f => (
-            <label key={f.key} style={{ display:"flex", flexDirection:"column", gap:5, fontSize:13 }}>
-              <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{f.label}</span>
-              <input
-                type={f.type}
-                required={f.required}
-                value={f.value}
-                onChange={e => f.setter(e.target.value)}
-                placeholder={f.placeholder}
-                style={{ borderRadius:10, border:"1.5px solid var(--line, #e2e8f0)", padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
-                onFocus={e => e.target.style.borderColor="#C8A96A"}
-                onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
-              />
-            </label>
-          ))}
+          {/* Full Name */}
+          <label style={{ display:"flex", flexDirection:"column", gap:5, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.register.name}</span>
+            <input
+              type="text"
+              name="name"
+              autoComplete="name"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder={t.register.namePh}
+              style={{ borderRadius:10, border:"1.5px solid var(--line, #e2e8f0)", padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
+              onFocus={e => e.target.style.borderColor="#C8A96A"}
+              onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
+            />
+          </label>
 
+          {/* Email */}
+          <label style={{ display:"flex", flexDirection:"column", gap:5, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.register.email}</span>
+            <input
+              type="email"
+              name="email"
+              autoComplete="email"
+              inputMode="email"
+              required
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder={t.register.emailPh}
+              style={{ borderRadius:10, border:"1.5px solid var(--line, #e2e8f0)", padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
+              onFocus={e => e.target.style.borderColor="#C8A96A"}
+              onBlur={e => e.target.style.borderColor="var(--line, #e2e8f0)"}
+            />
+          </label>
+
+          {/* Password */}
+          <label style={{ display:"flex", flexDirection:"column", gap:5, fontSize:13 }}>
+            <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500, display:"flex", justifyContent:"space-between" }}>
+              <span>{t.register.password}</span>
+              <span style={{ fontSize:11, fontWeight:400, color: password.length === 0 ? "var(--ink-2, #64748b)" : password.length >= 8 ? "#10b981" : "#ef4444" }}>
+                {password.length === 0 ? t.tr("En az 8 karakter") : password.length >= 8 ? "✓ " + t.tr("Geçerli") : `${password.length}/8`}
+              </span>
+            </span>
+            <input
+              type="password"
+              name="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder={t.register.passwordPh}
+              style={{ borderRadius:10, border:`1.5px solid ${password && password.length < 8 ? "#ef4444" : "var(--line, #e2e8f0)"}`, padding:"11px 14px", fontSize:14, color:"var(--ink, #0f172a)", background:"var(--surface, #fff)", outline:"none", transition:"border-color 0.15s" }}
+              onFocus={e => e.target.style.borderColor = password && password.length < 8 ? "#ef4444" : "#C8A96A"}
+              onBlur={e => e.target.style.borderColor = password && password.length < 8 ? "#ef4444" : "var(--line, #e2e8f0)"}
+            />
+          </label>
+
+          {/* Confirm Password */}
           <label style={{ display:"flex", flexDirection:"column", gap:5, fontSize:13 }}>
             <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.register.confirmPassword}</span>
             <input
               type="password"
+              name="confirmPassword"
+              autoComplete="new-password"
+              minLength={8}
               required
               value={confirm}
               onChange={e => setConfirm(e.target.value)}

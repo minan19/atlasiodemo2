@@ -20,10 +20,11 @@ export function useI18n(): UseI18nReturn {
     (text: any): any => {
       if (text == null || text === "") return text;
       if (typeof text !== "string") return text;
-      if (lang === "tr") return text;
+      // Look up in target-language dict (TR block holds API error → TR mappings).
       const dict = flat[lang];
       const direct = dict?.[text];
       if (direct) return direct;
+      if (lang === "tr") return text;
       // Fallback chain: target lang → EN → original Turkish
       if (lang !== "en") {
         const en = flat.en?.[text];

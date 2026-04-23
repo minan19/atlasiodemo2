@@ -396,3 +396,30 @@ Kullanıcıdan onay sonrası seçenek:
 1. Pass 11 commit
 2. Final preview test (tarayıcıda RU/DE/AR)
 3. TopNav avatar dropdown logout
+
+### 2026-04-24 — Pass 16 + Pass 17 + Register hardening + TR reverse-lookup
+
+**Pass 16 (commit f3712b7) — DE/AR/RU top-200 native + TR reverse-lookup:**
+- DE/AR/RU her biri +208 native anahtar (toplam +624 çeviri)
+  - Kritik, Bilgi, Başarısız, Beklemede, Demo Talep Et, KALDI, Akademik, Basit ve ~200 diğer sık kullanılan UI etiketi
+- **TR reverse-lookup bloğu**: backend EN hata mesajları → TR gösterim
+  - `"Invalid credentials"` → `"Hatalı e-posta veya şifre"`, `Unauthorized`, `Forbidden`, `Not Found`, `Bad Request`, `Internal Server Error`
+- EN blokta aynı backend hata anahtarlarının identity eşlemesi + `"Geçerli"`
+- **`use-i18n.ts` değişikliği**: `tr()` artık TR dilinde de önce sözlükten bakar → backend EN hataları TR'ye map edilir; normal TR stringler identity-through
+- **`register/page.tsx` güçlendirme**: array-map form → explicit label'lar (browser autoComplete için), canlı şifre validation indicator (kırmızı "N/8" → yeşil "✓ Geçerli"), name="..." attribute'ları eklendi
+
+**Pass 17 (commit 03f1336) — KK 256 native genişletme:**
+- KK: 841 → **1097 anahtar** (+256)
+- Top-500 en sık kullanılan `t.tr()` anahtarından KK'da eksik 257 tanesi Cyrillic Kazakh'a çevrildi
+- Kapsam: core navigation (Тақта, Сессия, Қабылдамау), dashboard/gamification (Лига, Көшбасшылар), demo form (Сұранысыңыз қабылданды!), progress/GPA (Жалпы несие, Жалпы орта бал), skill tree (Дағды ағашы, Көк/Алтын/Сұр түйіндер), whiteboard (Тақта құлыпталды, Лазер көрсеткіш), AI agents/proctoring (TrustScore тікелей, Аудит жазбасы), LTI/OneRoster/QTI (Интеграция орталығы, Экспорт, Импорт), security center (Қауіпсіздік дабылдары, Тікелей бақылау)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Final anahtar sayıları: tr:8 · en:2739 · de:1083 · ar:1080 · ru:1246 · **kk:1097**
+
+**Sıradaki oturumda:**
+1. Manuel preview test — tarayıcıda RU/DE/AR/KK dil değiştirme turu
+2. Pass 18 — EN'den halen geride olan diller için ikinci 200-300 turu (KK en geride 1642 anahtar, sonra AR 1659, DE 1656)
+3. Mock isim/placeholder policy kararı ("Ahmet Yılmaz" gibi özel isimler çevrilsin mi?)
+4. `admin/proctoring` 13 kalan string + `admin/security`/`automation` time-format refactor (düşük impact)

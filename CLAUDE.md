@@ -423,3 +423,27 @@ Kullanıcıdan onay sonrası seçenek:
 2. Pass 18 — EN'den halen geride olan diller için ikinci 200-300 turu (KK en geride 1642 anahtar, sonra AR 1659, DE 1656)
 3. Mock isim/placeholder policy kararı ("Ahmet Yılmaz" gibi özel isimler çevrilsin mi?)
 4. `admin/proctoring` 13 kalan string + `admin/security`/`automation` time-format refactor (düşük impact)
+
+### 2026-04-24 (devam) — Pass 18 + git hygiene doğrulama
+
+**Git hijyeni (doğrulandı, zaten temiz):**
+- `apps/api/dist/**`, `dump.rdb`, `*.tsbuildinfo` → hepsi `.gitignore`'da, tracked değil
+- CLAUDE.md'deki eski "bekleyen git temizliği" notu eskimişti
+
+**Pass 18 (commit ab9c744) — DE/AR ortak +100, KK ayrı +101:**
+- **DE: 1083 → 1183 (+100)** — dashboard/demo form/progress/skill-tree/whiteboard top-used anahtarlar
+- **AR: 1080 → 1180 (+100)** — DE ile aynı 100-anahtar batch'i
+- **KK: 1097 → 1198 (+101)** — content library (upload), departments, SSO entegrasyonları (SAML/OIDC), LTI dialogları, admin approval center, AI safety center (PII masking), automation center
+
+**Önemli tespit:** DE ve AR'nin en sık eksik anahtarları %100 örtüşüyor (her ikisinde de Pass 17'de KK'ya eklenen aynı UI anahtarları eksikti). KK ise Pass 17 sonrası farklı bir top-100'e kaydı → admin/integration UI ön planda.
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 de:1183 ar:1180 ru:1246 **kk:1198**
+
+**Sıradaki oturumda:**
+1. Pass 19 — sıradaki 100 × 3 dil (DE/AR şu an aynı top-752'de eksik, KK'da farklı kalan ~800)
+2. RU native genişletme (sonraki top-200)
+3. Manuel preview test — tarayıcı (senin elinde)
+4. Mock isim policy kararı

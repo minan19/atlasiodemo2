@@ -518,6 +518,33 @@ Kullanıcıdan onay sonrası seçenek:
 2. Pass 23'te hedef: tüm diller ≥80% coverage
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim policy kararı (hâlâ bekliyor)
+
+### 2026-04-24 (devam 5) — Pass 22: DE/AR/KK +100, RU +126
+
+**Pass 22 (commit f4b22c1) — 426 yeni native çeviri:**
+- **DE: 1483 → 1583 (+100)** — admin UI (Son Aktiviteler, Risk Skoru, Rol Dağıtımı, Raporla), report prompts, session/quiz settings
+- **AR: 1481 → 1581 (+100)** — DE ile aynı set (top-100 %100 örtüşüyor)
+- **RU: 1484 → 1610 (+126)** — DE seti + 32 RU-özel (SSO Entegrasyonları, Sertifika PEM, Sınıf Sohbeti, Silgi Boyutu, smartboard AI prompts)
+- **KK: 1498 → 1598 (+100)** — KK-özel top-100 (Teslim, Telaffuz Analizi, Sınav, Sertifikalar, Risk Skoru)
+- 6 RU dup'ı silindi (önceki passlardan kalma: Sistem sağlığı, Rol Dağıtımı, Risk Skoru, Oturum Aç, Ort. quiz, Okuma Araçları)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing: 451 → 351 (~78%)
+- AR missing: 452 → 352 (~78%)
+- RU missing: 555 → 429 (~73%)
+- KK missing: 472 → 372 (~77%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1583** **ar:1581** **ru:1610** **kk:1598**
+
+**Sıradaki oturumda:**
+1. Pass 23 — sıradaki 100 × 4 dil (hedef: DE/AR ~85%, RU ~79%, KK ~83%)
+2. ~2 pass daha (Pass 24, 25) ile tüm diller %95+'a ulaşır
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim policy kararı (hâlâ bekliyor)
 BURAYA_KOPYALADIĞIN_İÇERİĞİ_YAPISTIR
 
 ---

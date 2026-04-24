@@ -572,6 +572,32 @@ Kullanıcıdan onay sonrası seçenek:
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim policy kararı (hâlâ bekliyor)
 
+### 2026-04-24 (devam 7) — Pass 24: DE/AR/RU/KK +100 × 4 dil
+
+**Pass 24 (commit d36066a) — 400 yeni native çeviri:**
+- **DE: 1683 → 1783 (+100)** — auth (Hesap Ayarları, Doğrulama Linki/Ekranı/Başarısız/Anahtarı), empty states (Henüz yükleme/materyal/kayıt/grup/aktivite yok), calculator/IoT (Hesap Makinesi, Hibrit), gamification (Gamification İstatistikleri, Haftalık XP/Gelir/Hedef/Aktivite), hand-raise UI (El Kaldır, El İptal, El Kaldırmaları Sıfırla), instructor discovery (Eğitmen Keşfi, Eğitmen Kamerası, Eğitmenle İletişime Geç), finance (Finans özeti, Finans · İstihbarat · Satış AI, Gelir paylaşım oranı, Gelir Bileşenleri)
+- **AR: 1681 → 1781 (+100)** — DE ile aynı 100-anahtar set (top-100 %100 örtüşüyor)
+- **RU: 1710 → 1810 (+100)** — DE setinin 53'ü + 47 RU-özel (Güvenlik Merkezi/Alarmları/Denetim, Kaydediliyor, Kaldığın Yerden Devam Et, Kamerayı Göster/Gizle, KALINLIK, Issuer URL, Hazırlıyor, Hak ediş oluştur, Haftalık Aktivite, Gönderildi ✓, Gri/kilitli düğümler, Genel Tamamlama/Not Ortalaması, Henüz rozet/aktif oturum/SSO sağlayıcı yok)
+- **KK: 1698 → 1798 (+100)** — KK-özel top-100 (Konu Bazlı Başarı, Komut paleti, Kamera açık — WebRTC, Kayıt & VOD, Karne akışı, Kazanılan Rozetler, Kazanç & Cüzdan, IoT Sınıf Kontrol)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing: 252 → 152 (~90.5%)
+- AR missing: 252 → 152 (~90.5%)
+- RU missing: 307 → 207 (~87%)
+- KK missing: 272 → 172 (~89%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1783** **ar:1781** **ru:1810** **kk:1798**
+
+**Sıradaki oturumda:**
+1. Pass 25 — son 100 × 4 dil turu → tüm diller %95+ (DE/AR ~97%, RU ~93%, KK ~95%)
+2. Pass 26 (opsiyonel) → KK/RU eksiklerini kapat → %99+
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim policy kararı (hâlâ bekliyor)
+
 ---
 
 ## 0. Oturum Başlangıç Protokolü (ZORUNLU)

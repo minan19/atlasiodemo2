@@ -491,3 +491,79 @@ Kullanıcıdan onay sonrası seçenek:
 2. Uzun cümle/açıklama anahtarlarına odak (admin UI sentence templates)
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim policy kararı (hâlâ bekliyor)
+
+### 2026-04-24 (devam 4) — Pass 21: DE/AR/RU/KK +100 each
+
+**Pass 21 (commit e9aa7de) — 424 yeni native çeviri:**
+- **DE: 1383 → 1483 (+100)** — admin UI (Yetkilendirme Merkezi, Tenant & Kullanıcı Yönetimi), exam/quiz (Sınav, Soru Bankası, Toplam Soru), whiteboard (Tahtayı Kilitle/Aç, Tahta Verileri), time strings
+- **AR: 1380 → 1481 (+101)** — DE set + Sınav Sonuçları
+- **RU: 1361 → 1484 (+123)** — DE set (minus 8 already present) + 31 RU-specific (Yaklaşan Etkinlikler, TrustScore (anlık), Tam Ekran, Talebiniz Alındı!, XP Ödülü, Toplantıya Katıl, Toplam gelir/Kredi)
+- **KK: 1398 → 1498 (+100)** — KK-specific top-100 (süresi dolmuş, söz verildi, Yeni Ders, Yazma Analizi, Yol Haritası Düzenleyici, Zihin Haritası)
+- 8 RU duplicates removed (önceki passlardan kalma: Yeni Tenant, Yazma Analizi, Varyans, Takvim, Tahtaya git, Tahta Verileri, Tahmini süre, Std Sapma)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing before: 551 → after: 451 (~72%)
+- AR missing before: 552 → after: 452 (~72%)
+- RU missing before: 655 → after: 555 (~65%)
+- KK missing before: 572 → after: 472 (~70%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key (8 RU dup'ları silindi)
+- Son sayımlar: tr:8 en:2739 **de:1483** **ar:1481** **ru:1484** **kk:1498**
+
+**Sıradaki oturumda:**
+1. Pass 22 — sıradaki 100 × 4 dil (hedef DE/AR ~80%, RU ~72%, KK ~77%)
+2. Pass 23'te hedef: tüm diller ≥80% coverage
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim policy kararı (hâlâ bekliyor)
+BURAYA_KOPYALADIĞIN_İÇERİĞİ_YAPISTIR
+
+---
+
+## 0. Oturum Başlangıç Protokolü (ZORUNLU)
+
+Her oturum başında şu adımları sırayla uygula:
+
+1. Bu CLAUDE.md dosyasını baştan sona oku
+2. Şu komutu çalıştır: git log --oneline -5 && git status --short
+3. Kullanıcıya 3 satırda özet ver: Son commit / Devam eden iş / Sıradaki adım
+4. Onay almadan hiçbir dosyaya dokunma
+
+---
+
+## 8. Kurulu Skill'ler
+
+| Skill | Ne zaman kullan |
+|---|---|
+| frontend-design | Yeni sayfa veya component tasarlarken |
+| webapp-testing | Test yazarken |
+| documentation-writer | JSDoc, README, API dökümanı yazarken |
+| git-commit | Commit mesajı yazarken |
+| gh-cli | PR, issue, branch işlemlerinde |
+| prd | Yeni feature spec yazarken |
+| vercel-react-best-practices | React component yazarken |
+| doc-coauthoring | CLAUDE.md güncellerken |
+
+---
+
+## 9. Hata Önleme Kuralları
+
+- flat-translations.ts: asla aynı dil bloğunda duplicate key kullanma (TS1117)
+- Server component'lerde hook kullanma, use client ekle veya atla
+- map parametresi t ile çakışır, item olarak yeniden adlandır
+- Her değişiklikten sonra TS kontrol: cd apps/web && /Users/mustafainan/.nvm/versions/node/v24.13.0/bin/node node_modules/typescript/bin/tsc --noEmit --skipLibCheck
+- git push --force ve git reset --hard asla onaysız çalıştırma
+- Rate limit'e takılırsa parallel agent'ları durdur sıralı çalış
+- Template literal sarma için factory fn makeRelTime(tr) pattern kullan
+- Mock isimler çevrilmez
+
+---
+
+## 10. Hızlı Komutlar
+
+cd apps/web && /Users/mustafainan/.nvm/versions/node/v24.13.0/bin/node node_modules/typescript/bin/tsc --noEmit --skipLibCheck
+grep -r "t\.tr(" apps/web/app --include="*.tsx" | wc -l
+grep -n "^\s*\"" apps/web/app/_i18n/flat-translations.ts | sort | uniq -d
+git log --oneline -5 && git status --short

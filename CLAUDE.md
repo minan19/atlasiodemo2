@@ -545,7 +545,32 @@ Kullanıcıdan onay sonrası seçenek:
 2. ~2 pass daha (Pass 24, 25) ile tüm diller %95+'a ulaşır
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim policy kararı (hâlâ bekliyor)
-BURAYA_KOPYALADIĞIN_İÇERİĞİ_YAPISTIR
+
+### 2026-04-24 (devam 6) — Pass 23: DE/AR/RU/KK +100 × 4 dil
+
+**Pass 23 (commit 51becfd) — 400 yeni native çeviri:**
+- **DE: 1583 → 1683 (+100)** — notes (Not Dağılımı, Not içeriği), camera/mic UI (Mikrofon Aç/Kapat, Kamera Akışı), curriculum (Müfredat & Branş Yönetimi), courses (Kurslarım, Kurs Ekle, Kurs Özeti, Kursa Göre Aylık Gelir), gradebook (Karne akışı, Kazanılan Rozetler, Kazanç & Cüzdan), enterprise (Kurumsal Kontrol, Kurumsal müşteriler), IoT (IoT Sınıf Kontrol), welcome (Hoş geldiniz!)
+- **AR: 1581 → 1681 (+100)** — DE ile aynı 100-anahtar set (top-missing'de %100 örtüşüyor)
+- **RU: 1610 → 1710 (+100)** — DE setinin 68'i + 32 RU-özel (Oturumu Sonlandır, Opacity, Neden ATLASIO?, Lütfen giriş yapınız, Login URL, Liderler, Lazer Pointer, LTI Araçları, Kursları Keşfet, Kurumsal Dış Araçlar, Kimlik Yönetimi, Kayıtlı Sağlayıcılar vb.)
+- **KK: 1598 → 1698 (+100)** — KK-özel top-100 (Quiz Ort., Puan Trendi, Profili Paylaş, Platform Özellikleri, PDF/DOCX/PPTX yükle, Oturum Sayısı, Ortalama Süre/Puan, Onay kuyruğu, Okuma Araçları, Odalar)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing: 351 → 252 (~84%)
+- AR missing: 352 → 253 (~84%)
+- RU missing: 429 → 330 (~79%)
+- KK missing: 372 → 273 (~83%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1683** **ar:1681** **ru:1710** **kk:1698**
+
+**Sıradaki oturumda:**
+1. Pass 24 — sıradaki 100 × 4 dil (hedef: DE/AR ~90%, RU ~85%, KK ~89%)
+2. Pass 25 ile tüm diller %95+'a ulaşır
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim policy kararı (hâlâ bekliyor)
 
 ---
 

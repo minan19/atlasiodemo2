@@ -598,6 +598,32 @@ Kullanıcıdan onay sonrası seçenek:
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim policy kararı (hâlâ bekliyor)
 
+### 2026-04-24 (devam 8) — Pass 25: DE/AR/RU/KK +100 × 4 dil → %95+ dönemeç
+
+**Pass 25 (commit d69480e) — 400 yeni native çeviri:**
+- **DE: 1783 → 1883 (+100)** — live session UI (Canlı Oda/Ders/Oturum/API/Program/Metrikler), lesson management (Ders Kaydı/Değerlendirme/Bazlı Analiz, Ders başlığı/notları), file sharing (Dosya paylaşım izni), evaluation (Değerlendirme Kriterleri/Yorumu, Değerlendir, Değerlendirdiniz), demo mode (Demo veri/oturuma bağlandı/modu), checkout flow (Checkout'a Git/başarısız/URL hazır), cloud storage (Bulut Depolama & Arşiv), breakout/listening/language lab, today's schedule, audit log/security
+- **AR: 1781 → 1881 (+100)** — DE ile aynı 100-anahtar set (top-100 %100 örtüşüyor)
+- **RU: 1810 → 1910 (+100)** — DE setinin 38'i + 62 RU-özel (Finans Merkezi, Formül, Formu Kapat, Fatura e-postanıza gönderildi, Farklı bir ödeme yöntemi, Eğitmen Ödeme Merkezi, Dosya Yükle/Paylaşımı, Diğer Kurslar, Dönem GPA, Detaylar ve canlı TrustScore, Demoda Görecekleriniz, E-posta *, Ek süre/bonus talepleri)
+- **KK: 1798 → 1898 (+100)** — KK-özel top-100 (Eğitmen Değer Skoru, El Kaldır/İptal/Sıfırla, Ekran Kaydı, Duyuru mesajı, Doğrulama Ekranı/Linki/Başarısız/Anahtarı, Dosya paylaşım izni, Dinleme Laboratuvarı, Değerlendirme Yorumu, Desteklenen format: ax+b=c, Ders başlığı, Canlı Oda/Ders Tarihi, Cevabınızı buraya yazın)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing: 152 → 52 (~96.7%)
+- AR missing: 152 → 52 (~96.7%)
+- RU missing: 207 → 107 (~93.3%)
+- KK missing: 172 → 72 (~95.5%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1883** **ar:1881** **ru:1910** **kk:1898**
+
+**Sıradaki oturumda:**
+1. Pass 26 — kalan 52/52/107/72 anahtar → tüm diller %99+
+2. Final cleanup: mock isim policy kararı ("Ahmet Yılmaz" gibi özel isimler çevrilsin mi?)
+3. Manuel tarayıcı preview test (senin elinde)
+4. (Opsiyonel) Pass 27 — 100% native coverage için backend error messages + copyright/legal strings
+
 ---
 
 ## 0. Oturum Başlangıç Protokolü (ZORUNLU)

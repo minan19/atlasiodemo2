@@ -447,3 +447,21 @@ Kullanıcıdan onay sonrası seçenek:
 2. RU native genişletme (sonraki top-200)
 3. Manuel preview test — tarayıcı (senin elinde)
 4. Mock isim policy kararı
+
+### 2026-04-24 (devam 2) — Pass 19: DE/AR/KK +100 × 3 dil
+
+**Pass 19 (commit 7a7a720) — 300 yeni native çeviri:**
+- **DE: 1183 → 1283 (+100)** — whiteboard toolbar (NOT EKLE, RENK, KALINLIK), admin UI (Finans Merkezi, SSO), SSO/LTI diyalogları, proctoring (TrustScore)
+- **AR: 1180 → 1280 (+100)** — DE ile aynı batch (100% örtüşme top-missing'de)
+- **KK: 1198 → 1298 (+100)** — Savunma Merkezi, Kullanıcı Yönetimi, E-posta Şablonları, Satış/AI dashboard
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1283** **ar:1280** ru:1246 **kk:1298**
+
+**Sıradaki oturumda:**
+1. Pass 20 — sıradaki 100 × 4 dil (DE/AR/RU/KK); RU'yu özellikle genişlet (en az güncellenmiş)
+2. Coverage raporu — kaç distinct `t.tr()` anahtarı / dil başına % kapsama
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim/placeholder policy kararı (hâlâ bekliyor)

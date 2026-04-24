@@ -465,3 +465,29 @@ Kullanıcıdan onay sonrası seçenek:
 2. Coverage raporu — kaç distinct `t.tr()` anahtarı / dil başına % kapsama
 3. Manuel tarayıcı preview test (senin elinde)
 4. Mock isim/placeholder policy kararı (hâlâ bekliyor)
+
+### 2026-04-24 (devam 3) — Pass 20: DE/AR/KK +100, RU +115
+
+**Pass 20 (commit c7816e9) — 415 yeni native çeviri:**
+- **DE: 1283 → 1383 (+100)** — whiteboard emoji UI (🪟 Panjurlar, 🧮 Hesap, 📋 Yoklama vb.), toolbar icons, kısa Türkçe son-ekler (puan, oy, kelime, görev, grup)
+- **AR: 1280 → 1380 (+100)** — DE ile aynı anahtar kümesi (top-100 %100 örtüşüyor)
+- **RU: 1246 → 1361 (+115)** — DE seti + RU'ya özel (Slayt, Sade, Quiz, Planla, Odakla, ✓ Bitti, kredi, destek merkezi, not oluşturuldu)
+- **KK: 1298 → 1398 (+100)** — KK'ya özel whiteboard/lab araçları (🧬 Hücre, 🧠 AI Soru Üretici, 🔬 3D/XR, ☁️ Bulut, 🌐 Çeviri vb.)
+
+**Coverage raporu:**
+- Distinct `t.tr()` anahtarları: 1595
+- DE missing before: 651 → after: 551 (~65% coverage)
+- AR missing before: 652 → after: 552 (~65%)
+- RU missing before: 770 → after: 655 (~59%)
+- KK missing before: 672 → after: 572 (~64%)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key
+- Son sayımlar: tr:8 en:2739 **de:1383** **ar:1380** **ru:1361** **kk:1398**
+
+**Sıradaki oturumda:**
+1. Pass 21 — sıradaki 100 × 4 dil (hedef: DE/AR ~75%, RU ~70%, KK ~75% coverage)
+2. Uzun cümle/açıklama anahtarlarına odak (admin UI sentence templates)
+3. Manuel tarayıcı preview test (senin elinde)
+4. Mock isim policy kararı (hâlâ bekliyor)

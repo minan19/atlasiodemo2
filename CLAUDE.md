@@ -649,11 +649,51 @@ Kullanıcıdan onay sonrası seçenek:
 
 **i18n native coverage hedefi TAMAMLANDI** — 26 pass'te tüm diller pratikte %100 native çeviriye ulaştı (toplam ~5500+ çeviri eklendi).
 
+### 2026-04-25 — Pass 27: Homepage gaps + audit blind spot fix + proxy.ts cleanup
+
+**Kullanıcı şikâyeti** (manuel tarayıcı testinden): "DE/AR/RU/KK ingilizce karışık olmuş, hayal kırıklığı yaşadım". Pass 26 sözlük raporu %100 gösteriyordu ama ekranda karışık dil görünüyordu.
+
+**Kök neden teşhisi:**
+- Eski coverage script sadece `t\.tr\(` pattern'ini sayıyordu → destructured `tr(...)` çağrılarını **kaçırıyordu**
+- 1595 distinct anahtar → gerçekte **1646** distinct anahtar (51 anahtar kayıp)
+- Ana sayfa hero/feature/pricing/CTA module-data string'leri DE/AR/RU/KK sözlüklerinde yoktu → fallback chain → EN gösteriyordu
+- DE/AR true coverage: %96.7, RU: %93.3, KK: %95.5 (script önce yanlış %100 demişti)
+
+**Pass 27 yapılanlar (commit `e317576`):**
+- Yeni audit script (`/tmp/coverage2.mjs`) hem `t.tr()` hem destructured `tr()` çağrılarını yakalar (lookbehind `(?<![a-zA-Z0-9_.])tr\("..."\)`)
+- DE: +156 anahtar (1935→2048) — %96.7 → **%100.0**
+- AR: +154 anahtar (1933→2046) — %96.7 → **%100.0**
+- RU: +198 anahtar (2016→2124) — %93.3 → **%99.9** (sadece "Ahmet Yılmaz" mock)
+- KK: +180 anahtar (1970→2078) — %95.5 → **%100.0**
+- 4 EN gap fix de eklendi: "Global CDN + TURN", "99.97% SLA", "Pro'ya Geç", "Öğrencilerimin..."
+
+**Pass 27 kapsadığı string kategorileri:**
+- Homepage hero metrics (Aktif Öğrenci, Canlı Oturum SLA, AI Öneri Puanı, 42 Ülkede)
+- Features section (8 ana özellik kartı + alt açıklamaları)
+- Whiteboard demo card (30+ araç, El kaldırma & soru kuyruğu, Canlı anket & geri sayım)
+- Testimonials (3 müşteri yorumu + isim/unvan etiketleri)
+- Pricing tiers (Ücretsiz/Pro/Kurumsal — feature listesi her birinde)
+- CTA section (Hesap Oluştur, Kurulum gerekmez, Anında erişim, 7/24 destek)
+- 404 page (Sayfa bulunamadı, Aradığınız sayfa..., Ana sayfa)
+- Confidence badges (Yüksek/Orta/Düşük Güven), Risk badges (Yüksek/Orta/Düşük Risk)
+- Ghost Mentor chat greeting + help text
+- Empty states (Henüz ders yok..., Yüklemek için dosya bırak...)
+
+**proxy.ts cleanup:**
+- Next.js 16'da `proxy.ts` config'inde `runtime: 'nodejs'` **yasak** (her zaman Node çalışır, deklarasyon yapamazsın)
+- `runtime` field kaldırıldı + comment eklendi → "Route segment config is not allowed" uyarısı temizlendi
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key (5 dup tespit edip temizledikten sonra)
+- Final dict sayıları: tr:8 en:2741 **de:2048 ar:2046 ru:2124 kk:2078**
+- Final true coverage: en:%100.0 **de:%100.0 ar:%100.0 ru:%99.9 kk:%100.0**
+
 **Sıradaki oturumda:**
-1. **Manuel tarayıcı preview test** (senin elinde) — tüm 5 dilde sayfa-sayfa görsel doğrulama
-2. (Opsiyonel) Pass 27 — backend error messages + copyright/legal strings için 100% native eşleme
-3. (Opsiyonel) DE/AR/RU/KK için "natural language polish" turu — mevcut çeviriler birebir doğru ama bazıları daha doğal hâle getirilebilir
-4. **Bekleyen**: Auth E2E hardening (Sprint 2026-04-22'de smoke pass; production deploy öncesi tam audit gerekir)
+1. **Manuel tarayıcı preview test** (senin elinde) — http://localhost:3001 — DE/AR/RU/KK dil değiştirip ana sayfa-dashboard-courses turu
+2. Eğer hâlâ karışık dil görüyorsan: hangi sayfa/string olduğunu söyle, audit script ile yakalayıp ekleyeyim
+3. (Opsiyonel) Auth E2E hardening — production deploy öncesi tam audit
+4. (Opsiyonel) Mock isim policy onayı ("Ahmet Yılmaz" gibi özel isimler kalsın mı çevrilsin mi)
 
 ---
 

@@ -82,8 +82,9 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Next.js 16 proxy.ts always runs on Node.js runtime — `runtime` field is not
+// allowed here; only `matcher` is supported.
 export const config = {
-  runtime: 'nodejs', // Next.js 16 proxy.ts requires explicit Node.js runtime
   matcher: [
     '/((?!api|_next/static|_next/image|favicon.ico|login|register|forgot-password|reset-password|verify-email|api-health).*)',
   ],

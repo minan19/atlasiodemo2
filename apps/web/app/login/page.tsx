@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRole, type UserRole } from "../_components/role-context";
 import { useI18n } from "../_i18n/use-i18n";
+import { translateError } from "../_i18n/translate-error";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4100";
 
@@ -50,7 +51,7 @@ function LoginForm() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({} as { message?: string }));
       if (!res.ok) throw new Error(data?.message || t.common.error);
 
       // Token'ları sakla
@@ -66,7 +67,7 @@ function LoginForm() {
       setRole(role);
       router.push(redirectTo ?? redirectForRole(role));
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t.common.error);
+      setError(translateError(err, t.tr));
     } finally {
       setLoading(false);
     }
@@ -127,7 +128,10 @@ function LoginForm() {
           <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
             <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.login.email}</span>
             <input
+              id="login-email"
+              name="email"
               type="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -141,7 +145,10 @@ function LoginForm() {
           <label style={{ display:"flex", flexDirection:"column", gap:6, fontSize:13 }}>
             <span style={{ color:"var(--ink-2, #64748b)", fontWeight:500 }}>{t.login.password}</span>
             <input
+              id="login-password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -2862,6 +2862,9 @@ export const flat: FlatTranslations = {
     "Kullanılabilir kamera cihazı bulunamadı.": "No usable camera device found.",
     "Kamera başka bir uygulama tarafından kullanılıyor.": "The camera is being used by another application.",
     "Kamera açılamadı.": "Camera could not be opened.",
+    // Network / generic error messages
+    "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Could not reach the server. Please check your internet connection or try again later.",
+    "Bir hata oluştu. Lütfen tekrar deneyin.": "An error occurred. Please try again.",
   },
 
   // ─── German ───────────────────────────────────────────────────────────────────
@@ -5049,6 +5052,9 @@ export const flat: FlatTranslations = {
     "Kullanılabilir kamera cihazı bulunamadı.": "Kein verfügbares Kameragerät gefunden.",
     "Kamera başka bir uygulama tarafından kullanılıyor.": "Die Kamera wird von einer anderen Anwendung verwendet.",
     "Kamera açılamadı.": "Kamera konnte nicht geöffnet werden.",
+    // Network / generic error messages
+    "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "Bir hata oluştu. Lütfen tekrar deneyin.": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   },
 
   // ─── Arabic ───────────────────────────────────────────────────────────────────
@@ -7232,6 +7238,9 @@ export const flat: FlatTranslations = {
     "Kullanılabilir kamera cihazı bulunamadı.": "لم يتم العثور على كاميرا قابلة للاستخدام.",
     "Kamera başka bir uygulama tarafından kullanılıyor.": "الكاميرا مستخدمة من قبل تطبيق آخر.",
     "Kamera açılamadı.": "تعذر فتح الكاميرا.",
+    // Network / generic error messages
+    "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "Bir hata oluştu. Lütfen tekrar deneyin.": "حدث خطأ. يرجى المحاولة مرة أخرى.",
   },
 
   // ─── Russian ──────────────────────────────────────────────────────────────────
@@ -9488,6 +9497,9 @@ export const flat: FlatTranslations = {
     "Kullanılabilir kamera cihazı bulunamadı.": "Не найдено доступное камерное устройство.",
     "Kamera başka bir uygulama tarafından kullanılıyor.": "Камера используется другим приложением.",
     "Kamera açılamadı.": "Не удалось открыть камеру.",
+    // Network / generic error messages
+    "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "Bir hata oluştu. Lütfen tekrar deneyin.": "Произошла ошибка. Пожалуйста, попробуйте еще раз.",
   },
 
   // ─── Kazakh ───────────────────────────────────────────────────────────────────
@@ -11702,5 +11714,8 @@ export const flat: FlatTranslations = {
     "Kullanılabilir kamera cihazı bulunamadı.": "Қол жетімді камера құрылғысы табылмады.",
     "Kamera başka bir uygulama tarafından kullanılıyor.": "Камера басқа қосымша арқылы пайдаланылып жатыр.",
     "Kamera açılamadı.": "Камераны ашу мүмкін болмады.",
+    // Network / generic error messages
+    "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "Bir hata oluştu. Lütfen tekrar deneyin.": "Қате орын алды. Қайталап көріңіз.",
   },
 };

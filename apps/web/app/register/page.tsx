@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRole, type UserRole } from "../_components/role-context";
 import { useI18n } from "../_i18n/use-i18n";
+import { translateError } from "../_i18n/translate-error";
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4100";
 
@@ -72,7 +73,7 @@ export default function RegisterPage() {
       setRole(role);
       router.push("/courses?welcome=1");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t.common.error);
+      setError(translateError(err, t.tr));
     } finally {
       setLoading(false);
     }

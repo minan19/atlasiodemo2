@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../_i18n/use-i18n';
+import { translateError } from '../_i18n/translate-error';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
@@ -36,7 +37,7 @@ export default function ForgotPasswordPage() {
       }
       setSent(true);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t.common.error);
+      setError(translateError(err, t.tr));
     } finally {
       setLoading(false);
     }

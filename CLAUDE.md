@@ -695,6 +695,55 @@ Kullanıcıdan onay sonrası seçenek:
 3. (Opsiyonel) Auth E2E hardening — production deploy öncesi tam audit
 4. (Opsiyonel) Mock isim policy onayı ("Ahmet Yılmaz" gibi özel isimler kalsın mı çevrilsin mi)
 
+### 2026-04-27 — 4 user-reported bug fix (Bug 1, 2, 4, 5) + Pass 28
+
+**Kullanıcının manuel test sonrası bildirdiği 5 bug:**
+1. Ders isimleri DE/AR/RU/KK'de çevrilmiyor
+2. Live session'da kamera açılmıyor
+3. Admin/instructor panellerine nasıl giriş yapılır?
+4. Whiteboard text tool klavye girdisi tahtaya yazılmıyor
+5. "Kayıt ol" → 404 boş sayfa
+
+**Bug 3 (giriş)**: `apps/api/prisma/seed.ts`'de zaten test hesapları seed'lenmiş. Tüm parolalar `Atlasio123!`: admin@atlasio.com, head@atlasio.com, instructor1@atlasio.com, veli@atlasio.com, student1@atlasio.com, topstudent@atlasio.com, riskstudent@atlasio.com. Kod değişikliği yok.
+
+**Bug 5 (404)**: Catalog'daki demo kursların ID'leri (`d1`-`d12`) DB'de yok → API null → `courses/[id]/page.tsx` "404" branch çalışıyor. Çözüm:
+- Yeni shared modül: `apps/web/app/courses/_demo-data.ts` — `DEMO_COURSES` + `findDemoCourseById()` + `isDemoCourseId()` + `DemoLesson` (kategori başına 5-10 demo ders)
+- `catalog/page.tsx`'tan inline `DEMO_COURSES` (184 satır) kaldırıldı, shared modülden import edildi (`SHARED_DEMO_COURSES.map(({ lessons, ...rest }) => rest)`)
+- `[id]/page.tsx` useEffect'te API null + demo ID ise demo data fallback yapıyor → catalog → detail akışı DB seed olmadan da çalışıyor
+- Next.js 16 `params: Promise<{ id }>` için `React.use(params)` migrasyonu da yapıldı (eski sync params signature TS2344 hatası veriyordu)
+
+**Bug 1 (kurs isimleri)**: 2 katmanlı sorun — render site sarılmamış + sözlükler eksik:
+- `catalog/page.tsx`: `{course.title}` → `{t.tr(course.title)}`, `{course.description}` → `{t.tr(course.description)}`, `{course.category}` → `{t.tr(course.category)}` sarmaları eklendi (instructor mock isim policy gereği bırakıldı)
+- **Pass 28** sözlük genişletme: 12 demo kurs başlığı + 12 açıklama + 5 kategori = 29 anahtar × 5 dil → 118 yeni native çeviri (EN'de 2/29 zaten vardı)
+- DE: +29, AR: +29, RU: +29, KK: +29, EN: +2 (Matematik, Bilim)
+
+**Bug 4 (whiteboard text tool)**: `whiteboard-local.tsx:898` `addTextAt()` IText oluşturuyor + `enterEditing()` çağırıyor ama hidden textarea focus alamıyor (toolbar buton tıklamasından focus alıkonuyor):
+- `setTimeout` 20ms → 50ms (mouse:down event unwind için)
+- `text.hiddenTextarea.focus({ preventScroll: true })` explicit eklendi
+- selectionStart/End reset
+- Try-catch ile boş textarea selection hata fallback
+
+**Bug 2 (kamera)**: `live/[id]/page.tsx:1428` butonu sadece `setIsCamOn` toggle yapıyordu, hiç `getUserMedia` çağrısı yoktu:
+- Yeni state: `camError`, ref'ler: `cameraStreamRef`, `videoRef`
+- `useEffect([isCamOn])`: ON → `getUserMedia({video: {1280×720, user-facing}, audio: false})` → stream ref'e + video element'e bağla; OFF → tracks stop + srcObject null
+- Default `isCamOn` `true` → `false` (kullanıcı isteyene kadar kamera açma)
+- Hata mapleme: NotAllowedError → izin reddedildi, NotFoundError → cihaz yok, NotReadableError → başka uygulama kullanıyor
+- Unmount cleanup useEffect (sayfa terkediliyorsa tracks stop)
+- `<video ref={videoRef} autoPlay playsInline muted>` eklendi (mirror için `transform: scaleX(-1)`)
+- Kamera kapalı/hata durumunda placeholder + "Tekrar Dene" butonu
+- 5 yeni hata mesajı anahtarı tüm 5 dile eklendi (25 çeviri)
+
+**Validation:**
+- 0 TS hatası (strict + skipLibCheck)
+- 0 duplicate key (5 lang × tarama temiz)
+- Toplam +143 yeni çeviri (Pass 28 + camera errors)
+- Final dict: tr:8 en:2748 de:2082 ar:2080 ru:2158 kk:2112
+
+**Sıradaki:**
+1. Manuel tarayıcı test — DE/AR/RU/KK ile catalog → detail → kayıt akışı, live session kamera (gerçek izin diyaloğu), whiteboard text tool yazım
+2. Backend up → seeded credentials ile admin/instructor/guardian panelleri test
+3. (Opsiyonel) Demo kurs slug → seed: gerçek DB kayıtları için backend seed genişletme
+
 ---
 
 ## 0. Oturum Başlangıç Protokolü (ZORUNLU)

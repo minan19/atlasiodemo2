@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../../_i18n/use-i18n';
+import { findDemoCourseById, isDemoCourseId } from '../_demo-data';
 
 const API_URL = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4100';
 
@@ -45,24 +46,43 @@ function fmtTimeRange(start: string, end: string) {
   })}`;
 }
 
-export default function CourseDetailPage({ params }: { params: { id: string } }) {
+export default function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Next.js 16: dynamic route params are async; unwrap with React.use()
+  const { id: courseId } = use(params);
   const t = useI18n();
   const [course, setCourse] = useState<Course | null | undefined>(undefined);
   const [schedule, setSchedule] = useState<Schedule[]>([]);
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_URL}/courses/published/${params.id}`).then((res) =>
+      fetch(`${API_URL}/courses/published/${courseId}`).then((res) =>
         res.ok ? (res.json() as Promise<Course>) : null
       ).catch(() => null),
-      fetch(`${API_URL}/courses/${params.id}/schedule`).then((res) =>
+      fetch(`${API_URL}/courses/${courseId}/schedule`).then((res) =>
         res.ok ? (res.json() as Promise<Schedule[]>) : []
       ).catch(() => [] as Schedule[]),
     ]).then(([c, s]) => {
+      // Frontend demo fallback: catalog ships demo IDs (d1-d12) that may
+      // not exist in the backend DB. When API returns null for a known
+      // demo ID, render the shared demo data instead of the 404 view so
+      // the catalog → detail flow works end-to-end without a DB seed.
+      if (!c && isDemoCourseId(courseId)) {
+        const demo = findDemoCourseById(courseId);
+        if (demo) {
+          setCourse({
+            id: demo.id,
+            title: demo.title,
+            description: demo.description,
+            lessons: demo.lessons,
+          });
+          setSchedule([]);
+          return;
+        }
+      }
       setCourse(c);
       setSchedule(s ?? []);
     });
-  }, [params.id]);
+  }, [courseId]);
 
   // Still loading
   if (course === undefined) {

@@ -111,12 +111,15 @@ export default function LivePage() {
 
   // ── New UI state ──
   const [isMicOn,      setIsMicOn]      = useState(true);
-  const [isCamOn,      setIsCamOn]      = useState(true);
+  const [isCamOn,      setIsCamOn]      = useState(false);
+  const [camError,     setCamError]     = useState<string | null>(null);
   const [isSharing,    setIsSharing]    = useState(false);
   const [isRecording,  setIsRecording]  = useState(false);
   const [handRaised,   setHandRaised]   = useState(false);
   const [handQueue,    setHandQueue]    = useState<{ id: string; name: string; time: string }[]>([]);
   const screenStreamRef = useRef<MediaStream | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [elapsed,      setElapsed]      = useState(0);
   const [chatInput,    setChatInput]    = useState("");
   const [showEmojis,   setShowEmojis]   = useState(false);
@@ -607,6 +610,81 @@ export default function LivePage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ── Camera (getUserMedia) ──
+  // Toggling `isCamOn` requests/releases the device camera. Stream is held in
+  // a ref (not state) so re-renders don't dispose it; the <video> element is
+  // wired in the camera view below via `videoRef`.
+  useEffect(() => {
+    let cancelled = false;
+
+    const start = async () => {
+      setCamError(null);
+      try {
+        if (!navigator?.mediaDevices?.getUserMedia) {
+          throw new Error("Bu tarayıcı kamera erişimini desteklemiyor.");
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+          audio: false, // mic is handled by isMicOn separately
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((tr) => tr.stop());
+          return;
+        }
+        cameraStreamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          // Some browsers need an explicit play() call after srcObject
+          videoRef.current.play().catch(() => {/* autoplay restrictions */});
+        }
+      } catch (err) {
+        const e = err as { name?: string; message?: string };
+        let msg = e?.message || "Kamera açılamadı.";
+        if (e?.name === "NotAllowedError" || e?.name === "PermissionDeniedError") {
+          msg = "Kamera izni reddedildi. Tarayıcı ayarlarından izin verin.";
+        } else if (e?.name === "NotFoundError" || e?.name === "DevicesNotFoundError") {
+          msg = "Kullanılabilir kamera cihazı bulunamadı.";
+        } else if (e?.name === "NotReadableError" || e?.name === "TrackStartError") {
+          msg = "Kamera başka bir uygulama tarafından kullanılıyor.";
+        }
+        if (!cancelled) {
+          setCamError(msg);
+          setIsCamOn(false);
+        }
+      }
+    };
+
+    const stop = () => {
+      const s = cameraStreamRef.current;
+      if (s) {
+        s.getTracks().forEach((tr) => tr.stop());
+        cameraStreamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+    };
+
+    if (isCamOn) {
+      start();
+    } else {
+      stop();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCamOn]);
+
+  // Cleanup on unmount: ensure camera tracks are released even if the user
+  // navigates away while the camera is still on.
+  useEffect(() => {
+    return () => {
+      cameraStreamRef.current?.getTracks().forEach((tr) => tr.stop());
+      cameraStreamRef.current = null;
+    };
+  }, []);
+
   const canWrite = useMemo(() => role === "ADMIN" || role === "INSTRUCTOR", [role]);
 
   // ── Chat send ──
@@ -874,13 +952,51 @@ export default function LivePage() {
               background: "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9))",
               position: "relative",
             }}>
-              <div style={{ textAlign: "center", color: "rgba(255,255,255,0.5)" }}>
-                <div style={{ fontSize: viewMode === "camera" ? 48 : 28, marginBottom: 6 }}>🎥</div>
-                <div style={{ fontSize: 12, fontWeight: 600 }}>{t.tr("Eğitmen Kamerası")}</div>
-                <div style={{ fontSize: 10, marginTop: 2, opacity: 0.6 }}>
-                  {isCamOn ? t.tr("Kamera açık — WebRTC bağlantısı bekleniyor") : t.tr("Kamera kapalı")}
+              {/* Live local camera stream — visible whenever the camera is on.
+                  videoRef is wired by the getUserMedia effect above. */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  // Mirror local preview so it feels like a mirror, like every
+                  // other video conferencing app.
+                  transform: "scaleX(-1)",
+                  display: isCamOn && !camError ? "block" : "none",
+                }}
+              />
+              {/* Placeholder shown when camera is off or unavailable */}
+              {(!isCamOn || camError) && (
+                <div style={{ textAlign: "center", color: "rgba(255,255,255,0.6)", padding: "0 16px" }}>
+                  <div style={{ fontSize: viewMode === "camera" ? 48 : 28, marginBottom: 6 }}>
+                    {camError ? "⚠️" : "🎥"}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 600 }}>{t.tr("Eğitmen Kamerası")}</div>
+                  <div style={{ fontSize: 10, marginTop: 4, opacity: 0.7, lineHeight: 1.5 }}>
+                    {camError
+                      ? t.tr(camError)
+                      : t.tr("Kamera kapalı")}
+                  </div>
+                  {camError && (
+                    <button
+                      onClick={() => { setCamError(null); setIsCamOn(true); }}
+                      style={{
+                        marginTop: 10, padding: "6px 12px", fontSize: 11, fontWeight: 600,
+                        borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)",
+                        background: "rgba(255,255,255,0.08)", color: "#fff", cursor: "pointer",
+                      }}
+                    >
+                      {t.tr("Tekrar Dene")}
+                    </button>
+                  )}
                 </div>
-              </div>
+              )}
               {/* Participant mini-cams */}
               {viewMode === "camera" && (
                 <div style={{ position: "absolute", bottom: 10, right: 10, display: "flex", gap: 6 }}>

@@ -911,10 +911,28 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
         c.add(text);
         c.setActiveObject(text);
         c.requestRenderAll();
-        // Small delay lets Fabric finish rendering before entering edit mode
+        // Small delay lets Fabric finish rendering and the current mouse:down
+        // handler unwind before we enter edit mode. Without this, fabric can
+        // immediately exit editing as part of cleaning up the click event.
         setTimeout(() => {
-          try { text.enterEditing(); c.requestRenderAll(); } catch (_) {}
-        }, 20);
+          try {
+            text.enterEditing();
+            // Fabric appends a hidden <textarea> to the DOM that captures key
+            // events while editing. Programmatic enterEditing does not always
+            // focus it (focus may have stayed on the previously-clicked
+            // toolbar button), which is why typing did nothing. Force focus
+            // here so keystrokes route into the IText.
+            const ta = (text as unknown as { hiddenTextarea?: HTMLTextAreaElement | null }).hiddenTextarea;
+            if (ta && typeof ta.focus === "function") {
+              ta.focus({ preventScroll: true });
+              try {
+                ta.selectionStart = 0;
+                ta.selectionEnd = 0;
+              } catch {/* some browsers throw on empty textarea selection */}
+            }
+            c.requestRenderAll();
+          } catch (_) {/* fabric may throw if canvas was disposed */}
+        }, 50);
         lastTextPos.current = { x: pointer.x, y: pointer.y + 28 };
       };
 

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useI18n } from '../../_i18n/use-i18n';
+import { DEMO_COURSES as SHARED_DEMO_COURSES } from '../_demo-data';
 
 /* ─────────────────────────────────────────────────────────────
    Config
@@ -99,191 +100,14 @@ const LEVEL_COLORS: Record<Level, string> = {
 const SORT_KEYS: SortKey[] = ['popular', 'newest', 'top-rated', 'lowest-price', 'free-first'];
 
 /* ─────────────────────────────────────────────────────────────
-   Demo data
+   Demo data — shared with /courses/[id] detail page so demo IDs
+   (d1-d12) work end-to-end even without DB seed.
 ───────────────────────────────────────────────────────────── */
 
-const DEMO_COURSES: Course[] = [
-  {
-    id: 'd1',
-    title: 'Modern React & Next.js ile Tam Yığın Geliştirme',
-    description: 'React 18, Next.js 14, TypeScript ve Tailwind CSS ile profesyonel web uygulamaları geliştirin.',
-    instructor: 'Ahmet Yılmaz',
-    category: 'Yazılım',
-    level: 'INTERMEDIATE',
-    price: 199,
-    rating: 4.9,
-    enrollmentCount: 8420,
-    duration: 42,
-    tags: ['React', 'Next.js', 'TypeScript'],
-    isFree: false,
-    createdAt: '2026-01-15',
-  },
-  {
-    id: 'd2',
-    title: 'Python ile Veri Bilimi ve Makine Öğrenmesi',
-    description: 'Pandas, NumPy, Scikit-learn ve TensorFlow ile veri analizi ve ML modelleri oluşturun.',
-    instructor: 'Zeynep Kaya',
-    category: 'Yazılım',
-    level: 'BEGINNER',
-    price: 0,
-    rating: 4.8,
-    enrollmentCount: 15300,
-    duration: 38,
-    tags: ['Python', 'ML', 'Pandas'],
-    isFree: true,
-    createdAt: '2026-02-01',
-  },
-  {
-    id: 'd3',
-    title: 'UI/UX Tasarım: Figma ile Profesyonel Arayüz',
-    description: 'Figma\'da wireframe, prototip ve tasarım sistemleri oluşturarak kullanıcı deneyimini mükemmelleştirin.',
-    instructor: 'Selin Demir',
-    category: 'Tasarım',
-    level: 'BEGINNER',
-    price: 149,
-    rating: 4.7,
-    enrollmentCount: 5670,
-    duration: 24,
-    tags: ['Figma', 'UX', 'Prototip'],
-    isFree: false,
-    createdAt: '2026-01-20',
-  },
-  {
-    id: 'd4',
-    title: 'İş Analitiği ve Strateji: Veri Odaklı Kararlar',
-    description: 'Excel, Power BI ve stratejik analiz araçlarıyla iş kararlarınızı veriye dayandırın.',
-    instructor: 'Murat Öztürk',
-    category: 'İş',
-    level: 'INTERMEDIATE',
-    price: 249,
-    rating: 4.6,
-    enrollmentCount: 3210,
-    duration: 18,
-    tags: ['Analitik', 'Power BI', 'Strateji'],
-    isFree: false,
-    createdAt: '2025-12-10',
-  },
-  {
-    id: 'd5',
-    title: 'İngilizce: B1\'den C1\'e Hızlı Yükseliş',
-    description: 'Konuşma, yazma ve dinleme becerilerinizi pekiştirin. Gerçek hayat senaryolarıyla pratik yapın.',
-    instructor: 'Elif Arslan',
-    category: 'Dil',
-    level: 'INTERMEDIATE',
-    price: 0,
-    rating: 4.5,
-    enrollmentCount: 21000,
-    duration: 30,
-    tags: ['İngilizce', 'Konuşma', 'Gramer'],
-    isFree: true,
-    createdAt: '2026-02-14',
-  },
-  {
-    id: 'd6',
-    title: 'İleri Kalkülüs ve Diferansiyel Denklemler',
-    description: 'Mühendislik ve fizik problemlerini çözmek için kalkülüs ve diferansiyel denklemlerde uzmanlaşın.',
-    instructor: 'Hasan Çelik',
-    category: 'Matematik',
-    level: 'ADVANCED',
-    price: 179,
-    rating: 4.8,
-    enrollmentCount: 2100,
-    duration: 55,
-    tags: ['Kalkülüs', 'Diferansiyel', 'Mühendislik'],
-    isFree: false,
-    createdAt: '2025-11-05',
-  },
-  {
-    id: 'd7',
-    title: 'Kuantum Fiziği: Temelden İleri Seviyeye',
-    description: 'Kuantum mekaniği prensipleri, dalga fonksiyonları ve modern fizik uygulamalarını keşfedin.',
-    instructor: 'Dr. Ayşe Şahin',
-    category: 'Bilim',
-    level: 'ADVANCED',
-    price: 299,
-    rating: 4.9,
-    enrollmentCount: 980,
-    duration: 60,
-    tags: ['Fizik', 'Kuantum', 'Teori'],
-    isFree: false,
-    createdAt: '2025-10-20',
-  },
-  {
-    id: 'd8',
-    title: 'Node.js & Express ile RESTful API Geliştirme',
-    description: 'Backend geliştirme, veritabanı entegrasyonu ve API güvenliğini pratik projelerle öğrenin.',
-    instructor: 'Can Yıldız',
-    category: 'Yazılım',
-    level: 'INTERMEDIATE',
-    price: 0,
-    rating: 4.7,
-    enrollmentCount: 11200,
-    duration: 28,
-    tags: ['Node.js', 'API', 'Express'],
-    isFree: true,
-    createdAt: '2026-03-01',
-  },
-  {
-    id: 'd9',
-    title: 'Grafik Tasarım: Adobe Suite ile Marka Kimliği',
-    description: 'Photoshop, Illustrator ve InDesign kullanarak güçlü marka kimliği ve kurumsal tasarımlar oluşturun.',
-    instructor: 'Pınar Doğan',
-    category: 'Tasarım',
-    level: 'BEGINNER',
-    price: 129,
-    rating: 4.4,
-    enrollmentCount: 4500,
-    duration: 22,
-    tags: ['Adobe', 'Marka', 'Logo'],
-    isFree: false,
-    createdAt: '2026-01-08',
-  },
-  {
-    id: 'd10',
-    title: 'Girişimcilik ve Startup: Fikrinden Şirkete',
-    description: 'Lean startup metodolojisi, MVP geliştirme, yatırımcı sunumu ve büyüme stratejilerini öğrenin.',
-    instructor: 'Barış Erdoğan',
-    category: 'İş',
-    level: 'BEGINNER',
-    price: 0,
-    rating: 4.6,
-    enrollmentCount: 7800,
-    duration: 16,
-    tags: ['Startup', 'Girişim', 'MVP'],
-    isFree: true,
-    createdAt: '2026-02-20',
-  },
-  {
-    id: 'd11',
-    title: 'Almanca A1-B2: Günlük Hayatta Almanca',
-    description: 'Sıfırdan başlayarak B2 seviyesine ulaşın. Sesli alıştırmalar ve kültürel içeriklerle öğrenin.',
-    instructor: 'Nur Koç',
-    category: 'Dil',
-    level: 'BEGINNER',
-    price: 199,
-    rating: 4.5,
-    enrollmentCount: 3400,
-    duration: 45,
-    tags: ['Almanca', 'A1-B2', 'Konuşma'],
-    isFree: false,
-    createdAt: '2025-12-28',
-  },
-  {
-    id: 'd12',
-    title: 'Biyokimya ve Moleküler Biyoloji Temelleri',
-    description: 'Hücre biyolojisi, protein sentezi ve metabolizma yollarını kapsamlı şekilde inceleyin.',
-    instructor: 'Prof. Taner Aksoy',
-    category: 'Bilim',
-    level: 'INTERMEDIATE',
-    price: 219,
-    rating: 4.7,
-    enrollmentCount: 1650,
-    duration: 48,
-    tags: ['Biyoloji', 'Kimya', 'Hücre'],
-    isFree: false,
-    createdAt: '2026-01-30',
-  },
-];
+// Strip the `lessons` field from the shared demo data; catalog grid does
+// not need it. Kept identical otherwise so Course shape matches.
+const DEMO_COURSES: Course[] = SHARED_DEMO_COURSES.map(({ lessons: _lessons, ...rest }) => rest);
+
 
 /* ─────────────────────────────────────────────────────────────
    Utility helpers
@@ -371,7 +195,7 @@ function CourseCard({
         )}
         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
           <span className="text-[10px] font-semibold bg-black/30 backdrop-blur-sm text-white rounded-full px-2.5 py-1">
-            {course.category}
+            {t.tr(course.category)}
           </span>
           <span className={`text-[10px] font-semibold rounded-full px-2.5 py-1 ${LEVEL_COLORS[course.level]}`}>
             {t.tr(LEVEL_LABELS[course.level])}
@@ -383,13 +207,13 @@ function CourseCard({
       <div className="p-4 flex flex-col gap-2 flex-1">
         {/* Title */}
         <h3 className="font-bold text-sm leading-snug line-clamp-2 text-slate-800 dark:text-slate-100">
-          {course.title}
+          {t.tr(course.title)}
         </h3>
 
         {/* Description */}
-        <p className="text-xs text-slate-500 line-clamp-2">{course.description}</p>
+        <p className="text-xs text-slate-500 line-clamp-2">{t.tr(course.description)}</p>
 
-        {/* Instructor */}
+        {/* Instructor — proper names are not translated (mock data policy) */}
         <div className="flex items-center gap-2 mt-1">
           <span className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0">
             {(course.instructor ?? '?').charAt(0)}

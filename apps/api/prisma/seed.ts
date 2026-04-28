@@ -4,99 +4,174 @@ import { randomUUID } from 'crypto';
 
 const prisma = new PrismaClient();
 
+/**
+ * Resilient runner — wraps each seed step so a failure in one block does not
+ * abort the whole script. Logs the failure with section name and continues.
+ *
+ * Why: previously seed.ts was a flat `await` chain. A single FK violation
+ * (e.g. ParentStudent) would prevent later sections (department, course,
+ * enrollments, topics) from running, leaving the DB in a half-seeded state.
+ * We want every category of demo data populated independently.
+ */
+async function step<T>(label: string, fn: () => Promise<T>): Promise<T | null> {
+  try {
+    const out = await fn();
+    console.log(`[seed] ✓ ${label}`);
+    return out;
+  } catch (err) {
+    const e = err as { code?: string; message?: string };
+    console.warn(`[seed] ✗ ${label}: ${e?.code ?? ''} ${e?.message ?? String(err)}`);
+    return null;
+  }
+}
+
 async function main() {
   const now = new Date();
 
   // Tenant
-  await prisma.tenant.upsert({
-    where: { id: 'public' },
-    update: { name: 'Atlasio Demo', slug: 'atlasio-demo', updatedAt: now },
-    create: { id: 'public', name: 'Atlasio Demo', slug: 'atlasio-demo', status: 'active', updatedAt: now },
+  await step('tenant.upsert(public)', () =>
+    prisma.tenant.upsert({
+      where: { id: 'public' },
+      update: { name: 'Atlasio Demo', slug: 'atlasio-demo', updatedAt: now },
+      create: { id: 'public', name: 'Atlasio Demo', slug: 'atlasio-demo', status: 'active', updatedAt: now },
+    }),
+  );
+
+  // Hash passwords once (argon2 is intentionally slow)
+  const passHash = await argon2.hash('Atlasio123!');
+
+  /**
+   * Demo users — upserted by email so reruns are idempotent. We capture the
+   * actual DB id after upsert so later FK-bearing inserts (parentStudent,
+   * enrollment, etc.) reference the right user even if the row already
+   * existed from a previous run.
+   */
+  const userSpecs: Array<{ key: string; email: string; data: any }> = [
+    { key: 'admin', email: 'admin@atlasio.com', data: { role: Role.ADMIN, name: 'Atlasio Admin' } },
+    { key: 'head', email: 'head@atlasio.com', data: { role: Role.HEAD_INSTRUCTOR, name: 'Bölüm Başkanı' } },
+    { key: 'instructor', email: 'instructor1@atlasio.com', data: { role: Role.INSTRUCTOR, name: 'Atlasio Eğitmeni' } },
+    { key: 'guardian', email: 'veli@atlasio.com', data: { role: Role.GUARDIAN, name: 'Örnek Veli' } },
+    { key: 'student', email: 'student1@atlasio.com', data: { role: Role.STUDENT, name: 'Normal Öğrenci', currentStreak: 3, longestStreak: 5, totalXp: 1500, league: 'SILVER', hearts: 3 } },
+    { key: 'topStudent', email: 'topstudent@atlasio.com', data: { role: Role.STUDENT, name: 'Şampiyon Öğrenci', currentStreak: 120, longestStreak: 150, totalXp: 25000, league: 'MASTER', hearts: 5, coins: 4500, streakFreezes: 2 } },
+    { key: 'riskStudent', email: 'riskstudent@atlasio.com', data: { role: Role.STUDENT, name: 'Riskli Öğrenci', currentStreak: 0, longestStreak: 2, totalXp: 100, league: 'BRONZE', hearts: 0 } },
+  ];
+
+  const userIds: Record<string, string> = {};
+  for (const spec of userSpecs) {
+    const result = await step(`user.upsert(${spec.email})`, () =>
+      prisma.user.upsert({
+        where: { email: spec.email },
+        update: { ...spec.data, passwordHash: passHash, isActive: true, updatedAt: now },
+        create: { id: randomUUID(), email: spec.email, passwordHash: passHash, isActive: true, updatedAt: now, ...spec.data },
+        select: { id: true },
+      }),
+    );
+    if (result) userIds[spec.key] = result.id;
+  }
+
+  // Backwards-compat aliases (older parts of seed reference these names)
+  const adminId = userIds.admin;
+  const headInstructorId = userIds.head;
+  const instructorId = userIds.instructor;
+  const guardianId = userIds.guardian;
+  const studentId = userIds.student;
+  const topStudentId = userIds.topStudent;
+  const riskStudentId = userIds.riskStudent;
+  void adminId; // currently unreferenced, kept for future hooks
+
+  // Veli-Öğrenci bağlantısı (idempotent: composite unique on (parentId, studentId))
+  if (guardianId && riskStudentId) {
+    await step('parentStudent.upsert(veli↔risk)', () =>
+      prisma.parentStudent.upsert({
+        where: { parentId_studentId: { parentId: guardianId, studentId: riskStudentId } },
+        update: {},
+        create: { parentId: guardianId, studentId: riskStudentId, tenantId: 'public' },
+      }),
+    );
+  }
+
+  // Departman ve eğitmen ataması (idempotent on department name)
+  let deptId: string | null = null;
+  if (headInstructorId) {
+    const deptResult = await step('department.upsert(İngilizce Zümresi)', async () => {
+      const existing = await prisma.department.findFirst({ where: { name: 'İngilizce Zümresi', tenantId: 'public' }, select: { id: true } });
+      if (existing) return existing;
+      return prisma.department.create({
+        data: { name: 'İngilizce Zümresi', headInstructorId, tenantId: 'public' },
+        select: { id: true },
+      });
+    });
+    deptId = deptResult?.id ?? null;
+  }
+
+  if (instructorId && deptId) {
+    await step('user.update(instructor.departmentId)', () =>
+      prisma.user.update({ where: { id: instructorId }, data: { departmentId: deptId! } }),
+    );
+  }
+
+  // Courses (idempotent on title+tenant — re-runs reuse the existing demo course)
+  const demoCourseTitle = 'AI Destekli Öğrenme';
+  let courseId: string | null = null;
+  const courseResult = await step('course.upsert(AI Destekli Öğrenme)', async () => {
+    const existing = await prisma.course.findFirst({ where: { title: demoCourseTitle, tenantId: 'public' }, select: { id: true } });
+    if (existing) return existing;
+    return prisma.course.create({
+      data: {
+        id: randomUUID(),
+        title: demoCourseTitle,
+        description: 'Canlı + asenkron derslerle demo katalog.',
+        isPublished: true,
+        updatedAt: now,
+        price: 0,
+        tenantId: 'public',
+        instructorId: null,
+      },
+      select: { id: true },
+    });
   });
+  courseId = courseResult?.id ?? null;
 
-  // Users
-  const adminId = randomUUID();
-  const instructorId = randomUUID();
-  const studentId = randomUUID();
-  const adminPass = await argon2.hash('Atlasio123!');
-  const instrPass = await argon2.hash('Atlasio123!');
-  const studentPass = await argon2.hash('Atlasio123!');
+  if (courseId) {
+    // Lessons — idempotent: skip if any lesson exists for this course
+    await step('lessonContent.createMany', async () => {
+      const existing = await prisma.lessonContent.count({ where: { courseId: courseId! } });
+      if (existing > 0) return { skipped: true };
+      return prisma.lessonContent.createMany({
+        data: [
+          { id: randomUUID(), courseId: courseId!, title: 'Hoş geldin', order: 1, updatedAt: now },
+          { id: randomUUID(), courseId: courseId!, title: 'Canlı sınıfa giriş', order: 2, updatedAt: now },
+        ],
+      });
+    });
 
-  // Yeni Rollerin Eklenmesi (Head Instructor, Guardian vb.)
-  const headInstructorId = randomUUID();
-  const guardianId = randomUUID();
-  const topStudentId = randomUUID(); // Oyunlaştırma şampiyonu
-  const riskStudentId = randomUUID(); // Düşme (Dropout) riski olan
-
-  await prisma.user.createMany({
-    data: [
-      { id: adminId, email: 'admin@atlasio.com', role: Role.ADMIN, passwordHash: adminPass, isActive: true, name: 'Atlasio Admin', updatedAt: now },
-      { id: headInstructorId, email: 'head@atlasio.com', role: Role.HEAD_INSTRUCTOR, passwordHash: instrPass, isActive: true, name: 'Bölüm Başkanı', updatedAt: now },
-      { id: instructorId, email: 'instructor1@atlasio.com', role: Role.INSTRUCTOR, passwordHash: instrPass, isActive: true, name: 'Atlasio Eğitmeni', updatedAt: now },
-      { id: guardianId, email: 'veli@atlasio.com', role: Role.GUARDIAN, passwordHash: studentPass, isActive: true, name: 'Örnek Veli', updatedAt: now },
-
-      { id: studentId, email: 'student1@atlasio.com', role: Role.STUDENT, passwordHash: studentPass, isActive: true, name: 'Normal Öğrenci', updatedAt: now, currentStreak: 3, longestStreak: 5, totalXp: 1500, league: 'SILVER', hearts: 3 },
-      { id: topStudentId, email: 'topstudent@atlasio.com', role: Role.STUDENT, passwordHash: studentPass, isActive: true, name: 'Şampiyon Öğrenci', updatedAt: now, currentStreak: 120, longestStreak: 150, totalXp: 25000, league: 'MASTER', hearts: 5, coins: 4500, streakFreezes: 2 },
-      { id: riskStudentId, email: 'riskstudent@atlasio.com', role: Role.STUDENT, passwordHash: studentPass, isActive: true, name: 'Riskli Öğrenci', updatedAt: now, currentStreak: 0, longestStreak: 2, totalXp: 100, league: 'BRONZE', hearts: 0 },
-    ],
-    skipDuplicates: true,
-  });
-
-  // Veli-Öğrenci Bağlantısı
-  await prisma.parentStudent.create({
-     data: { parentId: guardianId, studentId: riskStudentId, tenantId: 'public' }
-  });
-
-  // Departman ve Eğitmen Ataması
-  const dept = await prisma.department.create({
-     data: { name: 'İngilizce Zümresi', headInstructorId: headInstructorId, tenantId: 'public' }
-  });
-
-  await prisma.user.update({
-     where: { id: instructorId },
-     data: { departmentId: dept.id }
-  });
-
-  // Courses
-  const courseId = randomUUID();
-  await prisma.course.create({
-    data: {
-      id: courseId,
-      title: 'AI Destekli Öğrenme',
-      description: 'Canlı + asenkron derslerle demo katalog.',
-      isPublished: true,
-      updatedAt: now,
-      price: 0,
-      tenantId: 'public',
-      instructorId: null,
-    },
-  });
-
-  // Lessons
-  await prisma.lessonContent.createMany({
-    data: [
-      { id: randomUUID(), courseId, title: 'Hoş geldin', order: 1, updatedAt: now },
-      { id: randomUUID(), courseId, title: 'Canlı sınıfa giriş', order: 2, updatedAt: now },
-    ],
-  });
-
-  // Enrollments
-  await prisma.enrollment.createMany({
-     data: [
-        { userId: studentId, courseId: courseId, tenantId: 'public' },
-        { userId: topStudentId, courseId: courseId, tenantId: 'public' },
-        { userId: riskStudentId, courseId: courseId, tenantId: 'public' }
-     ]
-  });
+    // Enrollments — skipDuplicates handles re-run; we still wrap in step()
+    await step('enrollment.createMany', () =>
+      prisma.enrollment.createMany({
+        data: [studentId, topStudentId, riskStudentId]
+          .filter((id): id is string => Boolean(id))
+          .map((userId) => ({ userId, courseId: courseId!, tenantId: 'public' })),
+        skipDuplicates: true,
+      }),
+    );
+  }
 
   // Topics
+  // Topics — idempotent on (name, tenantId? — schema-dependent). Skip if any
+  // exists; cognitive demo data depends on a fresh batch with consistent ids.
+  const existingTopicCount = await prisma.topic.count();
   const topics = [
     { id: randomUUID(), name: 'Temel Matematik', description: 'Toplama/çıkarma ve basit denklemler' },
     { id: randomUUID(), name: 'Fizik Giriş', description: 'Hız, ivme, hareket' },
   ];
-  await prisma.topic.createMany({
-    data: topics.map((t) => ({ ...t, updatedAt: now })),
-  });
+  if (existingTopicCount === 0) {
+    await step('topic.createMany', () =>
+      prisma.topic.createMany({ data: topics.map((t) => ({ ...t, updatedAt: now })) }),
+    );
+  } else {
+    console.log(`[seed] ↺ topics already present (${existingTopicCount}) — skipping topics/concepts/questions/choices/attempts`);
+    return; // Skip cognitive simulation on re-run; fresh DB only.
+  }
 
   // Cognitive AI & Micro-Weakness Concepts
   const concepts = [
@@ -104,9 +179,7 @@ async function main() {
     { id: randomUUID(), topicId: topics[0].id, name: 'Çıkarma', description: 'Negatif sayılara geçiş' },
     { id: randomUUID(), topicId: topics[1].id, name: 'Hız', description: 'v=s/t kuralı' },
   ];
-  await prisma.concept.createMany({
-     data: concepts
-  });
+  await step('concept.createMany', () => prisma.concept.createMany({ data: concepts }));
 
   // Questions & choices
   const q1 = randomUUID();
@@ -116,16 +189,18 @@ async function main() {
   const q5 = randomUUID();
   const q6 = randomUUID();
 
-  await prisma.question.createMany({
-    data: [
-      { id: q1, topicId: topics[0].id, conceptId: concepts[0].id, stem: '3 + 4 = ?', explanation: 'Basit toplama', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-      { id: q2, topicId: topics[0].id, conceptId: concepts[1].id, stem: '12 - 5 = ?', explanation: 'Basit çıkarma', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-      { id: q3, topicId: topics[0].id, conceptId: concepts[0].id, stem: 'x + 3 = 8 ise x = ?', explanation: 'Basit denklem çözümü', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-      { id: q4, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Hız = yol / zaman formülünde, yol 100m zaman 10s ise hız kaç m/s?', explanation: 'v = s/t', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-      { id: q5, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Sabit ivme 2 m/s² ile 5 saniyede hız değişimi kaç m/s olur?', explanation: 'Δv = a*t', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-      { id: q6, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Doğrusal hareket grafiğinde eğim hangi büyüklüğü verir?', explanation: 'Konum-zaman eğimi hızdır', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
-    ],
-  });
+  await step('question.createMany', () =>
+    prisma.question.createMany({
+      data: [
+        { id: q1, topicId: topics[0].id, conceptId: concepts[0].id, stem: '3 + 4 = ?', explanation: 'Basit toplama', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+        { id: q2, topicId: topics[0].id, conceptId: concepts[1].id, stem: '12 - 5 = ?', explanation: 'Basit çıkarma', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+        { id: q3, topicId: topics[0].id, conceptId: concepts[0].id, stem: 'x + 3 = 8 ise x = ?', explanation: 'Basit denklem çözümü', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+        { id: q4, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Hız = yol / zaman formülünde, yol 100m zaman 10s ise hız kaç m/s?', explanation: 'v = s/t', difficulty: 1, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+        { id: q5, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Sabit ivme 2 m/s² ile 5 saniyede hız değişimi kaç m/s olur?', explanation: 'Δv = a*t', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+        { id: q6, topicId: topics[1].id, conceptId: concepts[2].id, stem: 'Doğrusal hareket grafiğinde eğim hangi büyüklüğü verir?', explanation: 'Konum-zaman eğimi hızdır', difficulty: 2, correctChoiceId: randomUUID(), tenantId: 'public', updatedAt: now },
+      ],
+    }),
+  );
 
   // Choices (attach real ids to correctChoiceId)
   const choices: { q: string; text: string; correct: boolean }[] = [
@@ -150,16 +225,18 @@ async function main() {
   ];
 
   const choiceCreates = choices.map((c) => ({ id: randomUUID(), questionId: c.q, text: c.text, isCorrect: c.correct }));
-  await prisma.questionChoice.createMany({ data: choiceCreates });
+  await step('questionChoice.createMany', () => prisma.questionChoice.createMany({ data: choiceCreates }));
 
   // Update correctChoiceId using created ids
   const correctMap = choiceCreates.filter((c) => c.isCorrect).reduce<Record<string, string>>((acc, c) => {
     acc[c.questionId] = c.id;
     return acc;
   }, {});
-  await Promise.all(
-    Object.entries(correctMap).map(([questionId, correctChoiceId]) =>
-      prisma.question.update({ where: { id: questionId }, data: { correctChoiceId } }),
+  await step('question.update(correctChoiceId)', () =>
+    Promise.all(
+      Object.entries(correctMap).map(([questionId, correctChoiceId]) =>
+        prisma.question.update({ where: { id: questionId }, data: { correctChoiceId } }),
+      ),
     ),
   );
 
@@ -167,48 +244,64 @@ async function main() {
   const attemptBase = { tenantId: 'public', durationMs: 15000, createdAt: now };
 
   // TOP STUDENT: Good at everything
-  await prisma.quizAttempt.createMany({
-     data: [
-       { id: randomUUID(), userId: topStudentId, questionId: q1, correct: true, ...attemptBase },
-       { id: randomUUID(), userId: topStudentId, questionId: q2, correct: true, ...attemptBase },
-       { id: randomUUID(), userId: topStudentId, questionId: q4, correct: true, ...attemptBase },
-     ]
-  });
-  await prisma.conceptMastery.createMany({
-     data: [
-       { id: randomUUID(), userId: topStudentId, conceptId: concepts[0].id, masteryLevel: 0.9, consecutiveOk: 5, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 30) },
-       { id: randomUUID(), userId: topStudentId, conceptId: concepts[1].id, masteryLevel: 0.85, consecutiveOk: 4, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 14) },
-       { id: randomUUID(), userId: topStudentId, conceptId: concepts[2].id, masteryLevel: 0.95, consecutiveOk: 7, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 30) },
-     ]
-  });
+  if (topStudentId) {
+    await step('quizAttempt.topStudent', () =>
+      prisma.quizAttempt.createMany({
+        data: [
+          { id: randomUUID(), userId: topStudentId, questionId: q1, correct: true, ...attemptBase },
+          { id: randomUUID(), userId: topStudentId, questionId: q2, correct: true, ...attemptBase },
+          { id: randomUUID(), userId: topStudentId, questionId: q4, correct: true, ...attemptBase },
+        ],
+      }),
+    );
+    await step('conceptMastery.topStudent', () =>
+      prisma.conceptMastery.createMany({
+        data: [
+          { id: randomUUID(), userId: topStudentId, conceptId: concepts[0].id, masteryLevel: 0.9, consecutiveOk: 5, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 30) },
+          { id: randomUUID(), userId: topStudentId, conceptId: concepts[1].id, masteryLevel: 0.85, consecutiveOk: 4, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 14) },
+          { id: randomUUID(), userId: topStudentId, conceptId: concepts[2].id, masteryLevel: 0.95, consecutiveOk: 7, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 30) },
+        ],
+      }),
+    );
+  }
 
   // RISK STUDENT: Failing
-  await prisma.quizAttempt.createMany({
-     data: [
-       { id: randomUUID(), userId: riskStudentId, questionId: q1, correct: true, ...attemptBase }, // Toplamayı biliyor
-       { id: randomUUID(), userId: riskStudentId, questionId: q2, correct: false, ...attemptBase }, // Çıkarmada çuvallamış
-       { id: randomUUID(), userId: riskStudentId, questionId: q4, correct: false, ...attemptBase }, // Fizik (Hız) zayıf
-     ]
-  });
-  await prisma.conceptMastery.createMany({
-     data: [
-       { id: randomUUID(), userId: riskStudentId, conceptId: concepts[0].id, masteryLevel: 0.8, consecutiveOk: 2, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 3) },
-       { id: randomUUID(), userId: riskStudentId, conceptId: concepts[1].id, masteryLevel: 0.2, consecutiveOk: 0, lastReviewedAt: now, nextReviewAt: now }, // ACİL ŞİFA GEREKİYOR
-       { id: randomUUID(), userId: riskStudentId, conceptId: concepts[2].id, masteryLevel: 0.1, consecutiveOk: 0, lastReviewedAt: now, nextReviewAt: now }, // ACİL ŞİFA GEREKİYOR
-     ]
-  });
+  if (riskStudentId) {
+    await step('quizAttempt.riskStudent', () =>
+      prisma.quizAttempt.createMany({
+        data: [
+          { id: randomUUID(), userId: riskStudentId, questionId: q1, correct: true, ...attemptBase }, // Toplamayı biliyor
+          { id: randomUUID(), userId: riskStudentId, questionId: q2, correct: false, ...attemptBase }, // Çıkarmada çuvallamış
+          { id: randomUUID(), userId: riskStudentId, questionId: q4, correct: false, ...attemptBase }, // Fizik (Hız) zayıf
+        ],
+      }),
+    );
+    await step('conceptMastery.riskStudent', () =>
+      prisma.conceptMastery.createMany({
+        data: [
+          { id: randomUUID(), userId: riskStudentId, conceptId: concepts[0].id, masteryLevel: 0.8, consecutiveOk: 2, lastReviewedAt: now, nextReviewAt: new Date(now.getTime() + 86400000 * 3) },
+          { id: randomUUID(), userId: riskStudentId, conceptId: concepts[1].id, masteryLevel: 0.2, consecutiveOk: 0, lastReviewedAt: now, nextReviewAt: now }, // ACİL ŞİFA GEREKİYOR
+          { id: randomUUID(), userId: riskStudentId, conceptId: concepts[2].id, masteryLevel: 0.1, consecutiveOk: 0, lastReviewedAt: now, nextReviewAt: now }, // ACİL ŞİFA GEREKİYOR
+        ],
+      }),
+    );
 
-  // Risk Profile Simulation
-  await prisma.studentRiskProfile.create({
-     data: {
-       id: randomUUID(),
-       userId: riskStudentId,
-       courseId: courseId,
-       riskLevel: 'HIGH',
-       aiInsights: { message: "Yapay Zeka Uyarısı: Öğrencinin bilişsel hakimiyeti %40'ın altında. Düşme (Dropout) riski yüksek!", avgMastery: 0.36 },
-       lastCalculated: now
-     }
-  });
+    // Risk Profile Simulation
+    if (courseId) {
+      await step('studentRiskProfile.create', () =>
+        prisma.studentRiskProfile.create({
+          data: {
+            id: randomUUID(),
+            userId: riskStudentId,
+            courseId,
+            riskLevel: 'HIGH',
+            aiInsights: { message: "Yapay Zeka Uyarısı: Öğrencinin bilişsel hakimiyeti %40'ın altında. Düşme (Dropout) riski yüksek!", avgMastery: 0.36 },
+            lastCalculated: now,
+          },
+        }),
+      );
+    }
+  }
 
 }
 

@@ -1051,7 +1051,7 @@ const de: I18nStrings = {
     title1: "Weltklasse", title2: "Fernlernplattform",
     slogan: "Die digitale Bildungsplattform, die Wissen in Wert verwandelt",
     desc: "Live-Unterricht, smartes Whiteboard, KI-Mentor und Zertifikate — alles auf einem Bildschirm.",
-    ctaStart: "Kostenlos starten", ctaDemo: "▶ Live-Demo ansehen", ctaCatalog: "Kurskatalog",
+    ctaStart: "Kostenlos starten", ctaDemo: "▶ Live-Demo ansehen", ctaCatalog: "Kurs-Katalog",
     trustedBy: "Vertraut von:", universities: "42 Universitäten",
     companies: "180 Unternehmen", countries: "64 Ländern",
     statsTitle: "Plattform-Statistiken", statsHeading: "Atlasio in Zahlen",
@@ -1077,7 +1077,7 @@ const de: I18nStrings = {
     uploadAssignment: "Aufgabe hochladen", pendingApprovals: "Ausstehende Genehmigungen",
   },
   courses: {
-    catalogTitle: "Kurskatalog", catalogDesc: "Professionelle Kurse und Zertifikatsprogramme",
+    catalogTitle: "Kurs-Katalog", catalogDesc: "Professionelle Kurse und Zertifikatsprogramme",
     searchPh: "Kurse oder Dozenten suchen...", filterAll: "Alle", filterFree: "Kostenlos", filterPremium: "Premium",
     sortNewest: "Neueste", sortOldest: "Älteste", sortPopular: "Beliebteste", sortRating: "Bestbewertet",
     enrolled: "Eingeschrieben", enroll: "Einschreiben", continue: "Fortfahren", preview: "Vorschau",

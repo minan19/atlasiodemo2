@@ -114,12 +114,38 @@ function buildHeaders(token: string | null, extra?: HeadersInit): Record<string,
 
 // ─── core fetch ───────────────────────────────────────────────────────────────
 
+/**
+ * Canonical Turkish error message for network failures. Every locale block in
+ * `flat-translations.ts` maps this string to a native translation, so any
+ * caller that passes `err.message` through `tr()` (or shows it raw) will get
+ * a localised, user-friendly message instead of the browser-native
+ * "Failed to fetch" / "Load failed" / "NetworkError".
+ */
+const NETWORK_ERROR_MSG =
+  'Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
+
 async function rawFetch(path: string, init: RequestInit, token: string | null): Promise<Response> {
-  return fetch(`${BASE}${path}`, {
-    credentials: 'include',
-    ...init,
-    headers: buildHeaders(token, init.headers),
-  });
+  try {
+    return await fetch(`${BASE}${path}`, {
+      credentials: 'include',
+      ...init,
+      headers: buildHeaders(token, init.headers),
+    });
+  } catch (err) {
+    // Network failure (DNS, refused connection, offline, CORS-blocked).
+    // Surface our canonical TR key so UI catch-blocks across the app render
+    // a translated message regardless of whether they remembered to pipe
+    // err.message through the i18n helper.
+    const raw = err instanceof Error ? err.message.toLowerCase() : '';
+    const isNetwork =
+      raw.includes('failed to fetch') ||
+      raw.includes('load failed') ||
+      raw.includes('networkerror') ||
+      raw.includes('network request failed') ||
+      raw.includes('fetch failed') ||
+      raw === 'typeerror';
+    throw new Error(isNetwork ? NETWORK_ERROR_MSG : (err instanceof Error ? err.message : 'Bir hata oluştu. Lütfen tekrar deneyin.'));
+  }
 }
 
 // ─── public api() wrapper ─────────────────────────────────────────────────────

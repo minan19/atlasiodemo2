@@ -26,6 +26,15 @@ export const flat: FlatTranslations = {
     "Not Found": "Bulunamadı",
     "Bad Request": "Geçersiz istek",
     "Internal Server Error": "Sunucu hatası",
+    // Raw browser network error → localised message
+    "Failed to fetch": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "Load failed": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "NetworkError when attempting to fetch resource.": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "Network request failed": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "fetch failed": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "TypeError: Failed to fetch": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "TypeError: Load failed": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
+    "TypeError: NetworkError when attempting to fetch resource.": "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.",
   },
 
   // ─── English ─────────────────────────────────────────────────────────────────
@@ -2865,6 +2874,15 @@ export const flat: FlatTranslations = {
     // Network / generic error messages
     "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Could not reach the server. Please check your internet connection or try again later.",
     "Bir hata oluştu. Lütfen tekrar deneyin.": "An error occurred. Please try again.",
+    // Raw browser network error → localised message
+    "Failed to fetch": "Could not reach the server. Please check your internet connection or try again later.",
+    "Load failed": "Could not reach the server. Please check your internet connection or try again later.",
+    "NetworkError when attempting to fetch resource.": "Could not reach the server. Please check your internet connection or try again later.",
+    "Network request failed": "Could not reach the server. Please check your internet connection or try again later.",
+    "fetch failed": "Could not reach the server. Please check your internet connection or try again later.",
+    "TypeError: Failed to fetch": "Could not reach the server. Please check your internet connection or try again later.",
+    "TypeError: Load failed": "Could not reach the server. Please check your internet connection or try again later.",
+    "TypeError: NetworkError when attempting to fetch resource.": "Could not reach the server. Please check your internet connection or try again later.",
   },
 
   // ─── German ───────────────────────────────────────────────────────────────────
@@ -2978,7 +2996,7 @@ export const flat: FlatTranslations = {
     "Panel": "Dashboard",
 
     // ── Courses ───────────────────────────────────────────────────────────────
-    "Kurs Kataloğu": "Kurskatalog",
+    "Kurs Kataloğu": "Kurs-Katalog",
     "Kurslar": "Kurse",
     "Kurs bulunamadı": "Keine Kurse gefunden",
     "Kayıt Ol": "Einschreiben",
@@ -4581,7 +4599,7 @@ export const flat: FlatTranslations = {
     "Kurs Özeti": "Kursübersicht",
     "Kurs yapısını buradan düzenleyebilirsiniz.": "Hier können Sie die Kursstruktur bearbeiten.",
     "Kurs seçme": "Kurs auswählen",
-    "Kurs kataloğu": "Kurskatalog",
+    "Kurs kataloğu": "Kurs-Katalog",
     "Kurs bulunamadı.": "Keine Kurse gefunden.",
     "Kurs adı…": "Kursname…",
     "Kurs Tamamlama Oranları": "Kursabschlussquoten",
@@ -4987,7 +5005,7 @@ export const flat: FlatTranslations = {
     "Dünya Standartlarında": "Weltklasse",
     "Bilgiyi Değere Dönüştüren Dijital Eğitim Platformu": "Digitale Bildungsplattform, die Wissen in Wert verwandelt",
     "Ücretsiz Başla": "Kostenlos starten",
-    "Kurs Katalogu": "Kurskatalog",
+    "Kurs Katalogu": "Kurs-Katalog",
     "Platform İstatistikleri": "Plattformstatistiken",
     "Rakamlarla Atlasio": "Atlasio in Zahlen",
     "Özellikler": "Funktionen",
@@ -5055,6 +5073,15 @@ export const flat: FlatTranslations = {
     // Network / generic error messages
     "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
     "Bir hata oluştu. Lütfen tekrar deneyin.": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    // Raw browser network error → localised message
+    "Failed to fetch": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "Load failed": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "NetworkError when attempting to fetch resource.": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "Network request failed": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "fetch failed": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "TypeError: Failed to fetch": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "TypeError: Load failed": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
+    "TypeError: NetworkError when attempting to fetch resource.": "Server nicht erreichbar. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.",
   },
 
   // ─── Arabic ───────────────────────────────────────────────────────────────────
@@ -7241,6 +7268,15 @@ export const flat: FlatTranslations = {
     // Network / generic error messages
     "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
     "Bir hata oluştu. Lütfen tekrar deneyin.": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    // Raw browser network error → localised message
+    "Failed to fetch": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "Load failed": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "NetworkError when attempting to fetch resource.": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "Network request failed": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "fetch failed": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "TypeError: Failed to fetch": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "TypeError: Load failed": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
+    "TypeError: NetworkError when attempting to fetch resource.": "تعذر الوصول إلى الخادم. يرجى التحقق من اتصالك بالإنترنت أو المحاولة لاحقاً.",
   },
 
   // ─── Russian ──────────────────────────────────────────────────────────────────
@@ -9500,6 +9536,15 @@ export const flat: FlatTranslations = {
     // Network / generic error messages
     "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
     "Bir hata oluştu. Lütfen tekrar deneyin.": "Произошла ошибка. Пожалуйста, попробуйте еще раз.",
+    // Raw browser network error → localised message
+    "Failed to fetch": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "Load failed": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "NetworkError when attempting to fetch resource.": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "Network request failed": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "fetch failed": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "TypeError: Failed to fetch": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "TypeError: Load failed": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
+    "TypeError: NetworkError when attempting to fetch resource.": "Не удалось связаться с сервером. Проверьте подключение к интернету или повторите попытку позже.",
   },
 
   // ─── Kazakh ───────────────────────────────────────────────────────────────────
@@ -11717,5 +11762,14 @@ export const flat: FlatTranslations = {
     // Network / generic error messages
     "Sunucuya ulaşılamadı. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
     "Bir hata oluştu. Lütfen tekrar deneyin.": "Қате орын алды. Қайталап көріңіз.",
+    // Raw browser network error → localised message
+    "Failed to fetch": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "Load failed": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "NetworkError when attempting to fetch resource.": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "Network request failed": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "fetch failed": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "TypeError: Failed to fetch": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "TypeError: Load failed": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
+    "TypeError: NetworkError when attempting to fetch resource.": "Серверге қол жеткізу мүмкін болмады. Интернет қосылымыңызды тексеріңіз немесе кейінірек қайталап көріңіз.",
   },
 };

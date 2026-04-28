@@ -725,6 +725,19 @@ export default function SmartBoardPage({
   // -------------------------------------------------------------------------
   // Text box actions
   // -------------------------------------------------------------------------
+  /** Return keyboard focus to the canvas area so tool shortcuts work immediately. */
+  const returnFocusToCanvas = useCallback(() => {
+    // Blur the currently-active contentEditable div first (prevents browsers
+    // from keeping focus on a div that's about to become non-editable).
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    // Give focus to the canvas wrapper so the global keydown handler
+    // sees a non-editable target (isContentEditable === false) and
+    // correctly processes tool shortcuts like T, R, S, Escape, etc.
+    canvasWrapperRef.current?.focus({ preventScroll: true });
+  }, []);
+
   const confirmTextBox = useCallback(
     (id: string) => {
       const el = editableRef.current;
@@ -738,8 +751,9 @@ export default function SmartBoardPage({
         )
       );
       setEditingTextId(null);
+      returnFocusToCanvas();
     },
-    [rtFontFamily, rtFontSize, rtColor, rtBgColor, rtBold, rtItalic, rtUnderline, rtStrike, rtAlign]
+    [rtFontFamily, rtFontSize, rtColor, rtBgColor, rtBold, rtItalic, rtUnderline, rtStrike, rtAlign, returnFocusToCanvas]
   );
 
   const cancelTextBox = useCallback(
@@ -751,8 +765,9 @@ export default function SmartBoardPage({
         return prev;
       });
       setEditingTextId(null);
+      returnFocusToCanvas();
     },
-    []
+    [returnFocusToCanvas]
   );
 
   const applyRtStyle = useCallback((cmd: string, value?: string) => {
@@ -1044,11 +1059,28 @@ export default function SmartBoardPage({
   // -------------------------------------------------------------------------
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const isEditing = e.target instanceof HTMLInputElement
-        || e.target instanceof HTMLTextAreaElement
-        || (e.target as HTMLElement)?.isContentEditable;
+      // An element counts as "editing" only when it is genuinely text-editable:
+      // an input/textarea, or a div/span with contenteditable === "true".
+      // Divs that have contenteditable="false" (our non-active text-box overlays)
+      // must NOT be treated as editing — that was causing the 'T' shortcut to
+      // stop working after confirming/cancelling a text box.
+      const target = e.target as HTMLElement | null;
+      const isEditing =
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target?.getAttribute("contenteditable") === "true";
 
-      // Undo/Redo — always handle
+      // Ctrl/Cmd+A — prevent browser "select all" highlight which looks like
+      // a white rectangle drawn over the canvas and confuses drawing operations.
+      // In the canvas context, Ctrl+A has no meaningful "select all objects"
+      // implementation (we use React state, not a selectable layer), so we
+      // simply swallow it unless the user is actively editing a text box.
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        if (!isEditing) e.preventDefault();
+        return;
+      }
+
+      // Undo/Redo — always handle (even inside text boxes, so history works)
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         undo();
@@ -1060,15 +1092,23 @@ export default function SmartBoardPage({
         return;
       }
 
+      // All remaining shortcuts are canvas-only; skip when editing text.
       if (isEditing) return;
 
-      const map: Record<string, Tool> = {
-        s: "select", p: "draw", e: "eraser", t: "text",
-        n: "sticky", r: "rectangle", c: "circle", l: "line",
-        i: "image", k: "code",
-      };
-      const tool = map[e.key.toLowerCase()];
-      if (tool) setActiveTool(tool);
+      // Single-letter tool shortcuts (no modifier key).
+      if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        const map: Record<string, Tool> = {
+          s: "select", p: "draw", e: "eraser", t: "text",
+          n: "sticky", r: "rectangle", c: "circle", l: "line",
+          i: "image", k: "code",
+        };
+        const tool = map[e.key.toLowerCase()];
+        if (tool) {
+          e.preventDefault(); // prevent 'n', 'r', 't' etc. bubbling to browser
+          setActiveTool(tool);
+          return;
+        }
+      }
 
       if (e.key === "Escape" && editingTextId) {
         cancelTextBox(editingTextId);
@@ -1273,6 +1313,11 @@ export default function SmartBoardPage({
         <div
           ref={canvasWrapperRef}
           className="relative flex-1 overflow-hidden bg-white"
+          // tabIndex=-1: makes the div programmatically focusable (needed for
+          // returnFocusToCanvas() after text-box confirm/cancel) without adding
+          // it to the natural Tab order. outline:none removes the focus ring.
+          tabIndex={-1}
+          style={{ outline: "none" }}
           onClick={(e) => {
             // Close color picker on outside click
             if (showColorPicker) setShowColorPicker(false);

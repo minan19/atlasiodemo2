@@ -616,9 +616,28 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
         });
 
       const keyHandler = (e: KeyboardEvent) => {
-        // Don't intercept keys while a text object is being edited
+        // Don't intercept keys while a Fabric.js IText/Textbox is in edit mode.
         const activeObj = canvasRef.current?.getActiveObject() as any;
         const isEditingText = activeObj?.isEditing === true;
+
+        // Ctrl/Cmd+A — In a drawing app, Ctrl+A should select all canvas objects.
+        // Without this handler the browser fires its default "select all DOM text"
+        // which draws a blue selection rectangle over button labels — visually
+        // indistinguishable from a drawn shape, confusing users during drawing.
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+          e.preventDefault();
+          if (!isEditingText && canvasRef.current) {
+            canvasRef.current.discardActiveObject();
+            const all = canvasRef.current.getObjects();
+            if (all.length > 0) {
+              const sel = new (fabricRef.current as any).ActiveSelection(all, { canvas: canvasRef.current });
+              canvasRef.current.setActiveObject(sel);
+              canvasRef.current.requestRenderAll();
+            }
+          }
+          return;
+        }
+
         if (e.key === "Delete" || e.key === "Backspace") {
           if (!isEditingText) deleteSelection();
         }
@@ -638,6 +657,12 @@ export const WhiteboardLocal = forwardRef<WhiteboardLocalHandle, Props>(function
         if (!isEditingText && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "v") {
           e.preventDefault();
           pasteSelection();
+        }
+
+        // Escape: exit IText editing mode without discarding selection
+        if (!isEditingText && e.key === "Escape") {
+          canvasRef.current?.discardActiveObject();
+          canvasRef.current?.requestRenderAll();
         }
       };
       window.addEventListener("keydown", keyHandler);

@@ -44,15 +44,24 @@ export class CertificationsController {
     return this.certifications.markExpiries();
   }
 
+  /**
+   * Streams a print-ready PDF certificate. `?lang=` accepts tr|en|de|ar|ru|kk
+   * (defaults to tr). Returned inline so the browser can preview before
+   * download — frontend opens it in a new tab via target="_blank".
+   */
   @UseGuards(AuthGuard('jwt'))
   @Get(':id/pdf')
   async downloadPdf(
     @Param('id') id: string,
-    @Query('lang') lang: 'tr' | 'en' = 'tr',
+    @Query('lang') langRaw?: string,
   ): Promise<StreamableFile> {
+    const allowed = ['tr', 'en', 'de', 'ar', 'ru', 'kk'] as const;
+    const lang = (allowed as readonly string[]).includes(langRaw ?? '')
+      ? (langRaw as (typeof allowed)[number])
+      : 'tr';
     const stream = await this.certifications.generatePdf(id, lang);
     return new StreamableFile(stream, {
-      disposition: `inline; filename=\"certificate-${id}.pdf\"`,
+      disposition: `inline; filename="certificate-${id}.pdf"`,
       type: 'application/pdf',
     });
   }

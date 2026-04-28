@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { api } from "../api/client";
 import { useI18n } from "../_i18n/use-i18n";
+import { useRole } from "../_components/role-context";
 
 type Certificate = {
   id: string;
@@ -304,6 +305,7 @@ function CertSkeleton() {
 
 function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) => void }) {
   const t = useI18n();
+  const { language } = useRole();
   const [flipped, setFlipped] = useState(false);
 
   const verifyUrl =
@@ -718,7 +720,9 @@ function CertCard({ cert, onCopy }: { cert: Certificate; onCopy: (url: string) =
               </a>
               {!cert.isDemoMode && (
                 <a
-                  href={`${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100"}/certifications/${cert.id}/pdf`}
+                  // Forward the user's selected UI language so the PDF face is
+                  // rendered in the same locale (tr|en|de|ar|ru|kk).
+                  href={`${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:4100"}/certifications/${cert.id}/pdf?lang=${encodeURIComponent(language || "tr")}`}
                   target="_blank"
                   rel="noreferrer"
                   className="btn-link"

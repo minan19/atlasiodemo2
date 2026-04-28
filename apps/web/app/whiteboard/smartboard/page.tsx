@@ -768,6 +768,31 @@ export default function SmartBoardPage({
     editableRef.current?.focus();
   }, []);
 
+  // Focus the contentEditable div whenever a text box enters edit mode.
+  // Without this, typing does nothing: the div is rendered with
+  // contentEditable=true but the browser focus stays on the canvas/toolbar,
+  // so keystrokes are swallowed by the global keydown handler instead of
+  // going into the text box.
+  useEffect(() => {
+    if (!editingTextId) return;
+    // Small delay — let React finish rendering the new div and attaching the ref.
+    const timer = setTimeout(() => {
+      const el = editableRef.current;
+      if (!el) return;
+      el.focus();
+      // Place caret at end of any existing content.
+      try {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(el);
+        range.collapse(false); // collapse to end
+        sel?.removeAllRanges();
+        sel?.addRange(range);
+      } catch {/* ignore — selection API unavailable in some envs */}
+    }, 30);
+    return () => clearTimeout(timer);
+  }, [editingTextId]);
+
   // -------------------------------------------------------------------------
   // Sticky dragging
   // -------------------------------------------------------------------------

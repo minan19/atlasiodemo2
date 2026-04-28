@@ -744,6 +744,38 @@ Kullanıcıdan onay sonrası seçenek:
 2. Backend up → seeded credentials ile admin/instructor/guardian panelleri test
 3. (Opsiyonel) Demo kurs slug → seed: gerçek DB kayıtları için backend seed genişletme
 
+### 2026-04-28 — Cert PDF live test + AR font + i18n final coverage
+
+**Canlı PDF test (TAMAMLANDI, 4/4 dil geçti):**
+- HTTP 200, geçerli PDF, KK: 15532B, RU: 15106B, TR: 13332B, AR: 11619B
+- KK pdftotext: "ЖЕТІСТІК СЕРТИФИКАТЫ", Казак tarih formatı "2026 ж. 28 сәуір" — mükemmel
+- AR pdftotext: Latin fallback (glif yok) → Görev 2 tetiklendi
+
+**AR sertifika PDF (commit `46f1d1b`) — NotoSansArabic-Regular.ttf:**
+- Font indirildi (Google Fonts CDN, 173KB, v2.004) → `apps/api/src/assets/fonts/`
+- `certifications.service.ts`: `findFont()` helper (3 candidate path, dev+prod), `FONT_ARABIC` const, activeFont seçici
+- RTL layout: `textAlign='right'`, date/code sütunları yer değiştirdi, QR sola taşındı, imza etiketleri mirror
+- Test: AR PDF artık gerçek Arapça glifleri render ediyor (شهادة إنجاز, تُمنح هذه الشهادة)
+- 0 TS hatası
+
+**TopNav logout (doğrulandı — zaten tamamlanmış):**
+- Avatar dropdown'da `{t.tr("Çıkış yap")}` butonu mevcut (satır 349-374)
+- Profile sayfasında da ayrı logout var — her iki lokasyon da çalışıyor
+
+**i18n final coverage doğrulaması:**
+- Toplam distinct tr() anahtarı: 1644 (audit script her iki pattern'i yakalıyor)
+- EN: %100.0 | DE: %100.0 | AR: %100.0 | RU: %99.9 (sadece "Ahmet Yılmaz") | KK: %100.0
+- Dict boyutları: en:2744 de:2090 ar:2088 ru:2166 kk:2120
+
+**Son commit'ler:**
+- `ad5c831` — multilingual PDF (6 locale) + full Cyrillic font
+- `46f1d1b` — Arabic PDF + NotoSansArabic + RTL layout
+
+**Sıradaki oturumda:**
+1. Manuel tarayıcı preview (senin elinde) — http://localhost:3001 — AR sertifika PDF'i aç, Arapça metin görüntüle
+2. Production deploy hazırlığı — env var review, Docker image build test
+3. İsteğe bağlı: Admin panel yeni özellik veya UX iyileştirmesi
+
 ---
 
 ## 0. Oturum Başlangıç Protokolü (ZORUNLU)

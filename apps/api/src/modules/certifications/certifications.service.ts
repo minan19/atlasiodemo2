@@ -16,30 +16,28 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import type { Redis } from 'ioredis';
 
 /**
- * Türkçe + Cyrillic karakter desteği olan NotoSans font yolu.
- *
- * Dev (ts-node): __dirname = apps/api/src/modules/certifications/
- * Prod (compiled): __dirname = apps/api/dist/src/modules/certifications/
- *
- * Both layouts hold the asset two levels up under `assets/fonts/`. We
- * resolve relative to whichever __dirname we're in and pick the first
- * existing path so dev and prod both work without a build step.
+ * Font path helpers — resolves for both dev (ts-node src/) and prod (dist/src/).
  */
 import { existsSync } from 'fs';
-const FONT_CANDIDATES = [
-  join(__dirname, '../../assets/fonts/NotoSans-Regular.ttf'),     // dev (ts-node, src/)
-  join(__dirname, '../../../assets/fonts/NotoSans-Regular.ttf'),  // compiled (dist/src/)
-  join(__dirname, '../../../../assets/fonts/NotoSans-Regular.ttf'),
-];
-const FONT_REGULAR =
-  FONT_CANDIDATES.find((p) => existsSync(p)) ?? FONT_CANDIDATES[0];
+
+function findFont(filename: string): string {
+  const candidates = [
+    join(__dirname, '../../assets/fonts', filename),
+    join(__dirname, '../../../assets/fonts', filename),
+    join(__dirname, '../../../../assets/fonts', filename),
+  ];
+  return candidates.find((p) => existsSync(p)) ?? candidates[0];
+}
+
+/** Latin + Turkish diacritics + Cyrillic (tr/en/de/ru/kk) */
+const FONT_REGULAR = findFont('NotoSans-Regular.ttf');
+/** Arabic script (ar) — covers Arabic Unicode block with proper shaping */
+const FONT_ARABIC  = findFont('NotoSansArabic-Regular.ttf');
 
 /**
- * Supported certificate locales. Arabic falls back to Latin script in the PDF
- * because we ship only a Latin/Cyrillic font; rendering RTL Arabic glyphs
- * needs an Arabic-capable font (e.g. NotoSansArabic) which is a separate
- * follow-up. Cyrillic-script langs (ru, kk) work because NotoSans-Regular
- * covers the basic Cyrillic block.
+ * Supported certificate locales.
+ * - tr/en/de/ru/kk: NotoSans-Regular (Latin + Cyrillic)
+ * - ar: NotoSansArabic-Regular (proper Arabic glyph shaping, RTL layout)
  */
 type CertLocale = 'tr' | 'en' | 'de' | 'ar' | 'ru' | 'kk';
 
@@ -269,8 +267,14 @@ export class CertificationsService {
     const stream = new PassThrough();
     doc.pipe(stream);
 
+    // Register both fonts; select the Arabic one for `ar` locale.
     doc.registerFont('NotoSans', FONT_REGULAR);
-    doc.font('NotoSans');
+    doc.registerFont('NotoSansArabic', FONT_ARABIC);
+    const activeFont = lang === 'ar' ? 'NotoSansArabic' : 'NotoSans';
+    // Arabic is RTL — align all text blocks to the right.
+    const isRtl = lang === 'ar';
+    const textAlign = isRtl ? 'right' : 'center';
+    doc.font(activeFont);
 
     const pageW = doc.page.width; // 842
     const pageH = doc.page.height; // 595
@@ -305,7 +309,7 @@ export class CertificationsService {
     // ─── Top brand bar ─────────────────────────────────────────────────────
     doc.fillColor(COLORS.navy)
       .fontSize(11)
-      .text(s.brand, 0, innerInset + 22, { width: pageW, align: 'center', characterSpacing: 1.2 });
+      .text(s.brand, 0, innerInset + 22, { width: pageW, align: textAlign, characterSpacing: 1.2 });
 
     // ─── Monogram (large gold A·X) ─────────────────────────────────────────
     // Faux monogram using two large characters; replaces the absent logo
@@ -323,11 +327,11 @@ export class CertificationsService {
 
     // ─── Title ─────────────────────────────────────────────────────────────
     doc.fillColor(COLORS.navy).fontSize(34)
-      .text(s.title, 0, ruleY + 18, { width: pageW, align: 'center', characterSpacing: 3 });
+      .text(s.title, 0, ruleY + 18, { width: pageW, align: textAlign, characterSpacing: 3 });
 
     // ─── Presented to ──────────────────────────────────────────────────────
     doc.fillColor(COLORS.inkLight).fontSize(13)
-      .text(s.presentedTo, 0, ruleY + 70, { width: pageW, align: 'center' });
+      .text(s.presentedTo, 0, ruleY + 70, { width: pageW, align: textAlign });
 
     // ─── Recipient name (large, gold) ──────────────────────────────────────
     const holder = cert.User?.name ?? cert.User?.email ?? cert.userId;
@@ -343,7 +347,7 @@ export class CertificationsService {
 
     // ─── Course context ────────────────────────────────────────────────────
     doc.fillColor(COLORS.inkLight).fontSize(13)
-      .text(s.hasCompleted, 0, ruleY + 154, { width: pageW, align: 'center' });
+      .text(s.hasCompleted, 0, ruleY + 154, { width: pageW, align: textAlign });
 
     const courseTitle = cert.Course?.title ?? cert.courseId;
     doc.fillColor(COLORS.navy).fontSize(18)
@@ -352,28 +356,33 @@ export class CertificationsService {
     // ─── Bottom row: date · signatures · verify code ───────────────────────
     const baseY = pageH - innerInset - 90;
 
-    // Date (left column)
+    // For RTL (Arabic): swap date to right column, code to left column.
+    const dateColX  = isRtl ? pageW - 80 - 200 : 80;
+    const dateAlign = isRtl ? ('right' as const) : ('left' as const);
+    const codeColX  = isRtl ? 80 : pageW - 80 - 200;
+    const codeAlign = isRtl ? ('left' as const) : ('right' as const);
+
     const issuedFmt = new Intl.DateTimeFormat(localeForDate(lang), {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     }).format(new Date(cert.issuedAt));
     doc.fillColor(COLORS.inkLight).fontSize(10)
-      .text(s.issuedOn.toUpperCase(), 80, baseY, { width: 200, align: 'left', characterSpacing: 1.2 });
+      .text(s.issuedOn.toUpperCase(), dateColX, baseY, { width: 200, align: dateAlign, characterSpacing: 1.2 });
     doc.fillColor(COLORS.ink).fontSize(13)
-      .text(issuedFmt, 80, baseY + 16, { width: 200, align: 'left' });
+      .text(issuedFmt, dateColX, baseY + 16, { width: 200, align: dateAlign });
 
-    // Verify code (right column)
-    const codeX = pageW - 80 - 200;
+    // Verify code (opposite column)
     doc.fillColor(COLORS.inkLight).fontSize(10)
-      .text(s.verifyCode.toUpperCase(), codeX, baseY, { width: 200, align: 'right', characterSpacing: 1.2 });
+      .text(s.verifyCode.toUpperCase(), codeColX, baseY, { width: 200, align: codeAlign, characterSpacing: 1.2 });
     doc.fillColor(COLORS.navy).fontSize(13)
-      .text(verifyCode, codeX, baseY + 16, { width: 200, align: 'right', characterSpacing: 1.5 });
+      .text(verifyCode, codeColX, baseY + 16, { width: 200, align: codeAlign, characterSpacing: 1.5 });
 
     // Signature lines (centered, two columns)
     const signY = baseY + 8;
     const signW = 180;
-    const leftSignX = pageW / 2 - signW - 24;
+    // For RTL: left label becomes right label and vice versa
+    const leftSignX  = pageW / 2 - signW - 24;
     const rightSignX = pageW / 2 + 24;
     doc.lineWidth(0.8).strokeColor(COLORS.ink)
       .moveTo(leftSignX, signY)
@@ -384,14 +393,20 @@ export class CertificationsService {
       .lineTo(rightSignX + signW, signY)
       .stroke();
 
+    const [leftLabel, rightLabel] = isRtl
+      ? [s.signRight, s.signLeft]
+      : [s.signLeft,  s.signRight];
     doc.fillColor(COLORS.inkLight).fontSize(9.5)
-      .text(s.signLeft, leftSignX, signY + 6, { width: signW, align: 'center', characterSpacing: 0.8 });
+      .text(leftLabel,  leftSignX,  signY + 6, { width: signW, align: 'center', characterSpacing: 0.8 });
     doc.fillColor(COLORS.inkLight).fontSize(9.5)
-      .text(s.signRight, rightSignX, signY + 6, { width: signW, align: 'center', characterSpacing: 0.8 });
+      .text(rightLabel, rightSignX, signY + 6, { width: signW, align: 'center', characterSpacing: 0.8 });
 
-    // ─── QR code (top-right corner inside frame) ───────────────────────────
+    // ─── QR code (top-right corner inside frame, left for RTL) ────────────
     const qrSize = 78;
-    const qrX = pageW - innerInset - qrSize - 22;
+    // RTL: move QR to the left side so it doesn't clash with RTL text flow
+    const qrX = isRtl
+      ? innerInset + 22
+      : pageW - innerInset - qrSize - 22;
     const qrY = innerInset + 22;
     doc.image(qrPng, qrX, qrY, { fit: [qrSize, qrSize] });
     doc.fillColor(COLORS.inkLight).fontSize(7.5)
